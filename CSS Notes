@@ -1,0 +1,71 @@
+--CSS Notes
+<style>
+div {
+    background-color: #752e2e;
+   }
+</style>
+
+h1 {
+  color: efefef;
+  font-size: 80px;
+}
+h2 {
+  color: efefef;
+}
+h3 {
+  color: efefef;
+}
+body {
+  color: efefef;
+}
+/*
+Text
+
+Headers/Titles
+-Righteous
+--App Name 80pt (Bold) #efefef
+--Main Menu 37pt (Bold) #efefef
+--Logged in user name 24pt (Italic) #efefef
+--Field Name 32pt (Bold) #efefef
+
+Field Values
+-Arial
+--Fields 27pt #efefef
+--Expand Links 24pt (Italic)
+
+Bullets
+
+
+Images
+-Background Logo
+--\images\BackgroundLogo.png
+--512x512
+-AppIcon
+--\images\BackgroundLogo.png
+--80x80
+-Button
+--\images\the_button.jpg
+-Robin
+--\images\robin.png
+-Place
+--\images\place.png
+-Circle of Trust
+--\images\CoT.png
+-Sequence
+--\images\sequence.png
+-RPAN
+--\images\rpan.png
+-Search
+--\images\SearchIcon.png
+-Menu
+--\images\MenuIcon.png
+-Settings Gear
+--\images\Settings_app_icon.png
+-Edit Icon
+--\images\Edit-icon-grey.png
+-Knight Swoosh Logo
+--\images\knightswoosh.jpg
+-Knight Timer Logo
+--\images\knighttimer.png
+
+*/
