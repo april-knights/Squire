@@ -25,6 +25,8 @@ class LoginController extends Controller
     {
         $user = Socialite::driver('reddit')->user();
 
-        // $user->token;
+        dd($user);
+
+        return redirect()->to("/");
     }
 }

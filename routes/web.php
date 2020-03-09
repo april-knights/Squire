@@ -15,5 +15,7 @@ Route::get('/', function () {
     return view('home');
 });
 
-Route::get('login/reddit', 'Auth\LoginController@redirectToProvider');
-Route::get('login/reddit/callback', 'Auth\LoginController@handleProviderCallback');
+Route::view('/login', 'login');
+
+Route::get('login/reddit', 'LoginController@redirectToProvider');
+Route::get('login/reddit/callback', 'LoginController@handleProviderCallback');

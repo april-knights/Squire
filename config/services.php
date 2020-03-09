@@ -33,7 +33,7 @@ return [
     'reddit' => [
         'client_id' => env('REDDIT_CLIENT_ID'),
         'client_secret' => env('REDDIT_CLIENT_SECRET'),
-        'redirect' => '/login/reddit/callback',
+        'redirect' => env('REDDIT_REDIRECT_URI'),
     ],
 
 ];
