@@ -11,22 +11,28 @@
 |
 */
 
-Route::get('/', function () {
-    return view('home');
+## Public routes
+
+Route::view('/login', 'login')->name('login');
+Route::get('/logout', function () {
+    Auth::logout();
+    return redirect('/login');
 });
-
-Route::view('/login', 'login');
-Route::view('/links', 'links');
-
-# Profile
-Route::get('/profile/{rname}', 'ProfileController@show');
-
-
-# Battalion
-Route::get('/battalion', 'BattalionController@index');
-Route::get('/battalion/{name}', 'BattalionController@show');
-
 
 # Signin
 Route::get('/login/reddit', 'LoginController@redirectToProvider');
 Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback');
+
+
+## Internal routes
+
+Route::view('/', 'home')->middleware('auth');
+Route::view('/links', 'links')->middleware('auth');;
+
+# Profile
+Route::get('/profile/{rname}', 'ProfileController@show')->middleware('auth');;
+
+
+# Battalion
+Route::get('/battalion', 'BattalionController@index')->middleware('auth');;
+Route::get('/battalion/{name}', 'BattalionController@show')->middleware('auth');;

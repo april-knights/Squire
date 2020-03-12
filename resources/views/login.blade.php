@@ -10,16 +10,15 @@
         {{ session()->get('error') }}
     </div>
 @endif
-<div class="row">
-    <div class="col-md-8 col-md-offset-2">
-        <div class="panel panel-default">
-            <div class="panel-heading">Login</div>
-                <div class="panel-heading">Login with Reddit</div>
-                <div class="panel-body">
-                    <a class="btn btn-primary" href="/login/reddit">
-                        Reddit Login
-                    </a>
-                </div>
+<div class="row justify-content-md-center">
+    <div class="col-md-3">
+        <div class="card bg-dark">
+            <div class="card-header">Login</div>
+            <div class="card-body">
+                <h5 class="card-title">Login with Reddit</h5>
+                <a class="btn btn-primary" href="/login/reddit">
+                    Reddit Login
+                </a>
             </div>
         </div>
     </div>

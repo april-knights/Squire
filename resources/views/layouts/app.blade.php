@@ -42,8 +42,9 @@
           </ul>
           <form class="form-inline my-2 my-lg-0">
             <div class="username">{{ Auth::user()->rname }}</div>
-            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Search</button>
+            <!--<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Search</button>-->
+            <a class="btn btn-outline-light" href="/logout" type="submit">Logout <i class="fas fa-sign-out-alt"></i></a>
           </form>
         </div>
         @endif
