@@ -1,6 +1,6 @@
 @extends("layouts.app")
 
-@section("title", "Home")
+@section("title", $rank . " " . $knight->rname)
 
 @section("content")
     <div class="row">

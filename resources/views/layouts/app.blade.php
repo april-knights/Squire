@@ -29,7 +29,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-              <a class="nav-link" href="/profile">My Profile</a>
+            <a class="nav-link" href="/profile/{{ Auth::user()->rname }}">My Profile</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/battalions">Battalions</a>
