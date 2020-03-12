@@ -6,15 +6,15 @@
     <div class="row">
         <div class="col">
             <h2>Reddit Name</h2>
-            {{ $knight->rname }}
+            <p>{{ $knight->rname }}</p>
         </div>
         <div class="col">
             <h2>Discord Name</h2>
-            {{ $knight->dname }}
+            <p>{{ $knight->dname }}</p>
         </div>
         <div class="col">
             <h2>Knight ID</h2>
-            {{ $knight->knum }}
+            <p>{{ $knight->knum }}</p>
         </div>
     </div>
     <div class="row">
@@ -22,9 +22,11 @@
             <div class="row">
                 <div class="col-md-6">
                     <h2>Battalion</h2>
+                    <p>{{ $batt }}</p>
                 </div>
                 <div class="col-md-6">
                     <h2>Rank</h2>
+                    <p>{{ $rank }}</p>
                 </div>
             </div>
             <div class="row">
@@ -33,21 +35,29 @@
                 </div>
                 <div class="col-md-6">
                     <h2>Email</h2>
+                    <p>{{ $knight->email }}</p>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <h2>Skills</h2>
+            <ul class="skills">
+            @forelse ($skills as $skill)
+                <li>{{ $skill->skillname }}</li>
+            @empty
+                <li>None</li>
+            @endforelse
+            </ul>
         </div>
     </div>
     <div class="row">
         <div class="col">
             <h2>About Me</h2>
-            {{ $knight->bio }}
+            <p>{{ $knight->bio }}</p>
         </div>
         <div class="col">
             <h2>Real Life</h2>
-            {{ $knight->rlimpact }}
+            <p>{{ $knight->rlimpact }}</p>
         </div>
     </div>
 @endsection
