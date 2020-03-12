@@ -67,3 +67,11 @@ body {
     color: #efefef;
     font-size: 15pt;
 }
+
+.links {
+    list-style: none;
+}
+
+.links a {
+    color: #efefef;
+}

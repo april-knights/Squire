@@ -16,6 +16,7 @@ Route::get('/', function () {
 });
 
 Route::view('/login', 'login');
+Route::view('/links', 'links');
 
 # Profile
 Route::get('/profile/{rname}', 'ProfileController@show');
