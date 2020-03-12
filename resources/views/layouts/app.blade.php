@@ -6,8 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link type="text/css" href="{{ asset('static/css/app.css') }}" rel="stylesheet">
 </head>
 
 <body>
@@ -54,7 +53,7 @@
         @yield("content")
     </div>
 
-    @yield("script")
+    <script type="text/javascript" src="{{ asset('static/js/app.js') }}"></script>
 </body>
 
 </html>

@@ -17,16 +17,12 @@
     opacity: 30%;
 }
 
-body {
-    color: #efefef;
-}
-
 .navbar {
     font-weight: bold;
 }
 
 .navbar-brand {
-    font-size: 40pt;
+    font-size: 40pt !important;
 }
 
 .navbar-brand img {
@@ -35,7 +31,6 @@ body {
 }
 
 .nav-link {
-    color: #efefef !important;
     font-size: 23pt;
 }
 
@@ -57,27 +52,15 @@ body {
 }
 
 .content p, .content li {
-    color: #efefef;
     font-weight: bold;
     font-size: 15pt;
     margin-left: 15px;
 }
 
 .table {
-    color: #efefef;
     font-size: 15pt;
 }
 
 .links {
     list-style: none;
-}
-
-a {
-    color: #efefef;
-}
-
-a:hover {
-    color: #efefef;
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
 }
