@@ -32,7 +32,7 @@
             <a class="nav-link" href="/profile/{{ Auth::user()->rname }}">My Profile</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/battalions">Battalions</a>
+              <a class="nav-link" href="/battalion">Battalions</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="/orders">Orders</a>

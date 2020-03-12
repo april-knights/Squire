@@ -17,7 +17,15 @@ Route::get('/', function () {
 
 Route::view('/login', 'login');
 
+# Profile
 Route::get('/profile/{rname}', 'ProfileController@show');
 
+
+# Battalion
+Route::get('/battalion', 'BattalionController@index');
+Route::get('/battalion/{name}', 'BattalionController@show');
+
+
+# Signin
 Route::get('/login/reddit', 'LoginController@redirectToProvider');
 Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback');
