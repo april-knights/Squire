@@ -25,14 +25,15 @@ Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback');
 
 
 ## Internal routes
+Route::middleware(['auth'])->group(function () {
+    Route::view('/', 'home');
+    Route::view('/links', 'links');
+    Route::view('/orders', 'orders');
 
-Route::view('/', 'home')->middleware('auth');
-Route::view('/links', 'links')->middleware('auth');;
+    # Profile
+    Route::get('/profile/{rname}', 'ProfileController@show');
 
-# Profile
-Route::get('/profile/{rname}', 'ProfileController@show')->middleware('auth');;
-
-
-# Battalion
-Route::get('/battalion', 'BattalionController@index')->middleware('auth');;
-Route::get('/battalion/{name}', 'BattalionController@show')->middleware('auth');;
+    # Battalion
+    Route::get('/battalion', 'BattalionController@index');
+    Route::get('/battalion/{name}', 'BattalionController@show');
+});
