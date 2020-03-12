@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class KnightController extends Controller
+class ProfileController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,9 +14,9 @@ class KnightController extends Controller
      */
     public function index()
     {
-        $knights = DB::select("select * from knights");
+        $knights = DB::select('select * from knights');
 
-        return view("knight.index", ["knights" => $knights]);
+        return view('knight.index', ['knights' => $knights]);
     }
 
     /**
@@ -43,23 +43,23 @@ class KnightController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int  $rname
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($rname)
     {
-        $knight = DB::select("select * from knight where id = ?", [1]);
+        $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0];
 
-        return view("knight.show", ["knight" => $knight]);
+        return view('profile.show', ['knight' => $knight]);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int  $rname
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($rname)
     {
         //
     }

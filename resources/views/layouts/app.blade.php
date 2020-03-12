@@ -50,7 +50,7 @@
         @endif
       </nav>
 
-    <div class="container">
+    <div class="content container-xl">
         @yield("content")
     </div>
 
