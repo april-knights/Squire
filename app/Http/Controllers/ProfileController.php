@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use Auth;
+
 class ProfileController extends Controller
 {
     /**
@@ -50,12 +52,23 @@ class ProfileController extends Controller
     {
         $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0];
         $rank = DB::select('SELECT name FROM krank WHERE pkey = ?', [$knight->rnk])[0]->name;
-        $batt = DB::select('SELECT name FROM battalion WHERE pkey = ?', [$knight->batt])[0]->name;
+        $batt = DB::select('SELECT name FROM battalion WHERE pkey = ?', [$knight->batt])[0];
         $skills = DB::select('SELECT * FROM skill INNER JOIN userskill ON skill.pkey = userskill.fkeyskill WHERE userskill.fkeyuser = ? AND skill.delflg = 0',
             [$knight->pkey]);
         // TODO: Show skill parents as well
+        // Certain fields are limited to councillors and the user themselves
+        $show_sensitive = (Auth::user()->isCouncillor()) || (Auth::id() == $knight->pkey);
 
-        return view('profile.show', ['knight' => $knight, 'rank' => $rank, 'batt' => $batt, 'skills' => $skills]);
+        // Other fields are limited to officers from this knight's battalion
+        $show_irl = (Auth::user()->isOfficer($knight->batt)) || (Auth::id() == $knight->pkey);
+
+        return view('profile.show', ['knight' => $knight,
+                                     'rank' => $rank,
+                                     'batt' => $batt,
+                                     'skills' => $skills,
+                                     'show_sensitive' => $show_sensitive,
+                                     'show_irl' => $show_irl,
+                                     ]);
     }
 
     /**

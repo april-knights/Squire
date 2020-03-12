@@ -13,8 +13,10 @@
             <p>{{ $knight->dname }}</p>
         </div>
         <div class="col">
+            @if ($show_sensitive)
             <h2>Knight ID</h2>
             <p>{{ $knight->knum }}</p>
+            @endif
         </div>
     </div>
     <div class="row">
@@ -22,7 +24,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <h2>Battalion</h2>
-                    <p>{{ $batt }}</p>
+                    <p>{{ $batt->name }}</p>
                 </div>
                 <div class="col-md-6">
                     <h2>Rank</h2>
@@ -34,8 +36,10 @@
                     <h2>Divisions</h2>
                 </div>
                 <div class="col-md-6">
+                    @if ($show_sensitive)
                     <h2>Email</h2>
                     <p>{{ $knight->email }}</p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -56,8 +60,10 @@
             <p>{{ $knight->bio }}</p>
         </div>
         <div class="col">
+            @if ($show_irl)
             <h2>Real Life</h2>
             <p>{{ $knight->rlimpact }}</p>
+            @endif
         </div>
     </div>
 @endsection
