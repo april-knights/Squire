@@ -72,6 +72,12 @@ body {
     list-style: none;
 }
 
-.links a {
+a {
     color: #efefef;
+}
+
+a:hover {
+    color: #efefef;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
 }
