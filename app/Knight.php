@@ -4,11 +4,13 @@ namespace App;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Passport\HasApiTokens;
 
 class Knight extends Authenticatable
 {
-    use Notifiable, HasApiTokens;
+    use Notifiable;
+
+    protected $table = 'knight';
+    protected $primaryKey = 'pkey';
 
     /**
      * The attributes that are mass assignable.
@@ -16,7 +18,7 @@ class Knight extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'rname', 'dname', 'bio', 'firstevent', 'frenemy', 'rlimpact', 'delflg',
     ];
 
     /**
@@ -24,9 +26,7 @@ class Knight extends Authenticatable
      *
      * @var array
      */
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
+    protected $hidden = [];
 
     /**
      * The attributes that should be cast to native types.
@@ -34,10 +34,7 @@ class Knight extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'crtsetdt' => 'datetime',
+        'lstmdts' => 'datetime',
     ];
-
-    public function findForPassport($username) {
-        return $this->where("rname")->first();
-    }
 }

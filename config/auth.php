@@ -73,7 +73,7 @@ return [
 
         'users' => [
             'driver' => 'database',
-            'table' => 'auth',
+            'table' => 'knight',
         ],
     ],
 
@@ -93,12 +93,12 @@ return [
     */
 
     'passwords' => [
-        'users' => [
+        /*'users' => [
             'provider' => 'users',
             'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,
-        ],
+        ],*/
     ],
 
     /*

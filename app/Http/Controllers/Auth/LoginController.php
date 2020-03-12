@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Socialite;
+use DB;
+use Auth;
+
+use App\Knight;
 
 class LoginController extends Controller
 {
@@ -23,10 +27,18 @@ class LoginController extends Controller
      */
     public function handleProviderCallback()
     {
-        $user = Socialite::driver('reddit')->user();
+        $reddit_user = Socialite::driver('reddit')->user();
 
-        dd($user);
+        // Check if user exists and has not been deleted
+        $knight = Knight::where('rname', $reddit_user->getNickname())->where('delflg', 0)->first();
 
-        return redirect()->to("/");
+        if(!$knight) {
+            return redirect()->to('/login')->with('error', 'User not registered.');
+        }
+
+        // Log in user, handling session etc.
+        Auth::login($knight);
+
+        return redirect()->to('/');
     }
 }
