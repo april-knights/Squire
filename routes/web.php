@@ -36,4 +36,8 @@ Route::middleware(['auth'])->group(function () {
     # Battalion
     Route::get('/battalion', 'BattalionController@index');
     Route::get('/battalion/{name}', 'BattalionController@show');
+
+    # Division
+    Route::get('/division', 'DivisionController@index');
+    Route::get('/division/{name}', 'DivisionController@show');
 });

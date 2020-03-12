@@ -34,6 +34,9 @@
               <a class="nav-link" href="/battalion">Battalions</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="/division">Divisions</a>
+              </li>
+            <li class="nav-item">
                 <a class="nav-link" href="/orders">Orders</a>
             </li>
             <li class="nav-item">
