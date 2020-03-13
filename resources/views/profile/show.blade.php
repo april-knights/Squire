@@ -24,11 +24,19 @@
             <div class="row">
                 <div class="col-md-6">
                     <h2>Battalion</h2>
+                    @if($batt)
                     <a href="/battalion/{{ $batt->battalias }}">{{ $batt->name }}</a>
+                    @else
+                    <p>None</p>
+                    @endif
                 </div>
                 <div class="col-md-6">
                     <h2>Rank</h2>
-                    <p>{{ $rank }}</p>
+                    @if($rank)
+                    <p>{{ $rank->name }}</p>
+                    @else
+                    <p>None</p>
+                    @endif
                 </div>
             </div>
             <div class="row">

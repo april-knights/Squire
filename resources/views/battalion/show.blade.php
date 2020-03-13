@@ -10,9 +10,11 @@
         </div>
         <div class="col">
             <h2>Battalion Leader</h2>
+            @if ($battlead)
             <a href="/profile/{{ $battlead->rname }}">
                 {{ $battlead->rname }}
             </a>
+            @endif
         </div>
         <div class="col">
             <!-- TODO: battalion banner -->
@@ -28,15 +30,15 @@
                 <div class="col-md-6">
                     <h2>Battalion Officers</h2>
                     <ul class="officers">
-                        @forelse ($officers as $officer)
-                            <li>
-                                <a href="/profile/{{ $officer->rname }}">
-                                    {{ $officer->rname }}
-                                </a>
-                            </li>
-                        @empty
-                            <li>Noone</li>
-                        @endforelse
+                    @forelse ($officers as $officer)
+                        <li>
+                            <a href="/profile/{{ $officer->rname }}">
+                                {{ $officer->rname }}
+                            </a>
+                        </li>
+                    @empty
+                        <li>Noone</li>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -45,7 +47,7 @@
             <ul class="members">
             @forelse ($members as $member)
                 <li>
-                    <a href="/profile/{{ $officer->rname }}">
+                    <a href="/profile/{{ $member->rname }}">
                         {{ $member->rname }}
                     </a>
                 </li>

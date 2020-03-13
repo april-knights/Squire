@@ -51,8 +51,8 @@ class ProfileController extends Controller
     public function show($rname)
     {
         $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0];
-        $rank = DB::select('SELECT name FROM krank WHERE pkey = ?', [$knight->rnk])[0]->name;
-        $batt = DB::select('SELECT name, battalias FROM battalion WHERE pkey = ?', [$knight->batt])[0];
+        $rank = DB::select('SELECT name FROM krank WHERE pkey = ?', [$knight->rnk])[0] ?? null;
+        $batt = DB::select('SELECT name, battalias FROM battalion WHERE pkey = ?', [$knight->batt])[0] ?? null;
         $skills = DB::select('SELECT * FROM skill INNER JOIN userskill ON skill.pkey = userskill.fkeyskill WHERE userskill.fkeyuser = ? AND skill.delflg = 0',
             [$knight->pkey]);
         // TODO: Show skill parents as well
