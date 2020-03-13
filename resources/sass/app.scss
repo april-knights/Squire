@@ -3,6 +3,7 @@ $primary: #efefef;
 $secondary: $primary;
 $body-color: $primary;
 $navbar-dark-color: $primary;
+$container-max-widths: (xl: 1300px);
 
 @import '~@fortawesome/fontawesome-free/css/all.min.css';
 @import '~bootstrap/scss/bootstrap';
