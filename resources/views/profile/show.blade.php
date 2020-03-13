@@ -48,6 +48,13 @@
             <div class="row">
                 <div class="col-md-6">
                     <h2>Divisions</h2>
+                    @forelse ($divs as $div)
+                    <a href="/division/{{ $div->divalias }}">
+                        {{ $div->name }}
+                    </a>
+                    @empty
+                    <p>None</p>
+                    @endforelse
                 </div>
                 <div class="col-md-6">
                     @if ($show_sensitive)

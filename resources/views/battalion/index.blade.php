@@ -19,7 +19,7 @@
             @empty
             <tr>
                 <td>None</td>
-                <td>Noone</td>
+                <td>No one</td>
             </tr>
             @endforelse
         </tbody>

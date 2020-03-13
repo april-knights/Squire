@@ -14,6 +14,8 @@
             <a href="/profile/{{ $battlead->rname }}">
                 {{ $battlead->rname }}
             </a>
+            @else
+            <p>No one</p>
             @endif
         </div>
         <div class="col">
@@ -37,7 +39,7 @@
                             </a>
                         </li>
                     @empty
-                        <li>Noone</li>
+                        <li>No one</li>
                     @endforelse
                 </div>
             </div>
@@ -52,7 +54,7 @@
                     </a>
                 </li>
             @empty
-                <li>Noone</li>
+                <li>No one</li>
             @endforelse
             </ul>
         </div>

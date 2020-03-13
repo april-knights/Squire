@@ -14,6 +14,8 @@
             <a href="/profile/{{ $divlead->rname }}">
                 {{ $divlead->rname }}
             </a>
+            @else
+            <p>No one</a>
             @endif
         </div>
     </div>
@@ -34,7 +36,7 @@
                             </a>
                         </li>
                     @empty
-                        <li>Noone</li>
+                        <li>No one</li>
                     @endforelse
                 </div>
             </div>
@@ -49,7 +51,7 @@
                     </a>
                 </li>
             @empty
-                <li>Noone</li>
+                <li>No one</li>
             @endforelse
             </ul>
         </div>
