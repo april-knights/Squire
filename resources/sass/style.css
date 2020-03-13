@@ -64,3 +64,9 @@
 .links {
     list-style: none;
 }
+
+.explainer {
+    font-size: 12pt;
+    display: inline-block;
+    vertical-align: middle;
+}

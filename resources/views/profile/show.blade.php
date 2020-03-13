@@ -6,7 +6,7 @@
     <div class="row">
         <div class="col">
             <h2>Reddit Name</h2>
-            <p>{{ $knight->rname }}</p>
+            <p>/u/{{ $knight->rname }}</p>
         </div>
         <div class="col">
             <h2>Discord Name</h2>
@@ -14,7 +14,10 @@
         </div>
         <div class="col">
             @if ($show_sensitive)
-            <h2>Knight ID</h2>
+            <h2>
+                Knight ID
+                <i class="explainer fas fa-question-circle" data-toggle="tooltip" data-placement="right" title="Uniquely identifies you. Only visible to councillors and you."></i>
+            </h2>
             <p>{{ $knight->knum }}</p>
             @endif
         </div>
@@ -33,7 +36,10 @@
                 <div class="col-md-6">
                     <h2>Rank</h2>
                     @if($rank)
-                    <p>{{ $rank->name }}</p>
+                    <p>
+                        {{ $rank->name }}
+                        <i class="explainer fas fa-question-circle" data-toggle="tooltip" data-placement="right" title="{{ $rank->rankdescr }}"></i>
+                    </p>
                     @else
                     <p>None</p>
                     @endif

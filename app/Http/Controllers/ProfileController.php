@@ -51,10 +51,10 @@ class ProfileController extends Controller
     public function show($rname)
     {
         $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0];
-        $rank = DB::select('SELECT name FROM krank WHERE pkey = ?', [$knight->rnk])[0] ?? null;
+        $rank = DB::select('SELECT name, rankdescr FROM krank WHERE pkey = ?', [$knight->rnk])[0] ?? null;
         $batt = DB::select('SELECT name, battalias FROM battalion WHERE pkey = ?', [$knight->batt])[0] ?? null;
-        $skills = DB::select('SELECT * FROM skill INNER JOIN userskill ON skill.pkey = userskill.fkeyskill WHERE userskill.fkeyuser = ? AND skill.delflg = 0',
-            [$knight->pkey]);
+        $skills = DB::select('SELECT s.skillname FROM skill s INNER JOIN userskill u ON s.pkey = u.fkeyskill
+                              WHERE u.fkeyuser = ? AND s.delflg = 0', [$knight->pkey]);
         // TODO: Show skill parents as well
         // Certain fields are limited to councillors and the user themselves
         $show_sensitive = (Auth::user()->isCouncillor()) || (Auth::id() == $knight->pkey);
