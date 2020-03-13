@@ -53,8 +53,15 @@
         @endif
       </nav>
 
-    <div class="content container-xl">
-        @yield("content")
+    <div class="container-xl">
+        <div class="row">
+            <div class="content col-lg-9">
+                @yield("content")
+            </div>
+            <div class="discord col-lg-3 d-none d-lg-block">
+                <iframe src="https://discordapp.com/widget?id=295643919553921035&theme=dark" width="250" height="500px" align="right" allowtransparency="true" frameborder="0"></iframe>
+            </div>
+        </div>
     </div>
 
     <script type="text/javascript" src="{{ asset('static/js/app.js') }}"></script>
