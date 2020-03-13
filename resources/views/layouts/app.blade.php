@@ -53,6 +53,7 @@
         @endif
       </nav>
 
+    @if (Auth::check())
     <div class="container-xl">
         <div class="row">
             <div class="content col-lg-9">
@@ -63,6 +64,11 @@
             </div>
         </div>
     </div>
+    @else
+    <div class="container">
+        @yield("content")
+    </div>
+    @endif
 
     <script type="text/javascript" src="{{ asset('static/js/app.js') }}"></script>
 </body>
