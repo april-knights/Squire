@@ -14,7 +14,7 @@ class DivisionController extends Controller
      */
     public function index()
     {
-        $divs = DB::select('SELECT * FROM division d LEFT JOIN knight k on k.pkey = d.divlead');
+        $divs = DB::select('SELECT * FROM division d LEFT JOIN knight k on k.pkey = d.divlead WHERE d.delflg = 0');
 
         return view('division.index', ['divs' => $divs]);
     }
@@ -50,8 +50,12 @@ class DivisionController extends Controller
     {
         $div = DB::select('SELECT * FROM division WHERE divalias = ?', [$alias])[0];
         $divlead = DB::select('SELECT k.rname FROM division d INNER JOIN knight k ON k.pkey = d.divlead WHERE d.divalias = ?', [$alias])[0] ?? null;
-        $members = DB::select('SELECT k.rname FROM division d INNER JOIN knight k ON k.batt = d.pkey WHERE d.divalias = ?', [$alias]);
-        $officers = DB::select('SELECT k.rname FROM division d INNER JOIN knight k ON k.batt = d.pkey INNER JOIN krank r on r.pkey = k.rnk
+        $members = DB::select('SELECT k.rname FROM knight k INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
+                               INNER JOIN division d ON d.pkey = dk.fkeydivision
+                               WHERE d.divalias = ?', [$alias]);
+        $officers = DB::select('SELECT k.rname FROM knight k INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
+                                INNER JOIN division d ON d.pkey = dk.fkeydivision
+                                INNER JOIN krank r ON r.pkey = k.rnk
                                 WHERE d.divalias = ? AND r.rval <= 5', [$alias]);
 
         return view('division.show', ['div' => $div,

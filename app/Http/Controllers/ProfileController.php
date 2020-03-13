@@ -56,6 +56,9 @@ class ProfileController extends Controller
         $skills = DB::select('SELECT s.skillname FROM skill s INNER JOIN userskill u ON s.pkey = u.fkeyskill
                               WHERE u.fkeyuser = ? AND s.delflg = 0', [$knight->pkey]);
         // TODO: Show skill parents as well
+        $divs = DB::select('SELECT * FROM knight k INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
+                            INNER JOIN division d ON d.pkey = dk.fkeydivision WHERE d.delflg = 0 AND k.rname = ?', [$rname]);
+
         // Certain fields are limited to councillors and the user themselves
         $show_sensitive = (Auth::user()->isCouncillor()) || (Auth::id() == $knight->pkey);
 
@@ -65,6 +68,7 @@ class ProfileController extends Controller
         return view('profile.show', ['knight' => $knight,
                                      'rank' => $rank,
                                      'batt' => $batt,
+                                     'divs' => $divs,
                                      'skills' => $skills,
                                      'show_sensitive' => $show_sensitive,
                                      'show_irl' => $show_irl,
