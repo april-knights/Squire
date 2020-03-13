@@ -39,5 +39,5 @@ Route::middleware(['auth'])->group(function () {
 
     # Division
     Route::get('/division', 'DivisionController@index');
-    Route::get('/division/{name}', 'DivisionController@show');
+    Route::get('/division/{alias}', 'DivisionController@show');
 });

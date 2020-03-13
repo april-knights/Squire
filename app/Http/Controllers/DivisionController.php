@@ -43,12 +43,22 @@ class DivisionController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $rname
+     * @param  int  $alias
      * @return \Illuminate\Http\Response
      */
-    public function show($rname)
+    public function show($alias)
     {
-        //
+        $div = DB::select('SELECT * FROM division WHERE divalias = ?', [$alias])[0];
+        $divlead = DB::select('SELECT k.rname FROM division d INNER JOIN knight k ON k.pkey = d.divlead WHERE d.divalias = ?', [$alias])[0] ?? null;
+        $members = DB::select('SELECT k.rname FROM division d INNER JOIN knight k ON k.batt = d.pkey WHERE d.divalias = ?', [$alias]);
+        $officers = DB::select('SELECT k.rname FROM division d INNER JOIN knight k ON k.batt = d.pkey INNER JOIN krank r on r.pkey = k.rnk
+                                WHERE d.divalias = ? AND r.rval <= 5', [$alias]);
+
+        return view('division.show', ['div' => $div,
+                                       'divlead' => $divlead,
+                                       'members' => $members,
+                                       'officers' => $officers,
+                                       ]);
     }
 
     /**

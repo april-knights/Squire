@@ -13,7 +13,7 @@
         <tbody>
             @forelse ($divs as $div)
             <tr>
-                <td><a href="/division">{{ $div->name }}</a></td>
+                <td><a href="/division/{{ $div->divalias }}">{{ $div->name }}</a></td>
                 <td><a href="/profile/{{ $div->rname }}">{{ $div->rname }}</a></td>
             </tr>
             @empty
