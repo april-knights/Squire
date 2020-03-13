@@ -13,7 +13,7 @@
         <tbody>
             @forelse ($batts as $batt)
             <tr>
-                <td><a href="/battalion">{{ $batt->name }}</a></td>
+                <td><a href="/battalion/{{ $batt->battalias }}">{{ $batt->name }}</a></td>
                 <td><a href="/profile/{{ $batt->rname }}">{{ $batt->rname }}</a></td>
             </tr>
             @empty

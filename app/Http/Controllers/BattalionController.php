@@ -43,12 +43,22 @@ class BattalionController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $rname
+     * @param  int  $alias
      * @return \Illuminate\Http\Response
      */
-    public function show($rname)
+    public function show($alias)
     {
-        //
+        $batt = DB::select('SELECT * FROM battalion WHERE battalias = ?', [$alias])[0];
+        $battlead = DB::select('SELECT k.rname FROM battalion b INNER JOIN knight k ON k.pkey = b.battlead WHERE b.battalias = ?', [$alias])[0];
+        $members = DB::select('SELECT k.rname FROM battalion b INNER JOIN knight k ON k.batt = b.pkey WHERE b.battalias = ?', [$alias]);
+        $officers = DB::select('SELECT k.rname FROM battalion b INNER JOIN knight k ON k.batt = b.pkey INNER JOIN krank r on r.pkey = k.rnk
+                                WHERE b.battalias = ? AND r.rval <= 5', [$alias]);
+
+        return view('battalion.show', ['batt' => $batt,
+                                       'battlead' => $battlead,
+                                       'members' => $members,
+                                       'officers' => $officers,
+                                       ]);
     }
 
     /**

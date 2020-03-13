@@ -55,7 +55,7 @@
     margin-bottom: 15px;
 }
 
-.content p, .content li {
+.content p, .content a, .content li {
     font-weight: bold;
     font-size: 15pt;
     margin-left: 15px;

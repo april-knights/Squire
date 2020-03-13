@@ -24,7 +24,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <h2>Battalion</h2>
-                    <p>{{ $batt->name }}</p>
+                    <a href="/battalion/{{ $batt->battalias }}">{{ $batt->name }}</a>
                 </div>
                 <div class="col-md-6">
                     <h2>Rank</h2>
