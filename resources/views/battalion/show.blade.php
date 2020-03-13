@@ -57,6 +57,7 @@
                 <li>No one</li>
             @endforelse
             </ul>
+            <a class="font-italic" href="/battalion/{{ $batt->battalias }}/members">See all…</a>
         </div>
     </div>
     <div class="row">

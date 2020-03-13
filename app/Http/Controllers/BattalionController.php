@@ -14,7 +14,8 @@ class BattalionController extends Controller
      */
     public function index()
     {
-        $batts = DB::select('SELECT * FROM battalion b LEFT JOIN knight k on k.pkey = b.battlead');
+        $batts = DB::select('SELECT * FROM battalion b
+                             LEFT JOIN knight k on k.pkey = b.battlead');
 
         return view('battalion.index', ['batts' => $batts]);
     }
@@ -43,7 +44,7 @@ class BattalionController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $alias
+     * @param  string  $alias
      * @return \Illuminate\Http\Response
      */
     public function show($alias)
@@ -54,16 +55,55 @@ class BattalionController extends Controller
             abort(404, 'Battalion not found.');
         }
 
-        $battlead = DB::select('SELECT k.rname FROM battalion b INNER JOIN knight k ON k.pkey = b.battlead WHERE b.battalias = ?', [$alias])[0] ?? null;
-        $members = DB::select('SELECT k.rname FROM battalion b INNER JOIN knight k ON k.batt = b.pkey WHERE b.battalias = ?', [$alias]);
-        $officers = DB::select('SELECT k.rname FROM battalion b INNER JOIN knight k ON k.batt = b.pkey INNER JOIN krank r on r.pkey = k.rnk
-                                WHERE b.battalias = ? AND r.rval <= 5', [$alias]);
+        $battlead = DB::select('SELECT k.rname FROM battalion b
+                                INNER JOIN knight k ON k.pkey = b.battlead
+                                WHERE b.battalias = ?', [$alias])[0] ?? null;
+
+        $members = DB::select('SELECT k.rname FROM battalion b
+                               INNER JOIN knight k ON k.batt = b.pkey
+                               WHERE b.battalias = ?', [$alias]);
+
+        $officers = DB::select('SELECT k.rname FROM battalion b
+                                INNER JOIN knight k ON k.batt = b.pkey
+                                INNER JOIN krank r on r.pkey = k.rnk
+                                WHERE b.battalias = ? AND r.rval <= 5
+                                LIMIT 10', [$alias]);
 
         return view('battalion.show', ['batt' => $batt,
                                        'battlead' => $battlead,
                                        'members' => $members,
                                        'officers' => $officers,
-                                       ]);
+                                      ]);
+    }
+
+    /**
+     * Display the complete member list.
+     *
+     * @param  string  $alias
+     * @return \Illuminate\Http\Response
+     */
+    public function members($alias)
+    {
+        $batt = DB::select('SELECT * FROM battalion WHERE battalias = ?', [$alias])[0] ?? null;
+
+        if(!$batt) {
+            abort(404, 'Battalion not found.');
+        }
+
+        $battlead = DB::select('SELECT k.rname FROM battalion b
+                                INNER JOIN knight k ON k.pkey = b.battlead
+                                WHERE b.battalias = ?', [$alias])[0] ?? null;
+
+        $members = DB::select('SELECT k.rname, k.dname, r.name, r.rankdescr, e.title FROM battalion b
+                               INNER JOIN knight k ON b.pkey = k.batt
+                               LEFT JOIN krank r ON r.pkey = k.rnk
+                               LEFT JOIN event e ON e.pkey = k.firstevent
+                               WHERE b.battalias = ?', [$alias]);
+
+        return view('battalion.members', ['batt' => $batt,
+                                          'battlead' => $battlead,
+                                          'members' => $members,
+                                         ]);
     }
 
     /**
