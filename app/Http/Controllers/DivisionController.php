@@ -54,11 +54,16 @@ class DivisionController extends Controller
             abort(404, 'Division not found.');
         }
 
-        $divlead = DB::select('SELECT k.rname FROM division d INNER JOIN knight k ON k.pkey = d.divlead WHERE d.divalias = ?', [$alias])[0] ?? null;
-        $members = DB::select('SELECT k.rname FROM knight k INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
+        $divlead = DB::select('SELECT k.rname FROM division d
+                               INNER JOIN knight k ON k.pkey = d.divlead
+                               WHERE d.divalias = ?', [$alias])[0] ?? null;
+
+        $members = DB::select('SELECT k.rname FROM knight k
+                               INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
                                INNER JOIN division d ON d.pkey = dk.fkeydivision
                                WHERE d.divalias = ?', [$alias]);
-        $officers = DB::select('SELECT k.rname FROM knight k INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
+        $officers = DB::select('SELECT k.rname FROM knight k
+                                INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
                                 INNER JOIN division d ON d.pkey = dk.fkeydivision
                                 INNER JOIN krank r ON r.pkey = k.rnk
                                 WHERE d.divalias = ? AND r.rval <= 5', [$alias]);
@@ -67,7 +72,7 @@ class DivisionController extends Controller
                                        'divlead' => $divlead,
                                        'members' => $members,
                                        'officers' => $officers,
-                                       ]);
+                                     ]);
     }
 
     /**
