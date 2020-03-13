@@ -48,7 +48,12 @@ class DivisionController extends Controller
      */
     public function show($alias)
     {
-        $div = DB::select('SELECT * FROM division WHERE divalias = ?', [$alias])[0];
+        $div = DB::select('SELECT * FROM division WHERE divalias = ?', [$alias])[0] ?? null;
+
+        if(!$div) {
+            abort(404, 'Division not found.');
+        }
+
         $divlead = DB::select('SELECT k.rname FROM division d INNER JOIN knight k ON k.pkey = d.divlead WHERE d.divalias = ?', [$alias])[0] ?? null;
         $members = DB::select('SELECT k.rname FROM knight k INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
                                INNER JOIN division d ON d.pkey = dk.fkeydivision

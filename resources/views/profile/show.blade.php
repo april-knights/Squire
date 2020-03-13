@@ -1,6 +1,10 @@
 @extends("layouts.app")
 
-@section("title", $rank->name . " " . $knight->rname)
+@if ($rank)
+    @section("title", $rank->name . " " . $knight->rname)
+@else
+    @section("title", $knight->rname)
+@endif
 
 @section("content")
     <div class="row">
