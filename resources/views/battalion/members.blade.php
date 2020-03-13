@@ -44,7 +44,8 @@
             @if($member->name)
                 {{ $member->name }}
                 <i class="explainer fas fa-question-circle" data-toggle="tooltip" data-placement="right" title="{{ $member->rankdescr }}"></i>
-            @endif</td>
+            @endif
+            </td>
             <td>{{ $member->title }}</td>
         </tr>
         @empty
