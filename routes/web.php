@@ -28,7 +28,6 @@ Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback');
 Route::middleware(['auth'])->group(function () {
     Route::view('/', 'home');
     Route::view('/links', 'links');
-    Route::view('/orders', 'orders');
 
     # Profile
     Route::get('/profile/{rname}', 'ProfileController@show');
@@ -38,8 +37,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/battalion/{alias}', 'BattalionController@show');
     Route::get('/battalion/{alias}/members', 'BattalionController@members');
 
-
     # Division
     Route::get('/division', 'DivisionController@index');
     Route::get('/division/{alias}', 'DivisionController@show');
+
+    # Orders
+    Route::get('/orders', 'OrdersController@index');
 });

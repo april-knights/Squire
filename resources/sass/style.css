@@ -45,15 +45,18 @@
     padding-top: 15px;
     padding-bottom: 15px;
     border-radius: 25px;
+    font-size: 15pt;
 }
 
 .row {
     margin-bottom: 15px;
 }
 
-.content p, .content a, .content li {
+.content a {
     font-weight: bold;
-    font-size: 15pt;
+}
+
+.content p {
     margin-left: 15px;
 }
 

@@ -13,6 +13,7 @@
         "laravel/framework": "^6.2",
         "laravel/socialite": "^4.3",
         "laravel/tinker": "^2.0",
+        "mews/purifier": "^3.2",
         "socialiteproviders/reddit": "^3.0"
     },
     "require-dev": {
