@@ -54,6 +54,7 @@
             <li>No one</li>
         @endforelse
         </ul>
+        <a class="font-italic" href="/division/{{ $div->divalias }}/members">See all…</a>
     </div>
 </div>
 <div class="row">

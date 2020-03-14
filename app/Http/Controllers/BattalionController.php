@@ -59,15 +59,15 @@ class BattalionController extends Controller
                                 INNER JOIN knight k ON k.pkey = b.battlead
                                 WHERE b.battalias = ?', [$alias])[0] ?? null;
 
-        $members = DB::select('SELECT k.rname FROM battalion b
-                               INNER JOIN knight k ON k.batt = b.pkey
-                               WHERE b.battalias = ?', [$alias]);
-
         $officers = DB::select('SELECT k.rname FROM battalion b
                                 INNER JOIN knight k ON k.batt = b.pkey
                                 INNER JOIN krank r on r.pkey = k.rnk
-                                WHERE b.battalias = ? AND r.rval <= 5
-                                LIMIT 10', [$alias]);
+                                WHERE b.battalias = ? AND r.rval <= 5', [$alias]);
+
+        $members = DB::select('SELECT k.rname FROM battalion b
+                               INNER JOIN knight k ON k.batt = b.pkey
+                               WHERE b.battalias = ?
+                               LIMIT 10', [$alias]);
 
         return view('battalion.show', ['batt' => $batt,
                                        'battlead' => $battlead,

@@ -58,21 +58,56 @@ class DivisionController extends Controller
                                INNER JOIN knight k ON k.pkey = d.divlead
                                WHERE d.divalias = ?', [$alias])[0] ?? null;
 
-        $members = DB::select('SELECT k.rname FROM knight k
-                               INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
-                               INNER JOIN division d ON d.pkey = dk.fkeydivision
-                               WHERE d.divalias = ?', [$alias]);
         $officers = DB::select('SELECT k.rname FROM knight k
                                 INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
                                 INNER JOIN division d ON d.pkey = dk.fkeydivision
                                 INNER JOIN krank r ON r.pkey = k.rnk
                                 WHERE d.divalias = ? AND r.rval <= 5', [$alias]);
 
+        $members = DB::select('SELECT k.rname FROM knight k
+                               INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
+                               INNER JOIN division d ON d.pkey = dk.fkeydivision
+                               WHERE d.divalias = ?
+                               LIMIT 10', [$alias]);
+
+
+
         return view('division.show', ['div' => $div,
                                        'divlead' => $divlead,
                                        'members' => $members,
                                        'officers' => $officers,
                                      ]);
+    }
+
+    /**
+     * Display the complete member list.
+     *
+     * @param  string  $alias
+     * @return \Illuminate\Http\Response
+     */
+    public function members($alias)
+    {
+        $div = DB::select('SELECT * FROM division WHERE divalias = ?', [$alias])[0] ?? null;
+
+        if(!$div) {
+            abort(404, 'Division not found.');
+        }
+
+        $divlead = DB::select('SELECT k.rname FROM division d
+                               INNER JOIN knight k ON k.pkey = d.divlead
+                               WHERE d.divalias = ?', [$alias])[0] ?? null;
+
+        $members = DB::select('SELECT k.rname, k.dname, r.name, r.rankdescr, e.title FROM knight k
+                               INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
+                               INNER JOIN division d ON d.pkey = dk.fkeydivision
+                               LEFT JOIN krank r ON r.pkey = k.rnk
+                               LEFT JOIN event e ON e.pkey = k.firstevent
+                               WHERE d.divalias = ?', [$alias]);
+
+        return view('division.members', ['div' => $div,
+                                          'divlead' => $divlead,
+                                          'members' => $members,
+                                         ]);
     }
 
     /**
