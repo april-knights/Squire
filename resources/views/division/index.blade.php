@@ -1,8 +1,8 @@
-@extends("layouts.app")
+@extends('layouts.app')
 
-@section("title", "Divisions")
+@section('title', 'Divisions')
 
-@section("content")
+@section('content')
 <table class="table table-hover table-borderless">
     <thead>
         <tr>

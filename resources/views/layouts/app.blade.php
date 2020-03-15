@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Squire - @yield("title")</title>
+    <title>Squire - @yield('title')</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -57,7 +57,7 @@
         <div class="container-xl">
             <div class="row">
                 <div class="content col-lg-9">
-                    @yield("content")
+                    @yield('content')
                 </div>
                 <div class="discord col-lg-3 d-none d-lg-block">
                     <iframe src="https://discordapp.com/widget?id=295643919553921035&theme=dark" width="250" height="500px" align="right" allowtransparency="true" frameborder="0"></iframe>
@@ -66,7 +66,7 @@
         </div>
     @else
         <div class="container">
-            @yield("content")
+            @yield('content')
         </div>
     @endif
 

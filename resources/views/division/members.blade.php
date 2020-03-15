@@ -1,8 +1,8 @@
-@extends("layouts.app")
+@extends('layouts.app')
 
-@section("title", $div->name)
+@section('title', $div->name)
 
-@section("content")
+@section('content')
 <div class="row">
     <div class="col">
         <h2>Division Name</h2>
@@ -22,6 +22,8 @@
         <!-- TODO: division banner? -->
     </div>
 </div>
+
 @component('component.membertable', ['members' => $members])
 @endcomponent
+
 @endsection

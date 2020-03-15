@@ -1,10 +1,10 @@
-@extends("layouts.app")
+@extends('layouts.app')
 
-@section("title")
+@section('title')
     Login
 @endsection
 
-@section("content")
+@section('content')
 @if(session()->has('error'))
     <div class="alert alert-error">
         {{ session()->get('error') }}

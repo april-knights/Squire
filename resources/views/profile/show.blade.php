@@ -1,12 +1,12 @@
-@extends("layouts.app")
+@extends('layouts.app')
 
 @if ($rank)
-    @section("title", $rank->name . " " . $knight->rname)
+    @section('title', $rank->name . ' ' . $knight->rname)
 @else
-    @section("title", $knight->rname)
+    @section('title', $knight->rname)
 @endif
 
-@section("content")
+@section('content')
 <div class="row">
     <div class="col">
         <h2>Reddit Name</h2>

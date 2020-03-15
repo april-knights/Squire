@@ -1,8 +1,8 @@
-@extends("layouts.app")
+@extends('layouts.app')
 
-@section("title", $batt->name)
+@section('title', $batt->name)
 
-@section("content")
+@section('content')
 @component('component.battoverview', ['batt' => $batt, 'battlead' => $battlead])
 @endcomponent
 

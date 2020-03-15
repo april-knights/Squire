@@ -1,8 +1,8 @@
-@extends("layouts.app")
+@extends('layouts.app')
 
-@section("title", "Links")
+@section('title', 'Links')
 
-@section("content")
+@section('content')
 <h2>Websites</h2>
 <ul class="links">
     <li>

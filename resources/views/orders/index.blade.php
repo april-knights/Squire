@@ -1,9 +1,9 @@
-@extends("layouts.app")
+@extends('layouts.app')
 
-@section("title", "Battalions")
+@section('title', 'Battalions')
 
-@section("content")
-<h2 class="ordertitle">Knights</h2>
+@section('content')
+<h2 class='ordertitle'>Knights</h2>
 @component('component.orderlist', ['orders' => $knight_orders])
 @endcomponent
 
