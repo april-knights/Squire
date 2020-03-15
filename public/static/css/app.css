@@ -60,8 +60,13 @@
     font-weight: bold;
 }
 
-.content p {
+/* Somewhat hacky but works to indent grid contents and orders to the right */
+.content .row p, .content .row a, .order p {
     margin-left: 15px;
+}
+
+.content .row li a {
+    margin-left: 0px;
 }
 
 .table {
