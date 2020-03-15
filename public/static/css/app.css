@@ -77,6 +77,10 @@
     display: inline-block;
     vertical-align: middle;
 }
+
+.banner {
+    width: 150px;
+}
 @charset "UTF-8";
 
 /*!
