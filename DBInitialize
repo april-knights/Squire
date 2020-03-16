@@ -172,15 +172,14 @@ CREATE TABLE `orders` (
 
 CREATE TABLE `link` (
   `pkey` tinyint PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `typcd` enum NOT NULL,
+  `typcd` enum('subreddit','event','discord','document') NOT NULL,
   `linknm` varchar(50) NOT NULL,
-  `linkdesc` varchar(255),
   `linkurl` varchar(150),
   `imgurl` varchar(150),
-  `crtsetdt` date NOT NULL DEFAULT "CURRENT_TIMESTAMP",
+  `crtsetdt` date NOT NULL DEFAULT "NOW()",
   `crtsetid` int NOT NULL DEFAULT 1,
   `lstmdby` int NOT NULL DEFAULT 1,
-  `lstmdts` datetime NOT NULL DEFAULT "CURRENT_TIMESTAMP",
+  `lstmdts` datetime NOT NULL DEFAULT "NOW()",
   `activeflg` bit NOT NULL DEFAULT 1,
   `delflg` bit NOT NULL DEFAULT 0
 );
