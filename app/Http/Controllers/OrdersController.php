@@ -16,17 +16,25 @@ class OrdersController extends Controller
      */
     public function index()
     {
+        $user_rank = Auth::user()->getRankVal();
+
         $knight_orders = DB::select('SELECT * from orders o
                                      LEFT JOIN knight k ON k.pkey = o.authorid
-                                     WHERE o.level > 8');
+                                     WHERE o.level > 8 # Orders for level 8 and below
+                                     AND o.delflg = 0  # Not deleted
+                                     AND o.level >= ?', [$user_rank]); # The current user is authorized to see the order
 
         $officer_orders = DB::select('SELECT * from orders o
                                       LEFT JOIN knight k ON k.pkey = o.authorid
-                                      WHERE o.level <= 8 AND o.level > 7');
+                                      WHERE o.level <= 8 AND o.level > 6 # Orders between level 8 and 6
+                                      AND o.delflg = 0
+                                      AND o.level >= ?', [$user_rank]);
 
         $commander_orders = DB::select('SELECT * from orders o
                                         LEFT JOIN knight k ON k.pkey = o.authorid
-                                        WHERE o.level <= 11');
+                                        WHERE o.level <= 5 # Orders above level 6
+                                        AND o.delflg = 0
+                                        AND o.level >= ?', [$user_rank]);
 
         return view('orders.index', ['knight_orders' => $knight_orders,
                                      'officer_orders' => $officer_orders,
