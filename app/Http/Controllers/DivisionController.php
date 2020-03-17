@@ -56,18 +56,18 @@ class DivisionController extends Controller
 
         $divlead = DB::select('SELECT k.rname FROM division d
                                INNER JOIN knight k ON k.pkey = d.divlead
-                               WHERE d.divalias = ?', [$alias])[0] ?? null;
+                               WHERE d.divalias = ? AND k.pkey in(select pkey from knight where activeflg = 1 AND delflg = 0)', [$alias])[0] ?? null;
 
         $officers = DB::select('SELECT k.rname FROM knight k
                                 INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
                                 INNER JOIN division d ON d.pkey = dk.fkeydivision
                                 INNER JOIN krank r ON r.pkey = k.rnk
-                                WHERE d.divalias = ? AND r.rval <= 5', [$alias]);
+                                WHERE d.divalias = ? AND r.rval <= 5 AND k.pkey in(select pkey from knight where activeflg = 1 AND delflg = 0)', [$alias]);
 
         $members = DB::select('SELECT k.rname FROM knight k
                                INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
                                INNER JOIN division d ON d.pkey = dk.fkeydivision
-                               WHERE d.divalias = ?
+                               WHERE d.divalias = ? AND k.pkey in(select pkey from knight where activeflg = 1 AND delflg = 0)
                                LIMIT 10', [$alias]);
 
 
@@ -95,14 +95,14 @@ class DivisionController extends Controller
 
         $divlead = DB::select('SELECT k.rname FROM division d
                                INNER JOIN knight k ON k.pkey = d.divlead
-                               WHERE d.divalias = ?', [$alias])[0] ?? null;
+                               WHERE d.divalias = ? AND k.pkey in(select pkey from knight where activeflg = 1 AND delflg = 0)', [$alias])[0] ?? null;
 
         $members = DB::select('SELECT k.rname, k.dname, r.name, r.rankdescr, e.title FROM knight k
                                INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
                                INNER JOIN division d ON d.pkey = dk.fkeydivision
                                LEFT JOIN krank r ON r.pkey = k.rnk
                                LEFT JOIN event e ON e.pkey = k.firstevent
-                               WHERE d.divalias = ?', [$alias]);
+                               WHERE d.divalias = ? AND k.pkey in(select pkey from knight where activeflg = 1 AND delflg = 0)', [$alias]);
 
         return view('division.members', ['div' => $div,
                                           'divlead' => $divlead,
