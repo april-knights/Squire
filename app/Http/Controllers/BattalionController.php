@@ -57,16 +57,16 @@ class BattalionController extends Controller
 
         $battlead = DB::select('SELECT k.rname FROM battalion b
                                 INNER JOIN knight k ON k.pkey = b.battlead
-                                WHERE b.battalias = ?', [$alias])[0] ?? null;
+                                WHERE b.battalias = ?' AND k.pkey in(select pkey from knight where activeflg = 1 AND delflg = 0), [$alias])[0] ?? null;
 
         $officers = DB::select('SELECT k.rname FROM battalion b
                                 INNER JOIN knight k ON k.batt = b.pkey
                                 INNER JOIN krank r on r.pkey = k.rnk
-                                WHERE b.battalias = ? AND r.rval <= 5', [$alias]);
+                                WHERE b.battalias = ? AND r.rval <= 5' AND k.pkey in(select pkey from knight where activeflg = 1 AND delflg = 0), [$alias]);
 
         $members = DB::select('SELECT k.rname FROM battalion b
                                INNER JOIN knight k ON k.batt = b.pkey
-                               WHERE b.battalias = ?
+                               WHERE b.battalias = ? AND k.pkey in(select pkey from knight where activeflg = 1 AND delflg = 0)
                                LIMIT 10', [$alias]);
 
         return view('battalion.show', ['batt' => $batt,
@@ -92,13 +92,13 @@ class BattalionController extends Controller
 
         $battlead = DB::select('SELECT k.rname FROM battalion b
                                 INNER JOIN knight k ON k.pkey = b.battlead
-                                WHERE b.battalias = ?', [$alias])[0] ?? null;
+                                WHERE b.battalias = ?' AND k.pkey in(select pkey from knight where activeflg = 1 AND delflg = 0), [$alias])[0] ?? null;
 
         $members = DB::select('SELECT k.rname, k.dname, r.name, r.rankdescr, e.title FROM battalion b
                                INNER JOIN knight k ON b.pkey = k.batt
                                LEFT JOIN krank r ON r.pkey = k.rnk
                                LEFT JOIN event e ON e.pkey = k.firstevent
-                               WHERE b.battalias = ?', [$alias]);
+                               WHERE b.battalias = ?' AND k.pkey in(select pkey from knight where activeflg = 1 AND delflg = 0), [$alias]);
 
         return view('battalion.members', ['batt' => $batt,
                                           'battlead' => $battlead,
