@@ -59,7 +59,33 @@ class Knight extends Authenticatable
      */
     public function getRankVal() {
         $myid = $this->getAuthIdentifier();
-        return DB::select('SELECT r.rval FROM knight k INNER JOIN krank r ON r.pkey = k.rnk WHERE k.pkey = ?', [$myid])[0]->rval;
+        $rank = DB::select('SELECT r.rval FROM knight k
+                            INNER JOIN krank r ON r.pkey = k.rnk
+                            WHERE k.pkey = ?', [$myid])[0] ?? null;
+
+        if ($rank) {
+            return $rank->rval;
+        } else {
+            return 99; # If the knight doesn't have an assigned rank, default to rval 99.
+        }
+    }
+
+    /**
+     * Get this knight's rank name.
+     *
+     * @return int
+     */
+    public function getRankName() {
+        $myid = $this->getAuthIdentifier();
+        $rank = DB::select('SELECT r.name FROM knight k
+                            INNER JOIN krank r ON r.pkey = k.rnk
+                            WHERE k.pkey = ?', [$myid])[0] ?? null;
+
+        if ($rank) {
+            return $rank->name;
+        } else {
+            return ''; # If the knight doesn't have an assigned rank, return empty string.
+        }
     }
 
     /**
