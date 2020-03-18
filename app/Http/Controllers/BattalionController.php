@@ -62,7 +62,9 @@ class BattalionController extends Controller
         $officers = DB::select('SELECT k.rname FROM battalion b
                                 INNER JOIN knight k ON k.batt = b.pkey
                                 INNER JOIN krank r on r.pkey = k.rnk
-                                WHERE b.battalias = ? AND r.rval <= 5 AND k.pkey in(select pkey from knight where activeflg = 1 AND delflg = 0)', [$alias]);
+                                WHERE b.battalias = ? AND r.rval <= 8
+                                AND k.activeflg = 1 AND k.delflg = 0
+                                ORDER BY r.rval', [$alias]);
 
         $members = DB::select('SELECT k.rname FROM battalion b
                                INNER JOIN knight k ON k.batt = b.pkey
