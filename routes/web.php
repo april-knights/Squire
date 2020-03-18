@@ -27,7 +27,6 @@ Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback');
 ## Internal routes
 Route::middleware(['auth'])->group(function () {
     Route::view('/', 'home');
-    Route::view('/links', 'links');
 
     # Profile
     Route::get('/profile/{rname}', 'ProfileController@show');
@@ -44,4 +43,7 @@ Route::middleware(['auth'])->group(function () {
 
     # Orders
     Route::get('/orders', 'OrdersController@index');
+
+    # Links
+    Route::get('/links', 'LinkController@index');
 });

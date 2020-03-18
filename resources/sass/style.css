@@ -1,6 +1,6 @@
 #background-color {
     background-color: #752e2e;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -9,7 +9,7 @@
 
 #background-img {
     background: url(/static/img/BackgroundLogo.png) center/40% fixed no-repeat;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -81,4 +81,9 @@
 
 .banner {
     width: 150px;
+}
+
+.link-img {
+    width: 60px;
+    height: 60px;
 }
