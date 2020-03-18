@@ -5,10 +5,16 @@
 2. Clone the repository using `git clone https://github.com/april-knights/Squire.git`.
 3. Enter the `Squire` directory and run `composer install`.
 4. Copy `.env.example` to `.env` and modify whatever you need.
-4. Start the development server using `php artisan serve`
-### Only required for CSS/JS changes
-5. Install the required Javascript dependencies using `npm install`.
-6. Run `npm run watch` to automatically recompile css and js files when you update them.
+5. Start the development server using `php artisan serve`
+
+### Compiling CSS/JS changes
+1. Install the required Javascript dependencies using `npm install`.
+2. Run `npm run dev` to recompile css and js files.
+
+### Automatically recompile CSS/JS and refresh browser
+1. Change the redirect_uri in `.env` and on reddit to `127.0.0.1:3000`.
+2. Run `npm run watch`. Whenever you make a change to the application, your browser is automatically reloaded.
+
 
 ## Deployment
 0. Properly set up your webserver.
