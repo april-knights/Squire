@@ -102,6 +102,10 @@
     align-content: center;
     align-items: center;
 }
+
+.table thead th {
+    border-bottom: 2px solid #dee2e6 !important;
+}
 @charset "UTF-8";
 
 /*!
