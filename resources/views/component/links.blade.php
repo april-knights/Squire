@@ -7,7 +7,7 @@
             </div>
         @endif
         <div class="media-body">
-            <h5 class="mt-0 mb-0"><a href="{{ $link->linkurl }}">{{ $link->linknm }}</a></h5>
+            <h5 class="mt-0 mb-0"><a href="{{ $link->linkurl }}" target="_blank" rel="noopener">{{ $link->linknm }}</a></h5>
             <p class="ml-3">{{ $link->linkdesc }}</p>
         </div>
     </li>
