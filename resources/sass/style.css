@@ -86,4 +86,7 @@
 .link-img {
     width: 60px;
     height: 60px;
+    display: flex;
+    align-content: center;
+    align-items: center;
 }

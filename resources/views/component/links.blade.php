@@ -2,7 +2,9 @@
 @foreach ($links as $link)
     <li class="media">
         @if ($link->imgurl)
-            <img class="link-img align-self-start mr-3" src="{{ $link->imgurl }}" alt=" ">
+            <div class="link-img align-self-start mr-3">
+                <img class="img-fluid" src="{{ $link->imgurl }}" alt=" ">
+            </div>
         @endif
         <div class="media-body">
             <h5 class="mt-0 mb-0"><a href="{{ $link->linkurl }}">{{ $link->linknm }}</a></h5>
