@@ -38,6 +38,10 @@
     font-size: 23pt;
 }
 
+.active > .nav-link {
+    text-decoration: underline;
+}
+
 .username {
     margin-right: 1em;
     font-style: italic;

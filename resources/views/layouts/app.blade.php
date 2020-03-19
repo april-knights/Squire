@@ -27,19 +27,19 @@
         @if (Auth::check())
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                <a class="nav-link" href="/profile/{{ Auth::user()->rname }}">My Profile</a>
+                <li class="nav-item {{ Request::is('profile/' . Auth::user()->rname) ? 'active' : '' }}">
+                    <a class="nav-link" href="/profile/{{ Auth::user()->rname }}">My Profile</a>
                 </li>
-                <li class="nav-item">
-                <a class="nav-link" href="/battalion">Battalions</a>
+                <li class="nav-item {{ Request::is('battalion') ? 'active' : '' }}">
+                    <a class="nav-link" href="/battalion">Battalions</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item {{ Request::is('division') ? 'active' : '' }}">
                     <a class="nav-link" href="/division">Divisions</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item {{ Request::is('orders') ? 'active' : '' }}">
                     <a class="nav-link" href="/orders">Orders</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item {{ Request::is('links') ? 'active' : '' }}">
                     <a class="nav-link" href="/links">Links</a>
                 </li>
             </ul>
