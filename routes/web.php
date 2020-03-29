@@ -29,7 +29,12 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/', 'home');
 
     # Profile
+    Route::get('/profile/new', 'ProfileController@create');
     Route::get('/profile/{rname}', 'ProfileController@show');
+    Route::get('/profile/{rname}/edit', 'ProfileController@edit');
+
+    Route::post('/profile/new', 'ProfileController@store');
+    Route::post('/profile/{rname}/edit', 'ProfileController@update');
 
     # Battalion
     Route::get('/battalion', 'BattalionController@index');

@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 
 use DB;
 
@@ -108,5 +109,27 @@ class Knight extends Authenticatable
     public function isOfficer($batt_key) {
         // If the rank value is lower than or equal to 8, this knight is an officer
         return $this->isBattMember($batt_key) && $this->getRankVal() <= 8;
+    }
+
+    /**
+     * Check a users security entry for the given key.
+     *
+     * @var string security table column
+     *
+     * @return bool
+    */
+    public function checkSecurity($key) {
+        $myid = $this->getAuthIdentifier();
+        $security = DB::select('SELECT :key FROM knight k
+                                INNER JOIN security s ON s.pkey = k.security
+                                WHERE k.pkey = :id', ['id' => $myid, 'key' => $key]) ?? null;
+        if (!$security) {
+            return false; # Knight has no linked security entry
+        } else if (sizeof($security) != 1) {
+            Log::warning("Got more than one security entry for knight " , $myid->rname . " key " . $key);
+            return false;
+        } else {
+            return $security == 1;
+        }
     }
 }
