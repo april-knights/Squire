@@ -3,71 +3,95 @@
 @section('title', 'Editing ' . $knight->rname)
 
 @section('content')
+@if ($errors->any())
+<div class="alert alert-danger">
+    <ul>
+        @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
 <form method="POST">
     @csrf
     <div class="row">
         <div class="col">
             <label for="rname"><h2>Reddit Name</h2></label>
-            <input id="rname" type="text" value="{{ $knight->rname }}"></input>
+            <input id="rname" name="rname" type="text" value="{{ $knight->rname }}"></input>
         </div>
         <div class="col">
             <label for="dname"><h2>Discord Name</h2></label>
-            <input id="dname" type="text" value="{{ $knight->dname }}"></input>
+            <input id="dname" name="dname" type="text" value="{{ $knight->dname }}"></input>
         </div>
         <div class="col">
             <label for="email"><h2>Email</h2></label>
-            <input id="email" type="email" value="{{ $knight->email }}"></input>
+            <input id="email" name="email" type="email" value="{{ $knight->email }}"></input>
         </div>
     </div>
     <div class="row">
         <div class="col-md-8">
             <div class="row">
                 <div class="col-md-6">
-                    <label for="batt"><h2>Battalion</h2></label>
-                    @foreach ($all_batts as $batt)
-                    <fieldset class="form-check">
-                        <input class="form-check-input" type="radio" name="batt" id="{{ $batt->pkey }}"
-                            value="{{ $batt->pkey }}" @if ($batt->pkey == $cur_batt) checked @endif>
-                        <label class="form-check-label" for="{{ $batt->pkey }}">
-                            {{ $batt->name }}
-                        </label>
+                    <h2>Battalion</h2>
+                    <fieldset name="batt">
+                        @foreach ($all_batts as $batt)
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="batt" id="batt_{{ $batt->pkey }}"
+                                value="{{ $batt->pkey }}" @if ($batt->pkey == $knight->batt) checked @endif>
+                            <label class="form-check-label" for="batt_{{ $batt->pkey }}">
+                                {{ $batt->name }}
+                            </label>
+                        </div>
+                        @endforeach
                     </fieldset>
-                    @endforeach
                 </div>
                 <div class="col-md-6">
-                    <label for="rank"><h2>Rank</h2></label>
-                    @foreach ($all_ranks as $rank)
-                    <fieldset class="form-check">
-                        <input class="form-check-input" type="radio" name="rank" id="{{ $rank->pkey }}"
-                            value="{{ $rank->pkey }}" @if ($rank->pkey == $cur_rank) checked @endif>
-                        <label class="form-check-label" for="{{ $rank->pkey }}">
-                            {{ $rank->name }}
-                        </label>
+                    <h2>Rank</h2>
+                    <fieldset name="rank" class="form-check">
+                        @foreach ($all_ranks as $rank)
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="rank" id="rank_{{ $rank->pkey }}"
+                                value="{{ $rank->pkey }}" @if ($rank->pkey == $knight->rnk) checked @endif>
+                            <label class="form-check-label" for="rank_{{ $rank->pkey }}">
+                                {{ $rank->name }}
+                            </label>
+                        </div>
+                        @endforeach
                     </fieldset>
-                    @endforeach
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
                     <label for="divs"><h2>Divisions</h2></label>
-                    @foreach ($all_divs as $div)
-                    <fieldset class="form-check">
-                        <input class="form-check-input" type="checkbox" name="divs" id="{{ $batt->pkey }}"
-                            value="" @if (in_array($div, $cur_divs)) checked @endif>
-                        <label class="form-check-label" for="{{ $div->pkey }}">
-                            {{ $div->name }}
-                        </label>
+                    <fieldset name="divs" class="form-check">
+                        @foreach ($all_divs as $div)
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="divs[]" id="div_{{ $div->pkey }}"
+                                value="{{ $div->pkey }}" @if (in_array($div, $cur_divs)) checked @endif>
+                            <label class="form-check-label" for="div_{{ $div->pkey }}">
+                                {{ $div->name }}
+                            </label>
+                        </div>
+                        @endforeach
                     </fieldset>
-                    @endforeach
                 </div>
                 <div class="col-md-6">
-
+                    <h2>First Event</h2>
+                    @foreach ($all_events as $event)
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="firstevent" id="event_{{ $event->pkey }}"
+                                value="{{ $event->pkey }}" @if ($event->pkey == $knight->firstevent) checked @endif>
+                            <label class="form-check-label" for="event_{{ $event->pkey }}">
+                                {{ $event->title }}
+                            </label>
+                        </div>
+                        @endforeach
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <label for="skills"><h2>Skills</h2></label>
-            <select class="custom-select" multiple size="28">
+            <select class="custom-select" name="skills[]" multiple size="28">
                 @php
                     $in_group = false;
                 @endphp
@@ -96,11 +120,11 @@
     <div class="row">
         <div class="col">
             <label for="bio"><h2>About Me</h2></label>
-            <textarea id="bio">{{ $knight->bio }}</textarea>
+            <textarea id="bio" name="bio" maxlength="255">{{ $knight->bio }}</textarea>
         </div>
         <div class="col">
             <label for="rlimpact"><h2>Real Life</h2></label>
-            <textarea id="rlimpact">{{ $knight->rlimpact }}</textarea>
+            <textarea id="rlimpact" name="rlimpact" maxlength="255">{{ $knight->rlimpact }}</textarea>
         </div>
     </div>
     <div class="row">

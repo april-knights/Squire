@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
+use DB;
+use Log;
 use Auth;
 use App\Knight;
+use App\Http\Requests\StoreProfile;
 
 class ProfileController extends Controller
 {
@@ -20,27 +22,6 @@ class ProfileController extends Controller
         $knights = DB::select('select * from knights');
 
         return view('knight.index', ['knights' => $knights]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**
@@ -65,7 +46,7 @@ class ProfileController extends Controller
 
         $skills = DB::select('SELECT s.skillname FROM skill s
                               INNER JOIN userskill u ON s.pkey = u.fkeyskill
-                              WHERE u.fkeyuser = ? AND s.delflg = 0', [$knight->pkey]);
+                              WHERE u.fkeyuser = ? AND s.delflg = 0 AND u.delflg = 0', [$knight->pkey]);
 
         // TODO: Show skill parents as well
         $divs = DB::select('SELECT * FROM knight k
@@ -86,7 +67,17 @@ class ProfileController extends Controller
                                      'skills' => $skills,
                                      'show_sensitive' => $show_sensitive,
                                      'show_irl' => $show_irl,
-                                     ]);
+                                    ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
     }
 
     /**
@@ -99,7 +90,7 @@ class ProfileController extends Controller
     {
         $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0] ?? null;
 
-        if (!$knight) {
+        if (!$knight || $knight->delflg == 1) {
             abort(404, 'Knight not found.');
         }
 
@@ -109,11 +100,9 @@ class ProfileController extends Controller
             abort(401, 'Not authorized to edit knight.');
         }
 
-        $cur_rank = $knight->rnk;
-        $cur_batt = $knight->batt;
         $cur_skills = DB::select('SELECT s.pkey, s.skillname, s.parentid FROM skill s
                                   INNER JOIN userskill u ON s.pkey = u.fkeyskill
-                                  WHERE u.fkeyuser = ? AND s.delflg = 0', [$knight->pkey]);
+                                  WHERE u.fkeyuser = ? AND s.delflg = 0 AND u.delflg = 0', [$knight->pkey]);
 
         $cur_divs = DB::select('SELECT d.pkey, d.name FROM knight k
                                 INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
@@ -132,17 +121,19 @@ class ProfileController extends Controller
         $all_divs = DB::select('SELECT pkey, name FROM division
                                 WHERE activeflg = 1 AND delflg = 0');
 
+        $all_events = DB::select('SELECT pkey, title FROM event');
+
+
         return view('profile.edit', ['knight' => $knight,
-                                     'cur_rank' => $cur_rank,
-                                     'cur_batt' => $cur_batt,
                                      'cur_divs' => $cur_divs,
                                      'cur_skills' => $cur_skills,
                                      'all_ranks' => $all_ranks,
                                      'all_skills' => $all_skills,
                                      'all_batts' => $all_batts,
                                      'all_divs' => $all_divs,
-                                     'editable_fields' => $editable_fields,
-                                     ]);
+                                     'all_events' => $all_events,
+                                     'editable_fields' => $editable_fields, // TODO: Deactivate non-editable in blade
+                                    ]);
     }
 
     /**
@@ -168,27 +159,100 @@ class ProfileController extends Controller
     }
 
     /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StoreProfile $request)
+    {
+        //
+    }
+
+    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  string  $rname
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreProfile $request, $rname)
     {
-        $modified = false;
+        $validated = $request->validated();
 
-        // Transaction
+        // Start transaction
+        DB::transaction(function () use (&$validated, &$rname) {
 
-        // Update skills?
+            $editor = Auth::id();
+            // We need to get the pkey incase we change rname later
+            $pkey = DB::select('SELECT pkey FROM knight WHERE rname = ?', [$rname])[0]->pkey ?? null;
 
-        // Update everything else
+            if (!$pkey) {
+                Log::error("Could not get pkey for rname " . $rname);
+                abort(503);
+            }
 
-        if ($modified) {
-            // Update modified timestamp/user
-        }
 
+            // Update skills
+            if(array_key_exists('skills', $validated)) {
+                $old_skills_obj = DB::select('SELECT fkeyskill FROM userskill
+                                              WHERE fkeyuser = ? AND delflg = 0', [$pkey]);
+
+                // Merge array of skill objects into a single array of skill pkeys
+                $old_skills = [];
+                foreach($old_skills_obj as $skill) array_push($old_skills, $skill->fkeyskill);
+
+                // Get deleted and added skills by array intersection
+                $deleted = array_diff($old_skills, $validated['skills']);
+                $added = array_diff($validated['skills'], $old_skills);
+
+                // Set delflag for deleted skills
+                foreach ($deleted as $skill) {
+                    DB::update('UPDATE userskill
+                                SET delflg = 1,
+                                    lstmdby = :editor,
+                                    lstmdts = CURRENT_TIMESTAMP
+                                WHERE fkeyuser = :userid AND fkeyskill = :skillid',
+                                ['userid' => $pkey, 'skillid' => $skill, 'editor' => $editor]);
+                }
+
+                // Add skills, reactive deleted ones if they exist
+                foreach ($added as $skill) {
+                    $prev_deleted = DB::select('SELECT usid FROM userskill
+                                                WHERE fkeyuser = ? AND fkeyskill = ? AND delflg = 1', [$pkey, $skill])[0]->usid ?? null;
+
+                    if ($prev_deleted) {
+                        DB::update('UPDATE userskill
+                                    SET delflg = 0,
+                                        lstmdby = :editor,
+                                        lstmdts = CURRENT_TIMESTAMP
+                                    WHERE usid = :usid',
+                                    ['editor' => $editor, 'usid' => $prev_deleted]);
+                    } else {
+                        DB::insert('INSERT INTO userskill (fkeyuser, fkeyskill, crtsetid, lstmdby)
+                                    VALUES (?, ?, ?, ?)', [$pkey, $skill, $editor, $editor]);
+                    }
+                }
+            }
+
+
+            // Update knight-editable values
+            DB::update('UPDATE knight
+                        SET dname = ?,
+                            email = ?,
+                            bio = ?,
+                            firstevent = ?,
+                            rlimpact = ?,
+                            lstmdby = ?,
+                            lstmdts = CURRENT_TIMESTAMP
+                        WHERE pkey = ?',
+                        [$validated['dname'], $validated['email'],$validated['bio'],
+                         $validated['firstevent'], $validated['rlimpact'], $editor, $pkey
+                        ]);
         // Commit
+        });
+
+        return redirect()->route('profile', ['rname' => $rname]);
     }
 
     /**

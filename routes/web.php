@@ -30,7 +30,7 @@ Route::middleware(['auth'])->group(function () {
 
     # Profile
     Route::get('/profile/new', 'ProfileController@create');
-    Route::get('/profile/{rname}', 'ProfileController@show');
+    Route::get('/profile/{rname}', 'ProfileController@show')->name('profile');
     Route::get('/profile/{rname}/edit', 'ProfileController@edit');
 
     Route::post('/profile/new', 'ProfileController@store');
