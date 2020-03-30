@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 use DB;
 use Log;
 use Auth;
 use App\Knight;
-use App\Http\Requests\StoreProfile;
 
 class ProfileController extends Controller
 {
@@ -90,15 +90,10 @@ class ProfileController extends Controller
     {
         $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0] ?? null;
 
-        if (!$knight || $knight->delflg == 1) {
-            abort(404, 'Knight not found.');
-        }
+        abort_if(!$knight || $knight->delflg == 1, 404, 'Knight not found.');
 
-        $editable_fields = self::editableFields($knight, Auth::user());
-
-        if (!$editable_fields) {
-            abort(401, 'Not authorized to edit knight.');
-        }
+        $editable_fields = self::editableFields($knight);
+        abort_if(!$editable_fields, 401, 'Not authorized to edit knight.');
 
         $cur_skills = DB::select('SELECT s.pkey, s.skillname, s.parentid FROM skill s
                                   INNER JOIN userskill u ON s.pkey = u.fkeyskill
@@ -138,18 +133,20 @@ class ProfileController extends Controller
     /**
      * Gets the profile fields editable by another user.
      *
-     * @param array $knight Knight to be edited.
-     * @param Knight $user  User doing the editing.
+     * @param array $knight Knight to be edited
      * @return array        Array of editable fields
      */
-    private static function editableFields($knight, $user) {
-        # Councillor is editing the profile
+    private static function editableFields($knight) {
+        $user = Auth::user();
+
+        // Councillor is editing the profile
         if ($user->checkSecurity('cmuser')) {
-            return array('rname', 'dname', 'email', 'bio', 'firstevent', 'rlimpact', 'batt', 'divs', 'batt2', 'rnk', 'security', 'activeflg', 'skills');
-        # Battalion officer is editing
+            return array('rname', 'dname', 'email', 'batt', 'rank', 'divs', 'firstevent', 'skills', 'bio', 'rlimpact');
+            // TODO: implement 'batt2', 'security', 'activeflg',
+        // Battalion officer is editing
         } elseif ($user->checkSecurity('cmbattuser') && $user->isBattMember($knight->batt)) {
             return null;
-        # User is editing their own profile
+        // User is editing their own profile
         } elseif ($knight->pkey == $user->getAuthIdentifier()) {
             return array('dname', 'email', 'bio', 'firstevent', 'rlimpact', 'skills');
         } else {
@@ -158,12 +155,59 @@ class ProfileController extends Controller
     }
 
     /**
+     * Generate edit rules.
+     *
+     * @param array $knight Knight being edited
+     * @return array        Array of rules
+     */
+    private static function editRules($knight) {
+        $all_rules = [
+            'rname' => [
+                'required',
+                'max:30',
+                Rule::unique('knight')->ignore($knight->rname, 'rname'),
+            ],
+            'dname' => [
+                'nullable',
+                'max:40',
+                'regex:/^.+?#\d{4}/',
+                Rule::unique('knight')->ignore($knight->rname, 'rname'),
+            ],
+            'email' => [
+                'nullable',
+                'email',
+                'max:50',
+                Rule::unique('knight')->ignore($knight->rname, 'rname'),
+            ],
+            'batt' => 'nullable|integer|exists:battalion,pkey',
+            'rank' => 'nullable|integer|exists:krank,pkey',
+            'divs' => 'nullable',
+            'divs.*' => 'integer|exists:division,pkey',
+            'firstevent' => 'nullable|integer|exists:event,pkey',
+            'skills' => 'nullable',
+            'skills.*' => 'integer|exists:skill,pkey', // TODO: Exclude parent skills.
+            'bio' => 'nullable|string|max:255',
+            'rlimpact' => 'nullable|string|max:255',
+        ];
+
+        $editable_fields = self::editableFields($knight);
+
+        // User is not authorized to edit any fields
+        if (!$editable_fields) {
+            return null;
+        }
+
+        // Intersect values from editableFields with all rules
+        return array_intersect_key($all_rules, array_flip($editable_fields));
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreProfile $request)
+    public function store(Request $request)
     {
         //
     }
@@ -175,9 +219,17 @@ class ProfileController extends Controller
      * @param  string  $rname
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreProfile $request, $rname)
+    public function update(Request $request, $rname)
     {
-        $validated = $request->validated();
+        $knight = DB::select('SELECT pkey, batt, rname FROM knight WHERE rname = ?', [$rname])[0] ?? null;
+        $rules = $this->editRules($knight);
+
+        if (!$rules) {
+            Log::warning('User ' . Auth::user()->rname . ' illegally attempted to edit user ' . $rname . '!');
+            abort(401, "You are not authorized to edit that user!");
+        }
+
+        $validated = $request->validate($rules);
 
         // Start transaction
         DB::transaction(function () use (&$validated, &$rname) {
@@ -247,7 +299,7 @@ class ProfileController extends Controller
                         WHERE pkey = ?',
                         [$validated['dname'], $validated['email'],$validated['bio'],
                          $validated['firstevent'], $validated['rlimpact'], $editor, $pkey
-                        ]);
+                        ]); // TODO: dynamically select values to be updated from $validated
         // Commit
         });
 
