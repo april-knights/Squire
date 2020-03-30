@@ -25,7 +25,7 @@
         <p>{{ $knight->knum }}</p>
         @endif
     </div>
-    @if($can_edit))
+    @if($can_edit)
     <div class="col-md-1">
         <a href="/profile/{{ $knight->rname }}/edit"><i class="fas fa-edit"></i></a>
     </div>
