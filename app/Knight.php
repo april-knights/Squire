@@ -114,22 +114,18 @@ class Knight extends Authenticatable
     /**
      * Check a users security entry for the given key.
      *
-     * @var string security table column
-     *
+     * @param string $key   Security entry to check. Never use user input here.
      * @return bool
-    */
+     */
     public function checkSecurity($key) {
         $myid = $this->getAuthIdentifier();
-        $security = DB::select('SELECT :key FROM knight k
+        $security = DB::select("SELECT s.$key FROM knight k
                                 INNER JOIN security s ON s.pkey = k.security
-                                WHERE k.pkey = :id', ['id' => $myid, 'key' => $key]) ?? null;
+                                WHERE k.pkey = ?", [$myid])[0] ?? null;
         if (!$security) {
             return false; # Knight has no linked security entry
-        } else if (sizeof($security) != 1) {
-            Log::warning("Got more than one security entry for knight " , $myid->rname . " key " . $key);
-            return false;
         } else {
-            return $security == 1;
+            return current((array) $security) == 1;
         }
     }
 }

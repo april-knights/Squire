@@ -123,7 +123,6 @@ class ProfileController extends Controller
 
         $all_events = DB::select('SELECT pkey, title FROM event');
 
-
         return view('profile.edit', ['knight' => $knight,
                                      'cur_divs' => $cur_divs,
                                      'cur_skills' => $cur_skills,
@@ -132,16 +131,16 @@ class ProfileController extends Controller
                                      'all_batts' => $all_batts,
                                      'all_divs' => $all_divs,
                                      'all_events' => $all_events,
-                                     'editable_fields' => $editable_fields, // TODO: Deactivate non-editable in blade
+                                     'editable_fields' => $editable_fields,
                                     ]);
     }
 
     /**
      * Gets the profile fields editable by another user.
      *
-     * @param array    $knight Knight to be edited.
-     * @param Knight    $user User doing the editing.
-     * @return array    Array of editable fields
+     * @param array $knight Knight to be edited.
+     * @param Knight $user  User doing the editing.
+     * @return array        Array of editable fields
      */
     private static function editableFields($knight, $user) {
         # Councillor is editing the profile

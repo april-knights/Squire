@@ -17,21 +17,25 @@
     <div class="row">
         <div class="col">
             <label for="rname"><h2>Reddit Name</h2></label>
-            <input id="rname" name="rname" type="text" value="{{ $knight->rname }}"></input>
+            <input id="rname" name="rname" type="text" value="{{ $knight->rname }}" @check_disabled('rname')></input>
         </div>
         <div class="col">
             <label for="dname"><h2>Discord Name</h2></label>
-            <input id="dname" name="dname" type="text" value="{{ $knight->dname }}"></input>
+            <input id="dname" name="dname" type="text" value="{{ $knight->dname }}" @check_disabled('dname')></input>
         </div>
         <div class="col">
+            {{-- If you can't edit emails you probably shouldn't see them either --}}
+            @if (in_array('email', $editable_fields))
             <label for="email"><h2>Email</h2></label>
             <input id="email" name="email" type="email" value="{{ $knight->email }}"></input>
+            @endif
         </div>
     </div>
     <div class="row">
         <div class="col-md-8">
             <div class="row">
                 <div class="col-md-6">
+                    @if (in_array('batt', $editable_fields))
                     <h2>Battalion</h2>
                     <fieldset name="batt">
                         @foreach ($all_batts as $batt)
@@ -44,8 +48,10 @@
                         </div>
                         @endforeach
                     </fieldset>
+                    @endif
                 </div>
                 <div class="col-md-6">
+                    @if (in_array('batt', $editable_fields))
                     <h2>Rank</h2>
                     <fieldset name="rank" class="form-check">
                         @foreach ($all_ranks as $rank)
@@ -58,11 +64,13 @@
                         </div>
                         @endforeach
                     </fieldset>
+                    @endif
                 </div>
             </div>
             <div class="row">
+                @if (in_array('divs', $editable_fields))
                 <div class="col-md-6">
-                    <label for="divs"><h2>Divisions</h2></label>
+                    <label><h2>Divisions</h2></label>
                     <fieldset name="divs" class="form-check">
                         @foreach ($all_divs as $div)
                         <div class="form-check">
@@ -75,17 +83,20 @@
                         @endforeach
                     </fieldset>
                 </div>
+                @endif
                 <div class="col-md-6">
+                    @if (in_array('firstevent', $editable_fields))
                     <h2>First Event</h2>
                     @foreach ($all_events as $event)
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="firstevent" id="event_{{ $event->pkey }}"
-                                value="{{ $event->pkey }}" @if ($event->pkey == $knight->firstevent) checked @endif>
-                            <label class="form-check-label" for="event_{{ $event->pkey }}">
-                                {{ $event->title }}
-                            </label>
-                        </div>
-                        @endforeach
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="firstevent" id="event_{{ $event->pkey }}"
+                            value="{{ $event->pkey }}" @if ($event->pkey == $knight->firstevent) checked @endif>
+                        <label class="form-check-label" for="event_{{ $event->pkey }}">
+                            {{ $event->title }}
+                        </label>
+                    </div>
+                    @endforeach
+                    @endif
                 </div>
             </div>
         </div>
