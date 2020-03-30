@@ -67,6 +67,7 @@ class ProfileController extends Controller
                                      'skills' => $skills,
                                      'show_sensitive' => $show_sensitive,
                                      'show_irl' => $show_irl,
+                                     'can_edit' => $this->editableFields($knight) !== null,
                                     ]);
     }
 

@@ -8,15 +8,15 @@
 
 @section('content')
 <div class="row">
-    <div class="col">
+    <div class="col-md-4">
         <h2>Reddit Name</h2>
         <p>/u/{{ $knight->rname }}</p>
     </div>
-    <div class="col">
+    <div class="col-md-4">
         <h2>Discord Name</h2>
         <p>{{ $knight->dname }}</p>
     </div>
-    <div class="col">
+    <div class="col-md-3">
         @if ($show_sensitive)
         <h2>
             Knight ID
@@ -25,6 +25,11 @@
         <p>{{ $knight->knum }}</p>
         @endif
     </div>
+    @if($can_edit))
+    <div class="col-md-1">
+        <a href="/profile/{{ $knight->rname }}/edit"><i class="fas fa-edit"></i></a>
+    </div>
+    @endif
 </div>
 <div class="row">
     <div class="col-md-8">
