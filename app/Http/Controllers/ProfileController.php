@@ -143,16 +143,19 @@ class ProfileController extends Controller
                                 INNER JOIN division d ON d.pkey = dk.fkeydivision
                                 WHERE d.delflg = 0 AND k.rname = ?', [$rname]);
 
-        $all_ranks = DB::select('SELECT pkey, name FROM krank
+        $all_ranks = DB::select('SELECT pkey, name, rankdescr FROM krank
                                  WHERE activeflg = 1 AND delflg = 0');
+
+        $all_secs = DB::select('SELECT pkey, secname, secdescr FROM security
+                                WHERE activeflg = 1 AND delflg = 0');
 
         $all_skills = DB::select('SELECT pkey, skillname, parentid FROM skill
                                   WHERE activeflg = 1 AND delflg = 0');
 
-        $all_batts = DB::select('SELECT pkey, name FROM battalion
+        $all_batts = DB::select('SELECT pkey, name, battdescr FROM battalion
                                  WHERE activeflg = 1 AND delflg = 0');
 
-        $all_divs = DB::select('SELECT pkey, name FROM division
+        $all_divs = DB::select('SELECT pkey, name, divdescr FROM division
                                 WHERE activeflg = 1 AND delflg = 0');
 
         $all_events = DB::select('SELECT pkey, title FROM event');
@@ -161,6 +164,7 @@ class ProfileController extends Controller
                                      'cur_divs' => $cur_divs,
                                      'cur_skills' => $cur_skills,
                                      'all_ranks' => $all_ranks,
+                                     'all_secs' => $all_secs,
                                      'all_skills' => $all_skills,
                                      'all_batts' => $all_batts,
                                      'all_divs' => $all_divs,
@@ -180,8 +184,8 @@ class ProfileController extends Controller
 
         // Councillor is editing the profile
         if ($user->checkSecurity('cmuser')) {
-            return array('rname', 'dname', 'email', 'batt', 'rank', 'divs', 'firstevent', 'skills', 'bio', 'rlimpact');
-            // TODO: implement 'batt2', 'security', 'activeflg',
+            return array('rname', 'dname', 'email', 'batt', 'rank', 'security', 'divs', 'firstevent', 'skills', 'bio', 'rlimpact');
+            // TODO: implement 'batt2', 'activeflg',
         // Battalion officer is editing
         } elseif ($user->checkSecurity('cmbattuser') && $user->isBattMember($knight->batt)) {
             return null;

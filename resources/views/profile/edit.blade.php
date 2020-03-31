@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Editing ' . $knight->rname)
+@section('title', 'Edit ' . $knight->rname)
 
 @section('content')
 @if ($errors->any())
@@ -12,130 +12,165 @@
     </ul>
 </div>
 @endif
+<h1>Edit {{ $knight->rname }}</h1>
 <form method="POST">
     @csrf
     <div class="row">
-        <div class="col">
-            <label for="rname"><h2>Reddit Name</h2></label>
-            <input id="rname" name="rname" type="text" value="{{ $knight->rname }}" @check_disabled('rname')></input>
+        @if (in_array('rname', $editable_fields))
+        <div class="col-md">
+            <div class="form-group">
+                <label for="rname">Reddit Name</label>
+                <input class="form-control" id="rname" name="rname" type="text"
+                    value="{{ $knight->rname }}"></input>
+            </div>
         </div>
-        <div class="col">
-            <label for="dname"><h2>Discord Name</h2></label>
-            <input id="dname" name="dname" type="text" value="{{ $knight->dname }}" @check_disabled('dname')></input>
+        @endif
+        <div class="col-md">
+            <div class="form-group">
+                <label for="dname">Discord Name</label>
+                <input class="form-control" id="dname" name="dname" type="text"
+                    value="{{ $knight->dname }}" @check_disabled('dname')></input>
+            </div>
         </div>
-        <div class="col">
-            {{-- If you can't edit emails you probably shouldn't see them either --}}
-            @if (in_array('email', $editable_fields))
-            <label for="email"><h2>Email</h2></label>
-            <input id="email" name="email" type="email" value="{{ $knight->email }}"></input>
-            @endif
+        {{-- If you can't edit emails you probably shouldn't see them either --}}
+        @if (in_array('email', $editable_fields))
+        <div class="col-md">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input class="form-control" id="email" name="email" type="email"
+                    value="{{ $knight->email }}"></input>
+            </div>
         </div>
+        @endif
     </div>
     <div class="row">
         <div class="col-md-8">
             <div class="row">
-                <div class="col-md-6">
-                    @if (in_array('batt', $editable_fields))
-                    <h2>Battalion</h2>
-                    <fieldset name="batt">
-                        @foreach ($all_batts as $batt)
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="batt" id="batt_{{ $batt->pkey }}"
-                                value="{{ $batt->pkey }}" @if ($batt->pkey == $knight->batt) checked @endif>
-                            <label class="form-check-label" for="batt_{{ $batt->pkey }}">
+                @if (in_array('rname', $editable_fields))
+                <div class="col-sm">
+                    <div class="form-group">
+                        <label>Battalion</label>
+                        <select class="form-control" name="batt">
+                            @foreach ($all_batts as $batt)
+                            <option value="{{ $batt->pkey }}" label="{{ $batt->battdescr }}"
+                                @if ($batt->pkey == $knight->batt) selected @endif>
                                 {{ $batt->name }}
-                            </label>
-                        </div>
-                        @endforeach
-                    </fieldset>
-                    @endif
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    @if (in_array('batt', $editable_fields))
-                    <h2>Rank</h2>
-                    <fieldset name="rank" class="form-check">
-                        @foreach ($all_ranks as $rank)
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="rank" id="rank_{{ $rank->pkey }}"
-                                value="{{ $rank->pkey }}" @if ($rank->pkey == $knight->rnk) checked @endif>
-                            <label class="form-check-label" for="rank_{{ $rank->pkey }}">
+                @endif
+                @if (in_array('rank', $editable_fields))
+                <div class="col-sm">
+                    <div class="form-group">
+                        <label>Rank</label>
+                        <select class="form-control" name="rank">
+                            @foreach ($all_ranks as $rank)
+                            <option value="{{ $rank->pkey }}" label="{{ $rank->rankdescr }}"
+                                @if ($rank->pkey == $knight->rnk) selected @endif>
                                 {{ $rank->name }}
-                            </label>
-                        </div>
-                        @endforeach
-                    </fieldset>
-                    @endif
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
+                @endif
+                @if (in_array('security', $editable_fields))
+                <div class="col-sm">
+                    <div class="form-group">
+                        <label>Security</label>
+                        <select class="form-control" name="security">
+                            @foreach ($all_secs as $sec)
+                            <option value="{{ $sec->pkey }}" label="{{ $sec->secdescr }}"
+                                @if ($sec->pkey == $knight->security) selected @endif>
+                                {{ $sec->secname }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                @endif
             </div>
             <div class="row">
                 @if (in_array('divs', $editable_fields))
-                <div class="col-md-6">
-                    <label><h2>Divisions</h2></label>
-                    <fieldset name="divs" class="form-check">
-                        @foreach ($all_divs as $div)
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="divs[]" id="div_{{ $div->pkey }}"
-                                value="{{ $div->pkey }}" @if (in_array($div, $cur_divs)) checked @endif>
-                            <label class="form-check-label" for="div_{{ $div->pkey }}">
-                                {{ $div->name }}
-                            </label>
-                        </div>
-                        @endforeach
-                    </fieldset>
+                <div class="col-sm">
+                    <div class="form-group">
+                        <label>Divisions</label>
+                        <fieldset name="divs">
+                            @foreach ($all_divs as $div)
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="divs[]" id="div_{{ $div->pkey }}"
+                                    value="{{ $div->pkey }}" @if (in_array($div, $cur_divs)) checked @endif>
+                                <label class="form-check-label" for="div_{{ $div->pkey }}" title="{{ $div->divdescr }}">
+                                    {{ $div->name }}
+                                </label>
+                            </div>
+                            @endforeach
+                        </fieldset>
+                    </div>
                 </div>
                 @endif
-                <div class="col-md-6">
-                    @if (in_array('firstevent', $editable_fields))
-                    <h2>First Event</h2>
-                    @foreach ($all_events as $event)
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="firstevent" id="event_{{ $event->pkey }}"
-                            value="{{ $event->pkey }}" @if ($event->pkey == $knight->firstevent) checked @endif>
-                        <label class="form-check-label" for="event_{{ $event->pkey }}">
-                            {{ $event->title }}
-                        </label>
+                @if (in_array('firstevent', $editable_fields))
+                <div class="col-sm">
+                    <div class="form-group">
+                        <label>First Event</label>
+                        <fieldset name="firstevent">
+                            @foreach ($all_events as $event)
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="firstevent" id="event_{{ $event->pkey }}"
+                                    value="{{ $event->pkey }}" @if ($event->pkey == $knight->firstevent) checked @endif>
+                                <label class="form-check-label" for="event_{{ $event->pkey }}">
+                                    {{ $event->title }}
+                                </label>
+                            </div>
+                            @endforeach
+                        </fieldset>
                     </div>
-                    @endforeach
-                    @endif
+                </div>
+                @endif
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="bio">About Me</label>
+                        <textarea class="form-control" id="bio" name="bio" maxlength="255">{{ $knight->bio }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="rlimpact">Real Life</label>
+                        <textarea class="form-control" id="rlimpact" name="rlimpact" maxlength="255">{{ $knight->rlimpact }}</textarea>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <label for="skills"><h2>Skills</h2></label>
-            <select class="custom-select" name="skills[]" multiple size="28">
-                @php
-                    $in_group = false;
-                @endphp
-                @foreach ($all_skills as $skill)
-                @if (!$skill->parentid)
-                    @if ($in_group)
-                    </optgroup>
-                    @endif
-                    <optgroup label="{{ $skill->skillname }}">
+            <div class="form-group">
+                <label for="skills">Skills</label>
+                <select class="form-control" name="skills[]" multiple size="28">
                     @php
-                        $in_group = true;
+                        $in_group = false;
                     @endphp
-                @else
-                <option value="{{ $skill->pkey }}" @if (in_array($skill, $cur_skills)) selected @endif>
-                    {{ $skill->skillname }}
-                </option>
-                @endif
-            @endforeach
-            </optgroup>
-            </select>
-            <small id="skillsHelpBlock" class="form-text text-muted">
-                Hold down the Ctrl (Windows, Linux) or Command (MacOS) button to select multiple options.
-            </small>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <label for="bio"><h2>About Me</h2></label>
-            <textarea id="bio" name="bio" maxlength="255">{{ $knight->bio }}</textarea>
-        </div>
-        <div class="col">
-            <label for="rlimpact"><h2>Real Life</h2></label>
-            <textarea id="rlimpact" name="rlimpact" maxlength="255">{{ $knight->rlimpact }}</textarea>
+                    @foreach ($all_skills as $skill)
+                    @if (!$skill->parentid)
+                        @if ($in_group)
+                        </optgroup>
+                        @endif
+                        <optgroup label="{{ $skill->skillname }}">
+                        @php
+                            $in_group = true;
+                        @endphp
+                    @else
+                    <option value="{{ $skill->pkey }}" @if (in_array($skill, $cur_skills)) selected @endif>
+                        {{ $skill->skillname }}
+                    </option>
+                    @endif
+                @endforeach
+                </optgroup>
+                </select>
+                <small id="skillsHelpBlock" class="form-text text-muted">
+                    Hold down the Ctrl (Windows, Linux) or Command (MacOS) button to select multiple options.
+                </small>
+            </div>
         </div>
     </div>
     <div class="row">
