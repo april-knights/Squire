@@ -45,13 +45,13 @@ class ProfileController extends Controller
 
         $skills = DB::select('SELECT s.skillname FROM skill s
                               INNER JOIN userskill u ON s.pkey = u.fkeyskill
-                              WHERE u.fkeyuser = ? AND s.delflg = 0 AND u.delflg = 0', [$knight->pkey]);
-
+                              WHERE s.delflg = 0 AND u.delflg = 0 AND u.fkeyuser = ?', [$knight->pkey]);
         // TODO: Show skill parents as well
+
         $divs = DB::select('SELECT * FROM knight k
                             INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
                             INNER JOIN division d ON d.pkey = dk.fkeydivision
-                            WHERE d.delflg = 0 AND k.rname = ?', [$rname]);
+                            WHERE d.delflg = 0 AND dk.delflg = 0 AND k.rname = ?', [$rname]);
 
         // Certain fields are limited to councillors and the user themselves
         $show_sensitive = (Auth::user()->isCouncillor()) || (Auth::id() == $knight->pkey);
@@ -136,12 +136,12 @@ class ProfileController extends Controller
 
         $cur_skills = DB::select('SELECT s.pkey, s.skillname, s.parentid FROM skill s
                                   INNER JOIN userskill u ON s.pkey = u.fkeyskill
-                                  WHERE u.fkeyuser = ? AND s.delflg = 0 AND u.delflg = 0', [$knight->pkey]);
+                                  WHERE s.delflg = 0 AND u.delflg = 0 AND u.fkeyuser = ?', [$knight->pkey]);
 
-        $cur_divs = DB::select('SELECT d.pkey, d.name FROM knight k
+        $cur_divs = DB::select('SELECT d.pkey, d.name, d.divdescr FROM knight k
                                 INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
                                 INNER JOIN division d ON d.pkey = dk.fkeydivision
-                                WHERE d.delflg = 0 AND k.rname = ?', [$rname]);
+                                WHERE d.delflg = 0 AND dk.delflg = 0 AND k.rname = ?', [$rname]);
 
         $all_ranks = DB::select('SELECT pkey, name, rankdescr FROM krank
                                  WHERE activeflg = 1 AND delflg = 0');
@@ -326,7 +326,7 @@ class ProfileController extends Controller
      */
     public function update(Request $request, $rname)
     {
-        $knight = DB::select('SELECT pkey, batt, rname FROM knight WHERE rname = ?', [$rname])[0] ?? null;
+        $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0] ?? null;
         $editable_fields = $this->editableFields($knight);
 
         if (!$editable_fields) {
@@ -337,7 +337,7 @@ class ProfileController extends Controller
         $validated = $request->validate($this->getRules($editable_fields, $knight));
 
         // Start transaction
-        DB::transaction(function () use (&$validated, &$rname) {
+        DB::transaction(function () use (&$validated, &$rname, &$knight) {
 
             $editor = Auth::id();
             // We need to get the pkey incase we change rname later
@@ -372,10 +372,11 @@ class ProfileController extends Controller
                                 ['userid' => $pkey, 'skillid' => $skill, 'editor' => $editor]);
                 }
 
-                // Add skills, reactive deleted ones if they exist
+                // Add skills, reactivate deleted ones if they exist
                 foreach ($added as $skill) {
                     $prev_deleted = DB::select('SELECT usid FROM userskill
-                                                WHERE fkeyuser = ? AND fkeyskill = ? AND delflg = 1', [$pkey, $skill])[0]->usid ?? null;
+                                                WHERE fkeyuser = ? AND fkeyskill = ? AND delflg = 1',
+                                                [$pkey, $skill])[0]->usid ?? null;
 
                     if ($prev_deleted) {
                         DB::update('UPDATE userskill
@@ -386,25 +387,73 @@ class ProfileController extends Controller
                                     ['editor' => $editor, 'usid' => $prev_deleted]);
                     } else {
                         DB::insert('INSERT INTO userskill (fkeyuser, fkeyskill, crtsetid, lstmdby)
-                                    VALUES (?, ?, ?, ?)', [$pkey, $skill, $editor, $editor]);
+                                    VALUES (?, ?, ?, ?)',
+                                    [$pkey, $skill, $editor, $editor]);
+                    }
+                }
+            }
+
+            // Update divisions
+            if(array_key_exists('divs', $validated)) {
+                $old_divs_obj = DB::select('SELECT fkeydivision FROM divknight
+                                            WHERE fkeyknight = ? AND delflg = 0', [$pkey]);
+
+                // Merge array of div objects into a single array of div pkeys
+                $old_divs = [];
+                foreach($old_divs_obj as $div) array_push($old_divs, $div->fkeydivision);
+
+                // Get deleted and added divs by array intersection
+                $deleted = array_diff($old_divs, $validated['divs']);
+                $added = array_diff($validated['divs'], $old_divs);
+
+                // Set delflag for deleted divs
+                foreach ($deleted as $div) {
+                    DB::update('UPDATE divknight
+                                SET delflg = 1,
+                                    lstmdby = :editor,
+                                    lstmdts = CURRENT_TIMESTAMP
+                                WHERE fkeyknight = :userid AND fkeydivision = :divid',
+                                ['userid' => $pkey, 'divid' => $div, 'editor' => $editor]);
+                }
+
+                // Add divs, reactivate deleted ones if they exist
+                foreach ($added as $div) {
+                    $prev_deleted = DB::select('SELECT pkey FROM divknight
+                                                WHERE fkeyknight = ? AND fkeydivision = ? AND delflg = 1',
+                                                [$pkey, $div])[0]->pkey ?? null;
+
+                    if ($prev_deleted) {
+                        DB::update('UPDATE divknight
+                                    SET delflg = 0,
+                                        lstmdby = :editor,
+                                        lstmdts = CURRENT_TIMESTAMP
+                                    WHERE pkey = :pkey',
+                                    ['editor' => $editor, 'pkey' => $prev_deleted]);
+                    } else {
+                        DB::insert('INSERT INTO divknight (fkeyknight, fkeydivision, crtsetid, lstmdby)
+                                    VALUES (?, ?, ?, ?)',
+                                    [$pkey, $div, $editor, $editor]);
                     }
                 }
             }
 
 
-            // Update knight-editable values
-            DB::update('UPDATE knight
-                        SET dname = ?,
-                            email = ?,
-                            bio = ?,
-                            firstevent = ?,
-                            rlimpact = ?,
-                            lstmdby = ?,
-                            lstmdts = CURRENT_TIMESTAMP
-                        WHERE pkey = ?',
-                        [$validated['dname'], $validated['email'],$validated['bio'],
-                         $validated['firstevent'], $validated['rlimpact'], $editor, $pkey
-                        ]); // TODO: dynamically select values to be updated from $validated
+            // Update knight, using old values if not set.
+            DB::table('knight')
+                ->where('pkey', $pkey)
+                ->update([
+                    'rname' => $validated['rname'] ?? $knight->rname,
+                    'dname' => $validated['dname'] ?? $knight->dname,
+                    'email' => $validated['email'] ?? $knight->email,
+                    'bio' => $validated['bio'] ?? $knight->bio,
+                    'firstevent' => $validated['firstevent'] ?? $knight->firstevent,
+                    'rlimpact' => $validated['rlimpact'] ?? $knight->rlimpact,
+                    'batt' => $validated['batt'] ?? $knight->batt,
+                    'rnk' => $validated['rank'] ?? $knight->rnk,
+                    'security' => $validated['security'] ?? $knight->security,
+                    'crtsetid' => $editor,
+                    'lstmdby' => $editor,
+                ]);
         // Commit
         });
 

@@ -57,13 +57,17 @@
         <div class="row">
             <div class="col-md-6">
                 <h2>Divisions</h2>
+                <ul class="skills">
                 @forelse ($divs as $div)
-                <a href="/division/{{ $div->divalias }}">
-                    {{ $div->name }}
-                </a>
+                <li>
+                    <a href="/division/{{ $div->divalias }}">
+                        {{ $div->name }}
+                    </a>
+                </li>
                 @empty
                 <p>None</p>
                 @endforelse
+            </ul>
             </div>
             <div class="col-md-6">
                 @if ($show_sensitive)
