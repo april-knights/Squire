@@ -8,7 +8,6 @@ use Illuminate\Validation\Rule;
 use DB;
 use Log;
 use Auth;
-use App\Knight;
 
 class ProfileController extends Controller
 {
@@ -74,11 +73,50 @@ class ProfileController extends Controller
     /**
      * Show the form for creating a new resource.
      *
+     * @param integer $def_batt Default battalion
+     * @param integer $def_rank Default rank
+     * @param integer $def_sec  Default security
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        // $def_batt=99, $def_rank=13, $def_sec=9
+        abort_if(!Auth::user()->checkSecurity('cmuser'), 401, 'Not authorized to create knight.');
+
+        $validated = $request->validate([
+            'batt' => 'nullable|integer|exists:battalion,pkey',
+            'rank' => 'nullable|integer|exists:krank,pkey',
+            'security' => 'nullable|integer|exists:security,pkey',
+        ]);
+
+        $all_ranks = DB::select('SELECT pkey, name, rankdescr FROM krank
+                                 WHERE activeflg = 1 AND delflg = 0');
+
+        $all_skills = DB::select('SELECT pkey, skillname, parentid FROM skill
+                                  WHERE activeflg = 1 AND delflg = 0');
+
+        $all_batts = DB::select('SELECT pkey, name, battdescr FROM battalion
+                                 WHERE activeflg = 1 AND delflg = 0');
+
+        $all_divs = DB::select('SELECT pkey, name, divdescr FROM division
+                                WHERE activeflg = 1 AND delflg = 0');
+
+        $all_events = DB::select('SELECT pkey, title FROM event');
+
+        $all_secs = DB::select('SELECT pkey, secname, secdescr FROM security
+                                WHERE activeflg = 1 AND delflg = 0');
+
+        return view('profile.create', [
+            'all_ranks' => $all_ranks,
+            'all_skills' => $all_skills,
+            'all_batts' => $all_batts,
+            'all_divs' => $all_divs,
+            'all_events' => $all_events,
+            'all_secs' => $all_secs,
+            'def_batt' => $validated['batt'] ?? 99,
+            'def_rank' => $validated['rank'] ?? 13,
+            'def_sec' => $validated['security'] ?? 9,
+            ]);
     }
 
     /**
@@ -137,7 +175,7 @@ class ProfileController extends Controller
      * @param array $knight Knight to be edited
      * @return array        Array of editable fields
      */
-    private static function editableFields($knight) {
+    private static function editableFields($knight = null) {
         $user = Auth::user();
 
         // Councillor is editing the profile
@@ -148,7 +186,7 @@ class ProfileController extends Controller
         } elseif ($user->checkSecurity('cmbattuser') && $user->isBattMember($knight->batt)) {
             return null;
         // User is editing their own profile
-        } elseif ($knight->pkey == $user->getAuthIdentifier()) {
+        } elseif ($knight && $knight->pkey == $user->getAuthIdentifier()) {
             return array('dname', 'email', 'bio', 'firstevent', 'rlimpact', 'skills');
         } else {
             return null;
@@ -158,30 +196,43 @@ class ProfileController extends Controller
     /**
      * Generate edit rules.
      *
-     * @param array $knight Knight being edited
+     * @param array $fields Fields to include in rules, null for all
+     * @param array $knight Knight being edited, null if being created
      * @return array        Array of rules
      */
-    private static function editRules($knight) {
+    private static function getRules($fields = null, $knight = null) {
+        if ($knight) {
+            $unique = Rule::unique('knight')->ignore($knight->rname, 'rname');
+        } else {
+            $unique = Rule::unique('knight');
+        }
+
         $all_rules = [
+            'knum' => [
+                'required',
+                'digits:6',
+                $unique,
+            ],
             'rname' => [
                 'required',
                 'max:30',
-                Rule::unique('knight')->ignore($knight->rname, 'rname'),
+                $unique,
             ],
             'dname' => [
                 'nullable',
                 'max:40',
                 'regex:/^.+?#\d{4}/',
-                Rule::unique('knight')->ignore($knight->rname, 'rname'),
+                $unique,
             ],
             'email' => [
                 'nullable',
                 'email',
                 'max:50',
-                Rule::unique('knight')->ignore($knight->rname, 'rname'),
+                $unique,
             ],
-            'batt' => 'nullable|integer|exists:battalion,pkey',
-            'rank' => 'nullable|integer|exists:krank,pkey',
+            'batt' => 'required|integer|exists:battalion,pkey',
+            'rank' => 'required|integer|exists:krank,pkey',
+            'security' => 'required|integer|exists:security,pkey',
             'divs' => 'nullable',
             'divs.*' => 'integer|exists:division,pkey',
             'firstevent' => 'nullable|integer|exists:event,pkey',
@@ -191,15 +242,12 @@ class ProfileController extends Controller
             'rlimpact' => 'nullable|string|max:255',
         ];
 
-        $editable_fields = self::editableFields($knight);
-
-        // User is not authorized to edit any fields
-        if (!$editable_fields) {
-            return null;
+        if ($fields) {
+            // Intersect values from editableFields with all rules
+            return array_intersect_key($all_rules, array_flip($fields));
+        } else {
+            return $all_rules;
         }
-
-        // Intersect values from editableFields with all rules
-        return array_intersect_key($all_rules, array_flip($editable_fields));
     }
 
     /**
@@ -210,7 +258,59 @@ class ProfileController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if (!Auth::user()->checkSecurity('cmuser')) {
+            Log::warning('User ' . Auth::user()->rname . ' illegally attempted to create user!');
+            abort(401, 'You are not authorized to create a knight!');
+        }
+
+        $validated = $request->validate($this->getRules());
+
+        // Start transaction
+        DB::transaction(function () use (&$validated) {
+            $editor = Auth::id();
+
+            // Create knight
+            /* I've tried to use raw SQL queries for maintainability by people without
+             * PHP/Laravel knowledge but doing that here just made the code
+             * not only unreadable but also much more complicated.
+             */
+            DB::table('knight')->insertGetId([
+                'knum' => $validated['knum'],
+                'rname' => $validated['rname'],
+                'dname' => $validated['dname'],
+                'email' => $validated['email'],
+                'bio' => $validated['bio'],
+                'firstevent' => $validated['firstevent'] ?? null,
+                'rlimpact' => $validated['rlimpact'],
+                'batt' => $validated['batt'],
+                'rnk' => $validated['rank'],
+                'security' => $validated['security'],
+                'crtsetid' => $editor,
+                'lstmdby' => $editor,
+            ], 'pkey');
+
+            // Get pkey for many-to-many relationships
+            $pkey = DB::select('SELECT pkey FROM knight WHERE rname = ?', [$validated['rname']])[0]->pkey;
+
+            // Set skills
+            if(array_key_exists('skills', $validated)) {
+                foreach ($validated['skills'] as $skill) {
+                    DB::insert('INSERT INTO userskill (fkeyuser, fkeyskill, crtsetid, lstmdby)
+                                VALUES (?, ?, ?, ?)', [$pkey, $skill, $editor, $editor]);
+                }
+            }
+
+            // Set divisions
+            if(array_key_exists('divs', $validated)) {
+                foreach ($validated['divs'] as $div) {
+                    DB::insert('INSERT INTO divknight (fkeyknight, fkeydivision, crtsetid, lstmdby)
+                                VALUES (?, ?, ?, ?)', [$pkey, $div, $editor, $editor]);
+                }
+            }
+        // Commit
+        });
+
+        return redirect()->route('profile', ['rname' => $validated['rname']]);
     }
 
     /**
@@ -223,14 +323,14 @@ class ProfileController extends Controller
     public function update(Request $request, $rname)
     {
         $knight = DB::select('SELECT pkey, batt, rname FROM knight WHERE rname = ?', [$rname])[0] ?? null;
-        $rules = $this->editRules($knight);
+        $editable_fields = $this->editableFields($knight);
 
-        if (!$rules) {
+        if (!$editable_fields) {
             Log::warning('User ' . Auth::user()->rname . ' illegally attempted to edit user ' . $rname . '!');
-            abort(401, "You are not authorized to edit that user!");
+            abort(401, 'You are not authorized to edit that user!');
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($this->getRules($editable_fields, $knight));
 
         // Start transaction
         DB::transaction(function () use (&$validated, &$rname) {
@@ -240,7 +340,7 @@ class ProfileController extends Controller
             $pkey = DB::select('SELECT pkey FROM knight WHERE rname = ?', [$rname])[0]->pkey ?? null;
 
             if (!$pkey) {
-                Log::error("Could not get pkey for rname " . $rname);
+                Log::error('Could not get pkey for rname ' . $rname);
                 abort(503);
             }
 
