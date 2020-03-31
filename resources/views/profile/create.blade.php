@@ -20,7 +20,7 @@
             <div class="form-group">
                 <label for="knum">Knight Number</label>
                 <input class="form-control" id="knum" name="knum" type="text" size="6"
-                    placeholder="100000" pattern="[0-9]{6}" inputmode="numeric" required>
+                    placeholder="100000" pattern="\d{6}" inputmode="numeric" required>
                 </input>
             </div>
         </div>
@@ -35,13 +35,19 @@
         <div class="col-sm">
             <div class="form-group">
                 <label for="rname">Reddit Name</label>
-                <input class="form-control" id="rname" name="rname" type="text" {{--required--}}></input>
+                <input class="form-control" id="rname" name="rname" type="text" required></input>
+                <small id="rnameHelpBlock" class="form-text text-muted">
+                    Without the /u/
+                </small>
             </div>
         </div>
         <div class="col-sm">
             <div class="form-group">
                 <label for="dname">Discord Name</label>
-                <input class="form-control" id="dname" name="dname" type="text"></input>
+                <input class="form-control" id="dname" name="dname" type="text" pattern=".*#\d{4}"></input>
+                <small id="dnameHelpBlock" class="form-text text-muted">
+                    Format: Username#1234
+                </small>
             </div>
         </div>
     </div>

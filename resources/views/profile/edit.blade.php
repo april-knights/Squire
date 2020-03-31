@@ -22,14 +22,20 @@
                 <label for="rname">Reddit Name</label>
                 <input class="form-control" id="rname" name="rname" type="text"
                     value="{{ $knight->rname }}"></input>
+                <small id="rnameHelpBlock" class="form-text text-muted">
+                    Without the /u/
+                </small>
             </div>
         </div>
         @endif
         <div class="col-md">
             <div class="form-group">
                 <label for="dname">Discord Name</label>
-                <input class="form-control" id="dname" name="dname" type="text"
-                    value="{{ $knight->dname }}" @check_disabled('dname')></input>
+                <input class="form-control" id="dname" name="dname" type="text" pattern=".*#\d{4}"
+                     value="{{ $knight->dname }}" @check_disabled('dname')></input>
+                <small id="dnameHelpBlock" class="form-text text-muted">
+                    Format: Username#1234
+                </small>
             </div>
         </div>
         {{-- If you can't edit emails you probably shouldn't see them either --}}
