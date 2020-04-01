@@ -31,7 +31,9 @@ class ProfileController extends Controller
      */
     public function show($rname)
     {
-        $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0] ?? null;
+        $knight = DB::select('SELECT * FROM knight
+                              WHERE delflg = 0 AND rname = ?',
+                             [$rname])[0] ?? null;
 
         if(!$knight) {
             abort(404, 'Knight not found.');
@@ -160,6 +162,8 @@ class ProfileController extends Controller
 
         $all_events = DB::select('SELECT pkey, title FROM event');
 
+        $can_delete = Auth::user()->checkSecurity('cduser');
+
         return view('profile.edit', ['knight' => $knight,
                                      'cur_divs' => $cur_divs,
                                      'cur_skills' => $cur_skills,
@@ -170,6 +174,7 @@ class ProfileController extends Controller
                                      'all_divs' => $all_divs,
                                      'all_events' => $all_events,
                                      'editable_fields' => $editable_fields,
+                                     'can_delete' => $can_delete,
                                     ]);
     }
 
@@ -331,7 +336,7 @@ class ProfileController extends Controller
 
         if (!$editable_fields) {
             Log::warning('User ' . Auth::user()->rname . ' illegally attempted to edit user ' . $rname . '!');
-            abort(401, 'You are not authorized to edit that user!');
+            abort(401, 'Not authorized to edit knight.');
         }
 
         $validated = $request->validate($this->getRules($editable_fields, $knight));
@@ -461,13 +466,30 @@ class ProfileController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Set delete flag for user.
      *
-     * @param  int  $id
+     * @param  int  $rname
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $rname)
     {
-        //
+        if (!Auth::user()->checkSecurity('cduser')) {
+            Log::warning('User ' . Auth::user()->rname . ' illegally attempted to delete user ' . $rname . '!');
+            abort(401, 'You are not authorized to delete that knight!');
+        }
+
+        $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0] ?? null;
+
+        if (!$knight) {
+            abort(404, 'Knight does not exist!');
+        }
+
+        DB::table('knight')
+                ->where('rname', $rname)
+                ->update(['delflg' => 1]);
+
+        $request->session()->flash('success', 'Deleted user ' . $rname . '.');
+
+        return redirect()->route('home');
     }
 }

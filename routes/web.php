@@ -26,7 +26,7 @@ Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback');
 
 ## Internal routes
 Route::middleware(['auth'])->group(function () {
-    Route::view('/', 'home');
+    Route::view('/', 'home')->name('home');
 
     # Profile
     Route::get('/profile/new', 'ProfileController@create');
@@ -35,6 +35,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/profile/new', 'ProfileController@store');
     Route::post('/profile/{rname}/edit', 'ProfileController@update');
+
+    Route::delete('profile/{rname}', 'ProfileController@destroy');
 
     # Battalion
     Route::get('/battalion', 'BattalionController@index');

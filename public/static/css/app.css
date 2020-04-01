@@ -112,6 +112,14 @@ textarea {
     width: 100%;
     height: 200px;
 }
+
+.popover-header {
+   color: rgb(51, 51, 51);
+}
+
+.confirmation-buttons .fas {
+    margin-right: 2pt;
+}
 @charset "UTF-8";
 
 /*!

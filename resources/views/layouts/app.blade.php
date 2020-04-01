@@ -57,6 +57,11 @@
         <div class="container-xl">
             <div class="row">
                 <div class="content col-lg-9">
+                    @if(session()->has('success'))
+                    <div class="alert alert-sucess" role="alert">
+                        {{ session()->get('success') }}
+                    </div>
+                    @endif
                     @yield('content')
                 </div>
                 <div class="discord col-lg-3 d-none d-lg-block">
@@ -66,6 +71,11 @@
         </div>
     @else
         <div class="container">
+            @if(session()->has('success'))
+            <div class="alert alert-sucess" role="alert">
+                {{ session()->get('success') }}
+            </div>
+            @endif
             @yield('content')
         </div>
     @endif

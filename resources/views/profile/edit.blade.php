@@ -13,7 +13,7 @@
 </div>
 @endif
 <h1>Edit {{ $knight->rname }}</h1>
-<form method="POST">
+<form method="POST" id="edit">
     @csrf
     <div class="row">
         @if (in_array('rname', $editable_fields))
@@ -180,9 +180,23 @@
         </div>
     </div>
     <div class="row">
+        @if($can_delete)
         <div class="col">
-            <button type="submit" class="btn btn-primary float-right">Submit</button>
+            <div class="form-group">
+                <button type="submit" class="btn btn-danger float-left" form="delete" data-toggle="confirmation"
+                    data-btn-ok-icon-class="fas fa-check" data-btn-cancel-icon-class="fas fa-ban">Delete user</button>
+            </div>
+        </div>
+        @endif
+        <div class="col">
+            <button type="submit" class="btn btn-success float-right">Submit</button>
         </div>
     </div>
 </form>
+@if($can_delete)
+<form method="POST" id="delete" action="{{ route('profile', ['rname' => $knight->rname]) }}">
+    @csrf
+    @method('DELETE')
+</form>
+@endif
 @endsection
