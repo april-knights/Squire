@@ -462,7 +462,7 @@ class ProfileController extends Controller
         // Commit
         });
 
-        return redirect()->route('profile', ['rname' => $rname]);
+        return redirect()->route('profile', ['rname' => $validated['rname'] ?? $rname]);
     }
 
     /**
