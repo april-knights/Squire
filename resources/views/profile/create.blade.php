@@ -59,7 +59,7 @@
                         <label>Battalion</label>
                         <select class="custom-select" name="batt">
                             @foreach ($all_batts as $batt)
-                            <option value="{{ $batt->pkey }}" label="{{ $batt->battdescr }}"
+                            <option value="{{ $batt->pkey }}" label="{{ $batt->name }}"
                                 @if ($batt->pkey == $def_batt) selected @endif>
                                 {{ $batt->name }}
                             </option>
@@ -72,7 +72,7 @@
                         <label>Rank</label>
                         <select class="custom-select" name="rank">
                             @foreach ($all_ranks as $rank)
-                            <option value="{{ $rank->pkey }}" label="{{ $rank->rankdescr }}"
+                            <option value="{{ $rank->pkey }}" label="{{ $rank->name }}"
                                 @if ($rank->pkey == $def_rank) selected @endif>
                                 {{ $rank->name }}
                             </option>
@@ -85,7 +85,7 @@
                         <label>Security</label>
                         <select class="custom-select" name="security">
                             @foreach ($all_secs as $sec)
-                            <option value="{{ $sec->pkey }}" label="{{ $sec->secdescr }}"
+                            <option value="{{ $sec->pkey }}" label="{{ $sec->secname }}"
                                 @if ($sec->pkey == $def_sec) selected @endif>
                                 {{ $sec->secname }}
                             </option>
