@@ -58,7 +58,7 @@
                         <label>Battalion</label>
                         <select class="form-control" name="batt">
                             @foreach ($all_batts as $batt)
-                            <option value="{{ $batt->pkey }}" label="{{ $batt->battdescr }}"
+                            <option value="{{ $batt->pkey }}" label="{{ $batt->name }}"
                                 @if ($batt->pkey == $knight->batt) selected @endif>
                                 {{ $batt->name }}
                             </option>
@@ -73,7 +73,7 @@
                         <label>Rank</label>
                         <select class="form-control" name="rank">
                             @foreach ($all_ranks as $rank)
-                            <option value="{{ $rank->pkey }}" label="{{ $rank->rankdescr }}"
+                            <option value="{{ $rank->pkey }}" label="{{ $rank->name }}"
                                 @if ($rank->pkey == $knight->rnk) selected @endif>
                                 {{ $rank->name }}
                             </option>
@@ -88,7 +88,7 @@
                         <label>Security</label>
                         <select class="form-control" name="security">
                             @foreach ($all_secs as $sec)
-                            <option value="{{ $sec->pkey }}" label="{{ $sec->secdescr }}"
+                            <option value="{{ $sec->pkey }}" label="{{ $sec->secname }}"
                                 @if ($sec->pkey == $knight->security) selected @endif>
                                 {{ $sec->secname }}
                             </option>
