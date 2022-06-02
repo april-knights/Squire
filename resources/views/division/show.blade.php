@@ -18,6 +18,10 @@
         <p>No one</a>
         @endif
     </div>
+        <div class="col">
+        <img class="banner" src="{{ asset('static/img/batt_banners/' . $batt->divalias . '.png') }}"
+             alt="{{ $div->name }} Banner" title="{{ $div->name }} Banner">
+    </div>
 </div>
 <div class="row">
     <div class="col-md-8">
