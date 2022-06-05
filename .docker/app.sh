@@ -7,10 +7,7 @@ chown :www-data bootstrap/cache \
                 storage/logs
 
 # Copy the default environment for first run and make it writable by anyone so that it can be edited
-[ ! -f .env ] && cp .env.default .env && chmod ugo+rw .env
-
-# Generate app key if none is specified
-[[ -z $APP_KEY ]] && php artisan key:generate
+[ ! -f .env ] && cp .env.default .env && chmod ugo+rw .env && php artisan key:generate
 
 # Install packages
 /usr/bin/composer install --no-interaction --prefer-dist
