@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 chown :www-data bootstrap/cache \
-                storage/app/{public,tmp,media} \
-                storage/docs \
+                storage/app/public \
                 storage/framework/{cache,sessions,testing,views} \
                 storage/framework/cache/data \
                 storage/logs
