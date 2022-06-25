@@ -196,7 +196,7 @@ class ProfileController extends Controller
             return null;
         // User is editing their own profile
         } elseif ($knight && $knight->pkey == $user->getAuthIdentifier()) {
-            return array('dname', 'email', 'bio', 'firstevent', 'rlimpact', 'skills');
+            return array('dname', 'email', 'bio', 'rlimpact', 'skills');
         } else {
             return null;
         }
