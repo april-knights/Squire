@@ -82,7 +82,7 @@
                     </div>
                 </div>
                 @endif
-                @if (in_array('security', $editable_fields))
+                {{-- @if (in_array('security', $editable_fields))
                 <div class="col-sm">
                     <div class="form-group">
                         <label>Security</label>
@@ -96,7 +96,7 @@
                         </select>
                     </div>
                 </div>
-                @endif
+                @endif --}}
             </div>
             <div class="row">
                 @if (in_array('divs', $editable_fields))
