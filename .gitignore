@@ -14,5 +14,3 @@ _ide_helper.php
 .phpstorm.meta.php
 .idea
 database/*.sqlite
-public/static/js/app.js
-public/static/css/app.css
