@@ -1,5 +1,12 @@
 # Squire
 
+## Dev Setup (Docker)
+1. Install Git and Docker (with Compose)
+2. Clone the repository using `git clone https://github.com/april-knights/Squire.git`.
+3. Create a [Reddit application](https://www.reddit.com/prefs/apps/)
+4. Copy `.env.default` to `.env` and modify the Reddit client ID and secret to the values you got from Reddit
+5. Run `docker compose up --build`. Once everything is initialized properly, you can reach the page at http://localhost/
+
 ## Dev Setup
 1. Install `git`, `php`, `composer` and `npm`.
 2. Clone the repository using `git clone https://github.com/april-knights/Squire.git`.
