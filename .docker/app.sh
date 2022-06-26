@@ -8,6 +8,8 @@ chown :www-data bootstrap/cache \
 
 # Copy the default environment for first run and make it writable by anyone so that it can be edited
 [ ! -f .env ] && cp .env.default .env && chmod ugo+rw .env && php artisan key:generate
+# Or just set the key if not set yet
+grep APP_KEY=CHANGEME .env > /dev/null && php artisan key:generate
 
 # Install packages
 /usr/bin/composer install --no-interaction --prefer-dist
