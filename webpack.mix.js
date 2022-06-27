@@ -15,4 +15,8 @@ mix.js('resources/js/app.js', 'public/static/js')
     .sass('resources/sass/app.scss', 'public/static/css');
 
 // Auto-reload
-mix.browserSync('127.0.0.1:8000');
+mix.browserSync({
+    proxy: process.env.APP_HOST ? process.env.APP_HOST : '127.0.0.1:8000',
+    port: process.env.WEB_PORT ? process.env.WEB_PORT : 3000,
+    open: false
+});
