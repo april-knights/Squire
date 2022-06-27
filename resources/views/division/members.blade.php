@@ -19,8 +19,8 @@
         @endif
     </div>
     <div class="col">
-             <img class="banner" src="{{ asset('static/img/batt_banners/' . $batt->divalias . '.png') }}"
-             alt="{{ $div->name }} Banner" title="{{ $div->name }} Banner"
+             <img class="banner" src="{{ asset('static/img/div_banners/' . $div->divalias . '.png') }}"
+             alt="{{ $div->name }} Banner" title="{{ $div->name }} Banner">
     </div>
 </div>
 
