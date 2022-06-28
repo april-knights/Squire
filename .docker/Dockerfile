@@ -1,4 +1,4 @@
-FROM php:7.4-fpm AS development
+FROM php:8.0-fpm AS development
 
 RUN apt-get update && apt-get install -y wait-for-it libzip-dev zip gosu
 
