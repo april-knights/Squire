@@ -357,10 +357,17 @@ class ProfileController extends Controller
             abort(401, 'Not authorized to edit knight.');
         }
 
+        if ($knight->pkey == Auth::id()) {
+            // Editing own profile, allow setting current security level
+            $min_sec = Auth::user()->security;
+        } else {
+            // Only allow setting security levels up to one level higher than the editor's one
+            $min_sec = Auth::user()->security + 1;
+        }
+
         $validator = Validator::make(
             $request->all(),
-            // Ensure
-            $this->getRules($editable_fields, $knight, Auth::user()->security),
+            $this->getRules($editable_fields, $knight, $min_sec),
             $this->getMessages()
         );
 
