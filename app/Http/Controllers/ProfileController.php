@@ -191,12 +191,12 @@ class ProfileController extends Controller
         if ($user->checkSecurity('cmuser')) {
             return array('rname', 'dname', 'email', 'batt', 'rank', 'security', 'divs', 'firstevent', 'skills', 'bio', 'rlimpact');
             // TODO: implement 'batt2', 'activeflg',
-        // Battalion officer is editing
-        } elseif ($user->checkSecurity('cmbattuser') && $user->isBattMember($knight->batt)) {
-            return null;
         // User is editing their own profile
         } elseif ($knight && $knight->pkey == $user->getAuthIdentifier()) {
             return array('dname', 'email', 'bio', 'rlimpact', 'skills');
+        // Battalion officer is editing
+        } elseif ($user->checkSecurity('cmbattuser') && $user->isBattMember($knight->batt)) {
+            return null;
         } else {
             return null;
         }
