@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 use DB;
 use Log;
 use Auth;
+use Validator;
 
 class ProfileController extends Controller
 {
@@ -207,9 +208,10 @@ class ProfileController extends Controller
      *
      * @param array $fields Fields to include in rules, null for all
      * @param array $knight Knight being edited, null if being created
+     * @param int $min_sec  Minimum security level
      * @return array        Array of rules
      */
-    private static function getRules($fields = null, $knight = null) {
+    private static function getRules($fields = null, $knight = null, $min_sec = 0) {
         if ($knight) {
             $unique = Rule::unique('knight')->ignore($knight->rname, 'rname');
         } else {
@@ -241,7 +243,12 @@ class ProfileController extends Controller
             ],
             'batt' => 'required|integer|exists:battalion,pkey',
             'rank' => 'required|integer|exists:krank,pkey',
-            'security' => 'required|integer|exists:security,pkey',
+            'security' => [
+                'required',
+                'integer',
+                'exists:security,pkey',
+                'min:' . $min_sec
+            ],
             'divs' => 'nullable',
             'divs.*' => 'integer|exists:division,pkey',
             'firstevent' => 'nullable|integer|exists:event,pkey',
@@ -257,6 +264,17 @@ class ProfileController extends Controller
         } else {
             return $all_rules;
         }
+    }
+
+    /**
+     * Generate validation messages
+     *
+     * @return array Array of messages
+     */
+    private static function getMessages() {
+        return [
+            'security.min' => 'You cannot set a security level higher than your own!',
+        ];
     }
 
     /**
@@ -339,7 +357,21 @@ class ProfileController extends Controller
             abort(401, 'Not authorized to edit knight.');
         }
 
-        $validated = $request->validate($this->getRules($editable_fields, $knight));
+        if ($knight->pkey == Auth::id()) {
+            // Editing own profile, allow setting current security level
+            $min_sec = Auth::user()->security;
+        } else {
+            // Only allow setting security levels up to one level higher than the editor's one
+            $min_sec = Auth::user()->security + 1;
+        }
+
+        $validator = Validator::make(
+            $request->all(),
+            $this->getRules($editable_fields, $knight, $min_sec),
+            $this->getMessages()
+        );
+
+        $validated = $validator->validate();
 
         // Start transaction
         DB::transaction(function () use (&$validated, &$rname, &$knight) {
