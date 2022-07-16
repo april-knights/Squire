@@ -190,14 +190,14 @@ class ProfileController extends Controller
 
         // Councillor is editing the profile
         if ($user->checkSecurity('cmuser')) {
-            return array('rname', 'dname', 'email', 'batt', 'rank', 'security', 'divs', 'firstevent', 'skills', 'bio', 'rlimpact');
+            return array('rname', 'dname', 'discordid', 'email', 'batt', 'rank', 'security', 'divs', 'firstevent', 'skills', 'bio', 'rlimpact');
             // TODO: implement 'batt2', 'activeflg',
         // User is editing their own profile
         } elseif ($knight && $knight->pkey == $user->getAuthIdentifier()) {
             return array('dname', 'email', 'bio', 'rlimpact', 'skills');
         // Battalion officer is editing
         } elseif ($user->checkSecurity('cmbattuser') && $user->isBattMember($knight->batt)) {
-            return null;
+            return array('rname', 'dname', 'batt', 'rank', 'security', 'divs', 'firstevent', 'skills', 'bio', 'rlimpact');;
         } else {
             return null;
         }
@@ -233,6 +233,11 @@ class ProfileController extends Controller
                 'nullable',
                 'max:40',
                 'regex:/^.*#\d{4}/',
+                $unique,
+            ],
+            'discordid' => [
+                'required',
+                'max:20',
                 $unique,
             ],
             'email' => [
@@ -305,6 +310,7 @@ class ProfileController extends Controller
                 'knum' => $validated['knum'],
                 'rname' => $validated['rname'],
                 'dname' => $validated['dname'],
+                'discordid' => $validated['discordid'],
                 'email' => $validated['email'],
                 'bio' => $validated['bio'],
                 'firstevent' => $validated['firstevent'] ?? null,
@@ -481,6 +487,7 @@ class ProfileController extends Controller
                 ->update([
                     'rname' => $validated['rname'] ?? $knight->rname,
                     'dname' => $validated['dname'] ?? $knight->dname,
+                    'discordid' => $validated['discordid'] ?? $knight->discordid,
                     'email' => $validated['email'] ?? $knight->email,
                     'bio' => $validated['bio'] ?? $knight->bio,
                     'firstevent' => $validated['firstevent'] ?? $knight->firstevent,
