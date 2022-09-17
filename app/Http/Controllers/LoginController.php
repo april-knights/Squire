@@ -6,7 +6,7 @@ use Socialite;
 use DB;
 use Auth;
 
-use App\Knight;
+use App\Model\Knight;
 
 class LoginController extends Controller
 {

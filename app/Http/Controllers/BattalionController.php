@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\Battalion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class BattalionController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return View
      */
     public function index()
     {
-        $batts = DB::select('SELECT * FROM battalion b
-                             LEFT JOIN knight k on k.pkey = b.battlead');
+        $batts = Battalion::query()->with('leader')->get();
 
         return view('battalion.index', ['batts' => $batts]);
     }
