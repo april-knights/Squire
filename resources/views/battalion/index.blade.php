@@ -15,7 +15,7 @@
         @forelse ($batts as $batt)
             <tr>
                 <td><a href="/battalion/{{ $batt->battalias }}">{{ $batt->name }}</a></td>
-                <td><a href="/profile/{{ $batt->leader->rname }}">{{ $batt->leader->rname }}</a></td>
+                <td><a href="/profile/{{ $batt->leader?->rname }}">{{ $batt->leader?->rname }}</a></td>
             </tr>
         @empty
             <tr>

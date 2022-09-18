@@ -2,20 +2,27 @@
 
 namespace App\Model;
 
+use App\Support\HasActiveTrait;
+use App\Support\SquireModel;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 
-use Log;
-use DB;
-
-class Knight extends Authenticatable
+class Knight extends SquireModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
 {
+    use Authenticatable, Authorizable, CanResetPassword, MustVerifyEmail;
     use Notifiable;
+    use HasActiveTrait;
 
     protected $table = 'knight';
-    protected $primaryKey = 'pkey';
+    protected string|null $permName = 'user';
 
     /**
      * The attributes that are mass assignable.
@@ -46,13 +53,12 @@ class Knight extends Authenticatable
     /**
      * Whether this knight is a member of a battalion.
      *
-     * @var int battalion primary key
+     * @var int $batt_key battalion primary key
      *
      * @return bool
      */
     public function isBattMember($batt_key) {
-        $myid = $this->getAuthIdentifier();
-        return in_array($batt_key, get_object_vars(DB::select('SELECT batt, batt2 FROM knight WHERE pkey = ?', [$myid])[0]));
+        return !!$this->battalion()->find($batt_key);
     }
 
     /**
@@ -61,15 +67,10 @@ class Knight extends Authenticatable
      * @return int
      */
     public function getRankVal() {
-        $myid = $this->getAuthIdentifier();
-        $rank = DB::select('SELECT r.rval FROM knight k
-                            INNER JOIN krank r ON r.pkey = k.rnk
-                            WHERE k.pkey = ?', [$myid])[0] ?? null;
-
-        if ($rank) {
-            return $rank->rval;
+        if ($this->rank) {
+            return $this->rank->rval;
         } else {
-            return 99; # If the knight doesn't have an assigned rank, default to rval 99.
+            return Rank::DEFAULT_KNIGHT_RANK; # If the knight doesn't have an assigned rank, default to rval 99.
         }
     }
 
@@ -79,13 +80,8 @@ class Knight extends Authenticatable
      * @return int
      */
     public function getRankName() {
-        $myid = $this->getAuthIdentifier();
-        $rank = DB::select('SELECT r.name FROM knight k
-                            INNER JOIN krank r ON r.pkey = k.rnk
-                            WHERE k.pkey = ?', [$myid])[0] ?? null;
-
-        if ($rank) {
-            return $rank->name;
+        if ($this->rank) {
+            return $this->rank->name;
         } else {
             return ''; # If the knight doesn't have an assigned rank, return empty string.
         }
@@ -98,19 +94,19 @@ class Knight extends Authenticatable
      */
     public function isCouncillor() {
         // If the rank value is lower than or equal to 3, this knight is a councillor
-        return $this->getRankVal() <= 3;
+        return $this->getRankVal() <= Rank::HIGHEST_COUNCILOR_RANK;
     }
 
     /**
      * Whether this knight is an officer of a certain battalion.
      *
-     * @var int battalion primary key
+     * @var int $batt_key battalion primary key
      *
      * @return bool
      */
     public function isOfficer($batt_key) {
         // If the rank value is lower than or equal to 8, this knight is an officer
-        return $this->isBattMember($batt_key) && $this->getRankVal() <= 8;
+        return $this->isBattMember($batt_key) && $this->getRankVal() <= Rank::HIGHEST_OFFICER_RANK;
     }
 
     /**
@@ -120,16 +116,16 @@ class Knight extends Authenticatable
      * @return bool
      */
     public function checkSecurity($key) {
-        $security = $this->security()->{$key};
+        $security = $this->security()->first();
         if (!$security) {
             return false; # Knight has no linked security entry
         } else {
-            return current((array) $security) == 1;
+            return $security->{$key};
         }
     }
 
     public function security(): HasOne {
-        return $this->hasOne(Security::class);
+        return $this->hasOne(Security::class, 'pkey', 'security');
     }
 
     public function rank(): HasOne {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Model;
+namespace App\Support;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -13,10 +13,14 @@ trait HasActiveTrait {
      */
     public function scopeActive(Builder $builder, bool $active = null) {
         if ($active === null) {
-            //Auth::user()->checkSecurity('') - TODO: Check permission for seeing active things
-            $active = true;
+            if(!Auth::user()->checkSecurity($this->getPermission(SquireModel::PERMISSION_MODIFY))) {
+                // If we don't have permission to edit the entity, we only have permission for active entities
+                $builder->where('activeflg', true);
+            }
+        } else {
+            $builder->where('activeflg', $active);
         }
-        return $builder->where('activeflg', $active)->deleted(false);
+        return $builder->deleted(false);
     }
 
     /**

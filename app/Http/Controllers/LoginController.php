@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Socialite;
-use DB;
-use Auth;
-
 use App\Model\Knight;
+use Auth;
+use Socialite;
 
 class LoginController extends Controller
 {
