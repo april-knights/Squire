@@ -191,7 +191,7 @@ class ProfileController extends Controller
         // Councillor is editing the profile
         if ($user->checkSecurity('cmuser')) {
             return array('rname', 'dname', 'email', 'batt', 'rank', 'security', 'divs', 'firstevent', 'skills', 'bio', 'rlimpact');
-            // TODO: implement 'batt2', 'activeflg',
+            // TODO: implement 'activeflg',
         // User is editing their own profile
         } elseif ($knight && $knight->pkey == $user->getAuthIdentifier()) {
             return array('dname', 'email', 'bio', 'rlimpact', 'skills');

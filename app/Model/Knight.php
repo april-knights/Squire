@@ -2,6 +2,8 @@
 
 namespace App\Model;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -118,14 +120,23 @@ class Knight extends Authenticatable
      * @return bool
      */
     public function checkSecurity($key) {
-        $myid = $this->getAuthIdentifier();
-        $security = DB::select("SELECT s.$key FROM knight k
-                                INNER JOIN security s ON s.pkey = k.security
-                                WHERE k.pkey = ?", [$myid])[0] ?? null;
+        $security = $this->security()->{$key};
         if (!$security) {
             return false; # Knight has no linked security entry
         } else {
             return current((array) $security) == 1;
         }
+    }
+
+    public function security(): HasOne {
+        return $this->hasOne(Security::class);
+    }
+
+    public function rank(): HasOne {
+        return $this->hasOne(Rank::class, 'pkey', 'rnk');
+    }
+
+    public function battalion(): BelongsTo {
+        return $this->belongsTo(Battalion::class, 'pkey', 'batt');
     }
 }
