@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\Knight;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -28,45 +29,27 @@ class ProfileController extends Controller
      * Display the specified resource.
      *
      * @param  int  $rname
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function show($rname)
     {
-        $knight = DB::select('SELECT * FROM knight
-                              WHERE delflg = 0 AND rname = ?',
-                             [$rname])[0] ?? null;
+        $knight = Knight::firstWhere('rname', $rname);
 
         if(!$knight) {
             abort(404, 'Knight not found.');
         }
 
-        $rank = DB::select('SELECT name, rankdescr FROM krank
-                            WHERE pkey = ?', [$knight->rnk])[0] ?? null;
-
-        $batt = DB::select('SELECT name, battalias FROM battalion
-                            WHERE pkey = ?', [$knight->batt])[0] ?? null;
-
-        $skills = DB::select('SELECT s.skillname FROM skill s
-                              INNER JOIN userskill u ON s.pkey = u.fkeyskill
-                              WHERE s.delflg = 0 AND u.delflg = 0 AND u.fkeyuser = ?', [$knight->pkey]);
         // TODO: Show skill parents as well
 
-        $divs = DB::select('SELECT * FROM knight k
-                            INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
-                            INNER JOIN division d ON d.pkey = dk.fkeydivision
-                            WHERE d.delflg = 0 AND dk.delflg = 0 AND k.rname = ?', [$rname]);
+        $editingSelf = Auth::id() == $knight->pkey;
 
         // Certain fields are limited to councillors and the user themselves
-        $show_sensitive = (Auth::user()->isCouncillor()) || (Auth::id() == $knight->pkey);
+        $show_sensitive = Auth::user()->isCouncillor() || $editingSelf;
 
         // Other fields are limited to officers from this knight's battalion
-        $show_irl = (Auth::user()->isOfficer($knight->batt)) || (Auth::id() == $knight->pkey);
+        $show_irl = Auth::user()->isOfficer($knight->batt) || $editingSelf;
 
         return view('profile.show', ['knight' => $knight,
-                                     'rank' => $rank,
-                                     'batt' => $batt,
-                                     'divs' => $divs,
-                                     'skills' => $skills,
                                      'show_sensitive' => $show_sensitive,
                                      'show_irl' => $show_irl,
                                      'can_edit' => $this->editableFields($knight) !== null,

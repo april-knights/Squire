@@ -59,7 +59,7 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
      * @return bool
      */
     public function isBattMember($batt_key) {
-        return !!$this->battalion()->find($batt_key);
+        return $this->battalion->pkey === $batt_key;
     }
 
     /**
@@ -134,15 +134,20 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
     }
 
     public function battalion(): BelongsTo {
-        return $this->belongsTo(Battalion::class, 'pkey', 'batt');
+        return $this->belongsTo(Battalion::class, 'batt', 'pkey');
     }
 
-    public function division(): BelongsToMany {
-        return $this->belongsToMany(Knight::class, 'divknight', 'fkeyknight', 'fkeydivision')
+    public function divisions(): BelongsToMany {
+        return $this->belongsToMany(Division::class, 'divknight', 'fkeyknight', 'fkeydivision')
             ->withPivot('delflg')->using(DivKnight::class)->deleted(false);
     }
 
     public function firstEvent(): BelongsTo {
         return $this->belongsTo(Event::class, 'firstevent', 'pkey');
+    }
+
+    public function skills(): BelongsToMany {
+        return $this->belongsToMany(Skill::class, 'userskill', 'fkeyuser', 'fkeyskill')
+            ->withPivot('delflg')->deleted(false)->using(UserSkill::class);
     }
 }

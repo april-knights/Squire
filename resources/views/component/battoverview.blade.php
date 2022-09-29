@@ -1,3 +1,4 @@
+<?php /** @var \App\Model\Battalion $batt */ ?>
 <div class="row">
     <div class="col">
         <h2>Battalion Name</h2>
@@ -5,9 +6,9 @@
     </div>
     <div class="col">
         <h2>Battalion Leader</h2>
-        @if ($battlead)
-        <a href="/profile/{{ $battlead->rname }}">
-            {{ $battlead->rname }}
+        @if ($batt->leader)
+        <a href="/profile/{{ $batt->leader->rname }}">
+            {{ $batt->leader->rname }}
         </a>
         @else
         <p>No one</p>

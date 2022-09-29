@@ -1,7 +1,8 @@
 @extends('layouts.app')
+<?php /** @var \App\Model\Knight $knight */ ?>
 
-@if ($rank)
-    @section('title', $rank->name . ' ' . $knight->rname)
+@if ($knight->rank)
+    @section('title', $knight->rank->name . ' ' . $knight->rname)
 @else
     @section('title', $knight->rname)
 @endif
@@ -36,18 +37,18 @@
         <div class="row">
             <div class="col-md-6">
                 <h2>Battalion</h2>
-                @if($batt)
-                <a href="/battalion/{{ $batt->battalias }}">{{ $batt->name }}</a>
+                @if($knight->battalion)
+                <a href="/battalion/{{ $knight->battalion->battalias }}">{{ $knight->battalion->name }}</a>
                 @else
                 <p>None</p>
                 @endif
             </div>
             <div class="col-md-6">
                 <h2>Rank</h2>
-                @if($rank)
+                @if($knight->rank)
                 <p>
-                    {{ $rank->name }}
-                    <i class="explainer fas fa-question-circle" data-toggle="tooltip" data-placement="right" title="{{ $rank->rankdescr }}"></i>
+                    {{ $knight->rank->name }}
+                    <i class="explainer fas fa-question-circle" data-toggle="tooltip" data-placement="right" title="{{ $knight->rank->rankdescr }}"></i>
                 </p>
                 @else
                 <p>None</p>
@@ -58,7 +59,8 @@
             <div class="col-md-6">
                 <h2>Divisions</h2>
                 <ul class="skills">
-                @forelse ($divs as $div)
+                @forelse ($knight->divisions as $div)
+                <?php /** @var \App\Model\Division $div */ ?>
                 <li>
                     <a href="/division/{{ $div->divalias }}">
                         {{ $div->name }}
@@ -80,7 +82,9 @@
     <div class="col-md-4">
         <h2>Skills</h2>
         <ul class="skills">
-        @forelse ($skills as $skill)
+        @forelse ($knight->skills as $skill)
+            <?php /** @var \App\Model\Skill $skill */ ?>
+
             <li>{{ $skill->skillname }}</li>
         @empty
             <li>None</li>
