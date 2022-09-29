@@ -1,3 +1,4 @@
+<?php /** @var iterable<\App\Model\Knight> $members */ ?>
 <table class="table table-hover table-borderless">
     <thead>
         <tr>
@@ -17,12 +18,12 @@
             </td>
             <td>{{ $member->dname }}</td>
             <td>
-            @if($member->name)
-                {{ $member->name }}
-                <i class="explainer fas fa-question-circle" data-toggle="tooltip" data-placement="right" title="{{ $member->rankdescr }}"></i>
+            @if($member->rank->name)
+                {{ $member->rank->name }}
+                <i class="explainer fas fa-question-circle" data-toggle="tooltip" data-placement="right" title="{{ $member->rank->rankdescr }}"></i>
             @endif
             </td>
-            <td>{{ $member->title }}</td>
+            <td>{{ $member->firstEvent->title }}</td>
         </tr>
         @empty
         <tr>

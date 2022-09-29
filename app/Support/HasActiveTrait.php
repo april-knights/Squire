@@ -28,7 +28,7 @@ trait HasActiveTrait {
                 $builder->where('activeflg', true);
             }
         } else {
-            $builder->where('activeflg', $active);
+            $builder->where($this->table.'.activeflg', $active);
         }
         return $builder->deleted(false);
     }

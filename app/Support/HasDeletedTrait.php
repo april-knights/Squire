@@ -12,6 +12,6 @@ trait HasDeletedTrait {
      * @return Builder
      */
     public function scopeDeleted(Builder $builder, bool $deleted = true) {
-        return $builder->where('delflg', $deleted);
+        return $builder->where($this->table.'.delflg', $deleted);
     }
 }

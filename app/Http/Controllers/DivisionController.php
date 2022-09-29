@@ -14,7 +14,7 @@ class DivisionController extends Controller
      */
     public function index()
     {
-        $divs = Division::query();
+        $divs = Division::query()->get();
 
         return view('division.index', ['divs' => $divs]);
     }
@@ -56,8 +56,8 @@ class DivisionController extends Controller
 
         return view('division.show', ['div' => $div,
                                        'divlead' => $div->leader,
-                                       'members' => $div->members(),
-                                       'officers' => $div->officers(),
+                                       'members' => $div->members,
+                                       'officers' => $div->officers,
                                      ]);
     }
 
@@ -69,16 +69,13 @@ class DivisionController extends Controller
      */
     public function members($alias)
     {
-        $div = Division::firstWhere('alias', $alias);
+        $div = Division::firstWhere('divalias', $alias);
 
         if(!$div) {
             abort(404, 'Division not found.');
         }
 
-        return view('division.members', ['div' => $div,
-                                          'divlead' => $div->leader,
-                                          'members' => $div->members(),
-                                         ]);
+        return view('division.members', ['div' => $div]);
     }
 
     /**

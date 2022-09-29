@@ -11,8 +11,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Division extends SquireModel {
     use HasActiveTrait;
 
+    protected string|null $permName = 'batt';
+    protected $table = 'division';
+
     protected $fillable = [
-        'divalias'
+        'divalias',
+        'name'
     ];
 
     public function leader(): HasOne {
@@ -20,7 +24,8 @@ class Division extends SquireModel {
     }
 
     public function members(): BelongsToMany {
-        return $this->belongsToMany(Knight::class, 'divknight')->withPivot('delflg')->using(DivKnight::class);
+        return $this->belongsToMany(Knight::class, 'divknight', 'fkeydivision', 'fkeyknight')
+            ->withPivot('delflg')->using(DivKnight::class)->deleted(false);
     }
 
     public function officers(): BelongsToMany { // TODO: The same rank is being used for battalions and divisions

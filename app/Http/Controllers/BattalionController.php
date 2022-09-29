@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Model\Battalion;
+use App\Model\Knight;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -58,7 +59,7 @@ class BattalionController extends Controller
         return view('battalion.show', ['batt' => $batt,
                                        'battlead' => $batt->leader,
                                        'members' => $batt->members()->limit(10)->get(),
-                                       'officers' => $batt->officers()->orderBy('rank.rval'),
+                                       'officers' => $batt->officers()->get()->sortBy(fn(Knight $o) => $o->rank->rval),
                                       ]);
     }
 
@@ -76,10 +77,7 @@ class BattalionController extends Controller
             abort(404, 'Battalion not found.');
         }
 
-        return view('battalion.members', ['batt' => $batt,
-                                          'battlead' => $batt->leader,
-                                          'members' => $batt->members(), // TODO: firstevent
-                                         ]);
+        return view('battalion.members', ['batt' => $batt]);
     }
 
     /**
