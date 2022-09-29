@@ -49,7 +49,7 @@ class BattalionController extends Controller
      */
     public function show($alias)
     {
-        $batt = Battalion::where('battalias', $alias)->active()->first();
+        $batt = Battalion::where('battalias', $alias)->first();
 
         if(!$batt) {
             abort(404, 'Battalion not found.');
@@ -57,8 +57,8 @@ class BattalionController extends Controller
 
         return view('battalion.show', ['batt' => $batt,
                                        'battlead' => $batt->leader,
-                                       'members' => $batt->members()->active()->limit(10)->get(),
-                                       'officers' => $batt->officers()->active()->orderBy('rank.rval'),
+                                       'members' => $batt->members()->limit(10)->get(),
+                                       'officers' => $batt->officers()->orderBy('rank.rval'),
                                       ]);
     }
 
@@ -70,7 +70,7 @@ class BattalionController extends Controller
      */
     public function members($alias)
     {
-        $batt = Battalion::where('battalias', $alias)->active()->first();
+        $batt = Battalion::where('battalias', $alias)->first();
 
         if(!$batt) {
             abort(404, 'Battalion not found.');
@@ -78,7 +78,7 @@ class BattalionController extends Controller
 
         return view('battalion.members', ['batt' => $batt,
                                           'battlead' => $batt->leader,
-                                          'members' => $batt->members()->active(), // TODO: firstevent
+                                          'members' => $batt->members(), // TODO: firstevent
                                          ]);
     }
 

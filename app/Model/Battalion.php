@@ -20,11 +20,11 @@ class Battalion extends SquireModel {
     ];
 
     public function leader(): HasOne {
-        return $this->hasOne(Knight::class, 'pkey', 'battlead')->active();
+        return $this->hasOne(Knight::class, 'pkey', 'battlead');
     }
 
     public function officers(): HasMany {
-        return $this->hasMany(Knight::class, 'batt', 'pkey')->whereHas('rank', function (Builder $query) {
+        return $this->members()->whereHas('rank', function (Builder $query) {
             $query->where('rval', '<=', Rank::HIGHEST_OFFICER_RANK);
         });
     }
