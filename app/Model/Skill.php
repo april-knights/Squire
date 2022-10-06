@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Skill extends SquireModel {
     use HasActiveTrait;
 
-    protected string|null $permName = 'skill';
+    protected static string|null $permName = 'skill';
     protected $table = 'skill';
 
     protected $fillable = [

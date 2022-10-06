@@ -5,7 +5,7 @@ namespace App\Model;
 use App\Support\SquireModel;
 
 class Event extends SquireModel {
-    protected string|null $permName = 'event';
+    protected static string|null $permName = 'event';
     protected $table = 'event';
 
     protected $fillable = [

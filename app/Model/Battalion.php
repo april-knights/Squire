@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Battalion extends SquireModel {
     use HasActiveTrait;
 
-    protected string|null $permName = 'batt';
+    const DEFAULT_BATTALION = 99;
+
+    protected static string|null $permName = 'batt';
     protected $table = 'battalion';
 
     protected $fillable = [

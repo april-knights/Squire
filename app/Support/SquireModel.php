@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 abstract class SquireModel extends Model {
     protected $primaryKey = 'pkey';
-    protected string|null $permName = null;
+    protected static string|null $permName = null;
 
+    /**
+     * Raw permission value. Use with ModelClass::getPermission().
+     */
     public const PERMISSION_VIEW = 'v', PERMISSION_MODIFY = 'm', PERMISSION_DELETE = 'd';
 
     /**
@@ -15,9 +18,9 @@ abstract class SquireModel extends Model {
      * @param string $permType The permission type (see constants in this class)
      * @return string|null The permission field's name or null if permName is not set
      */
-    public function getPermission(string $permType) {
-        if ($this->permName) {
-            return 'c' . $permType . $this->permName;
+    public static function getPermission(string $permType) {
+        if (static::$permName) {
+            return 'c' . $permType . static::$permName;
         } else {
             return null;
         }

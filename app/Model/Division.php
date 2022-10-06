@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Division extends SquireModel {
     use HasActiveTrait;
 
-    protected string|null $permName = 'batt';
+    protected static string|null $permName = 'batt';
     protected $table = 'division';
 
     protected $fillable = [

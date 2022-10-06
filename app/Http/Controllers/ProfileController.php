@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\Battalion;
+use App\Model\Division;
+use App\Model\Event;
 use App\Model\Knight;
+use App\Model\Rank;
+use App\Model\Security;
+use App\Model\Skill;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -16,13 +22,11 @@ class ProfileController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function index()
     {
-        $knights = DB::select('select * from knights');
-
-        return view('knight.index', ['knights' => $knights]);
+        return view('knight.index', ['knights' => Knight::get()]);
     }
 
     /**
@@ -62,7 +66,7 @@ class ProfileController extends Controller
      * @param integer $def_batt Default battalion
      * @param integer $def_rank Default rank
      * @param integer $def_sec  Default security
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function create(Request $request)
     {
@@ -75,33 +79,16 @@ class ProfileController extends Controller
             'security' => 'nullable|integer|exists:security,pkey',
         ]);
 
-        $all_ranks = DB::select('SELECT pkey, name, rankdescr FROM krank
-                                 WHERE activeflg = 1 AND delflg = 0');
-
-        $all_skills = DB::select('SELECT pkey, skillname, parentid FROM skill
-                                  WHERE activeflg = 1 AND delflg = 0');
-
-        $all_batts = DB::select('SELECT pkey, name, battdescr FROM battalion
-                                 WHERE activeflg = 1 AND delflg = 0');
-
-        $all_divs = DB::select('SELECT pkey, name, divdescr FROM division
-                                WHERE activeflg = 1 AND delflg = 0');
-
-        $all_events = DB::select('SELECT pkey, title FROM event');
-
-        $all_secs = DB::select('SELECT pkey, secname, secdescr FROM security
-                                WHERE activeflg = 1 AND delflg = 0');
-
         return view('profile.create', [
-            'all_ranks' => $all_ranks,
-            'all_skills' => $all_skills,
-            'all_batts' => $all_batts,
-            'all_divs' => $all_divs,
-            'all_events' => $all_events,
-            'all_secs' => $all_secs,
-            'def_batt' => $validated['batt'] ?? 99,
-            'def_rank' => $validated['rank'] ?? 13,
-            'def_sec' => $validated['security'] ?? 9,
+            'all_ranks' => Rank::get(),
+            'all_skills' => Skill::get(),
+            'all_batts' => Battalion::get(),
+            'all_divs' => Division::get(),
+            'all_events' => Event::get(),
+            'all_secs' => Security::get(),
+            'def_batt' => $validated['batt'] ?? Battalion::DEFAULT_BATTALION,
+            'def_rank' => $validated['rank'] ?? Rank::DEFAULT_PROFILE_RANK_ID,
+            'def_sec' => $validated['security'] ?? Security::DEFAULT_PROFILE_SECURITY_ID,
             ]);
     }
 
@@ -109,70 +96,42 @@ class ProfileController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $rname
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function edit($rname)
     {
-        $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0] ?? null;
+        $knight = Knight::firstWhere('rname', $rname);
 
-        abort_if(!$knight || $knight->delflg == 1, 404, 'Knight not found.');
+        abort_if(!$knight, 404, 'Knight not found.');
 
         $editable_fields = self::editableFields($knight);
         abort_if(!$editable_fields, 401, 'Not authorized to edit knight.');
 
-        $cur_skills = DB::select('SELECT s.pkey, s.skillname, s.parentid FROM skill s
-                                  INNER JOIN userskill u ON s.pkey = u.fkeyskill
-                                  WHERE s.delflg = 0 AND u.delflg = 0 AND u.fkeyuser = ?', [$knight->pkey]);
-
-        $cur_divs = DB::select('SELECT d.pkey, d.name, d.divdescr FROM knight k
-                                INNER JOIN divknight dk ON dk.fkeyknight = k.pkey
-                                INNER JOIN division d ON d.pkey = dk.fkeydivision
-                                WHERE d.delflg = 0 AND dk.delflg = 0 AND k.rname = ?', [$rname]);
-
-        $all_ranks = DB::select('SELECT pkey, name, rankdescr FROM krank
-                                 WHERE activeflg = 1 AND delflg = 0');
-
-        $all_secs = DB::select('SELECT pkey, secname, secdescr FROM security
-                                WHERE activeflg = 1 AND delflg = 0');
-
-        $all_skills = DB::select('SELECT pkey, skillname, parentid FROM skill
-                                  WHERE activeflg = 1 AND delflg = 0');
-
-        $all_batts = DB::select('SELECT pkey, name, battdescr FROM battalion
-                                 WHERE activeflg = 1 AND delflg = 0');
-
-        $all_divs = DB::select('SELECT pkey, name, divdescr FROM division
-                                WHERE activeflg = 1 AND delflg = 0');
-
-        $all_events = DB::select('SELECT pkey, title FROM event');
-
-        $can_delete = Auth::user()->checkSecurity('cduser');
-
         return view('profile.edit', ['knight' => $knight,
-                                     'cur_divs' => $cur_divs,
-                                     'cur_skills' => $cur_skills,
-                                     'all_ranks' => $all_ranks,
-                                     'all_secs' => $all_secs,
-                                     'all_skills' => $all_skills,
-                                     'all_batts' => $all_batts,
-                                     'all_divs' => $all_divs,
-                                     'all_events' => $all_events,
+                                     'cur_divs' => $knight->divisions,
+                                     'cur_skills' => $knight->skills,
+                                     'all_ranks' => Rank::get(),
+                                     'all_secs' => Security::get(),
+                                     'all_skills' => Skill::get(),
+                                     'all_batts' => Battalion::get(),
+                                     'all_divs' => Division::get(),
+                                     'all_events' => Event::get(),
                                      'editable_fields' => $editable_fields,
-                                     'can_delete' => $can_delete,
+                                     'can_delete' => Auth::user()->checkSecurity('cduser'),
                                     ]);
     }
 
     /**
      * Gets the profile fields editable by another user.
      *
-     * @param array $knight Knight to be edited
+     * @param Knight|null $knight Knight to be edited
      * @return array        Array of editable fields
      */
-    private static function editableFields($knight = null) {
+    private static function editableFields(Knight $knight = null) {
         $user = Auth::user();
 
         // Councillor is editing the profile
-        if ($user->checkSecurity('cmuser')) {
+        if ($user->checkSecurity(Knight::getPermission(Knight::PERMISSION_MODIFY))) {
             return array('rname', 'dname', 'email', 'batt', 'rank', 'security', 'divs', 'firstevent', 'skills', 'bio', 'rlimpact');
             // TODO: implement 'activeflg',
         // User is editing their own profile
@@ -189,12 +148,12 @@ class ProfileController extends Controller
     /**
      * Generate edit rules.
      *
-     * @param array $fields Fields to include in rules, null for all
-     * @param array $knight Knight being edited, null if being created
+     * @param array|null $fields Fields to include in rules, null for all
+     * @param Knight|null $knight Knight being edited, null if being created
      * @param int $min_sec  Minimum security level
      * @return array        Array of rules
      */
-    private static function getRules($fields = null, $knight = null, $min_sec = 0) {
+    private static function getRules(array $fields = null, Knight $knight = null, int $min_sec = 0) {
         if ($knight) {
             $unique = Rule::unique('knight')->ignore($knight->rname, 'rname');
         } else {
@@ -264,11 +223,11 @@ class ProfileController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->checkSecurity('cmuser')) {
+        if (!Auth::user()->checkSecurity(Knight::getPermission(Knight::PERMISSION_MODIFY))) {
             Log::warning('User ' . Auth::user()->rname . ' illegally attempted to create user!');
             abort(401, 'You are not authorized to create a knight!');
         }
@@ -280,11 +239,7 @@ class ProfileController extends Controller
             $editor = Auth::id();
 
             // Create knight
-            /* I've tried to use raw SQL queries for maintainability by people without
-             * PHP/Laravel knowledge but doing that here just made the code
-             * not only unreadable but also much more complicated.
-             */
-            DB::table('knight')->insertGetId([
+            $knight = new Knight([
                 'knum' => $validated['knum'],
                 'rname' => $validated['rname'],
                 'dname' => $validated['dname'],
@@ -297,24 +252,20 @@ class ProfileController extends Controller
                 'security' => $validated['security'],
                 'crtsetid' => $editor,
                 'lstmdby' => $editor,
-            ], 'pkey');
-
-            // Get pkey for many-to-many relationships
-            $pkey = DB::select('SELECT pkey FROM knight WHERE rname = ?', [$validated['rname']])[0]->pkey;
+            ]);
+            $knight->save();
 
             // Set skills
             if(array_key_exists('skills', $validated)) {
                 foreach ($validated['skills'] as $skill) {
-                    DB::insert('INSERT INTO userskill (fkeyuser, fkeyskill, crtsetid, lstmdby)
-                                VALUES (?, ?, ?, ?)', [$pkey, $skill, $editor, $editor]);
+                    $knight->skills()->attach($skill, ['crtsetid' => $editor, 'lstmdby' => $editor]);
                 }
             }
 
             // Set divisions
             if(array_key_exists('divs', $validated)) {
                 foreach ($validated['divs'] as $div) {
-                    DB::insert('INSERT INTO divknight (fkeyknight, fkeydivision, crtsetid, lstmdby)
-                                VALUES (?, ?, ?, ?)', [$pkey, $div, $editor, $editor]);
+                    $knight->divisions()->attach($div, ['crtsetid' => $editor, 'lstmdby' => $editor]);
                 }
             }
         // Commit
@@ -328,11 +279,12 @@ class ProfileController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  string  $rname
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, $rname)
     {
-        $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0] ?? null;
+        $knight = Knight::firstWhere('rname', $rname);
+        abort_if(!$knight, 404, 'Knight not found.');
         $editable_fields = $this->editableFields($knight);
 
         if (!$editable_fields) {
@@ -360,23 +312,10 @@ class ProfileController extends Controller
         DB::transaction(function () use (&$validated, &$rname, &$knight) {
 
             $editor = Auth::id();
-            // We need to get the pkey incase we change rname later
-            $pkey = DB::select('SELECT pkey FROM knight WHERE rname = ?', [$rname])[0]->pkey ?? null;
-
-            if (!$pkey) {
-                Log::error('Could not get pkey for rname ' . $rname);
-                abort(503);
-            }
-
 
             // Update skills
             if(array_key_exists('skills', $validated)) {
-                $old_skills_obj = DB::select('SELECT fkeyskill FROM userskill
-                                              WHERE fkeyuser = ? AND delflg = 0', [$pkey]);
-
-                // Merge array of skill objects into a single array of skill pkeys
-                $old_skills = [];
-                foreach($old_skills_obj as $skill) array_push($old_skills, $skill->fkeyskill);
+                $old_skills = $knight->skills->map->pkey;
 
                 // Get deleted and added skills by array intersection
                 $deleted = array_diff($old_skills, $validated['skills']);
@@ -384,96 +323,72 @@ class ProfileController extends Controller
 
                 // Set delflag for deleted skills
                 foreach ($deleted as $skill) {
-                    DB::update('UPDATE userskill
-                                SET delflg = 1,
-                                    lstmdby = :editor,
-                                    lstmdts = CURRENT_TIMESTAMP
-                                WHERE fkeyuser = :userid AND fkeyskill = :skillid',
-                                ['userid' => $pkey, 'skillid' => $skill, 'editor' => $editor]);
+                    $skillModel = $knight->skills()->find($skill);
+                    $skillModel->pivot->delflg = true;
+                    $skillModel->pivot->lstmdby = $editor; // TODO: Automatic last modified update (time and user ID)
+                    $skillModel->pivot->save();
                 }
 
                 // Add skills, reactivate deleted ones if they exist
                 foreach ($added as $skill) {
-                    $prev_deleted = DB::select('SELECT usid FROM userskill
-                                                WHERE fkeyuser = ? AND fkeyskill = ? AND delflg = 1',
-                                                [$pkey, $skill])[0]->usid ?? null;
+                    $prev_deleted = $knight->skills()->wherePivot('delflg', true)->find($skill);
 
                     if ($prev_deleted) {
-                        DB::update('UPDATE userskill
-                                    SET delflg = 0,
-                                        lstmdby = :editor,
-                                        lstmdts = CURRENT_TIMESTAMP
-                                    WHERE usid = :usid',
-                                    ['editor' => $editor, 'usid' => $prev_deleted]);
+                        $prev_deleted->pivot->delflg = false;
+                        $prev_deleted->pivot->lstmdby = $editor;
+                        $prev_deleted->pivot->save();
                     } else {
-                        DB::insert('INSERT INTO userskill (fkeyuser, fkeyskill, crtsetid, lstmdby)
-                                    VALUES (?, ?, ?, ?)',
-                                    [$pkey, $skill, $editor, $editor]);
+                        $knight->skills()->attach($skill, ['crtsetid' => $editor, 'lstmdby' => $editor]);
                     }
                 }
             }
 
             // Update divisions
             if(array_key_exists('divs', $validated)) {
-                $old_divs_obj = DB::select('SELECT fkeydivision FROM divknight
-                                            WHERE fkeyknight = ? AND delflg = 0', [$pkey]);
+                $old_divs = $knight->divisions->map->pkey;
 
-                // Merge array of div objects into a single array of div pkeys
-                $old_divs = [];
-                foreach($old_divs_obj as $div) array_push($old_divs, $div->fkeydivision);
-
-                // Get deleted and added divs by array intersection
+                // Get deleted and added divisions by array intersection
                 $deleted = array_diff($old_divs, $validated['divs']);
                 $added = array_diff($validated['divs'], $old_divs);
 
-                // Set delflag for deleted divs
+
+                // Set delflag for deleted divisions
                 foreach ($deleted as $div) {
-                    DB::update('UPDATE divknight
-                                SET delflg = 1,
-                                    lstmdby = :editor,
-                                    lstmdts = CURRENT_TIMESTAMP
-                                WHERE fkeyknight = :userid AND fkeydivision = :divid',
-                                ['userid' => $pkey, 'divid' => $div, 'editor' => $editor]);
+                    $divModel = $knight->divisions()->find($div);
+                    $divModel->pivot->delflg = true;
+                    $divModel->pivot->lstmdby = $editor;
+                    $divModel->pivot->save();
                 }
 
-                // Add divs, reactivate deleted ones if they exist
+                // Add skills, reactivate deleted ones if they exist
                 foreach ($added as $div) {
-                    $prev_deleted = DB::select('SELECT pkey FROM divknight
-                                                WHERE fkeyknight = ? AND fkeydivision = ? AND delflg = 1',
-                                                [$pkey, $div])[0]->pkey ?? null;
+                    $prev_deleted = $knight->divisions()->wherePivot('delflg', true)->find($div);
 
                     if ($prev_deleted) {
-                        DB::update('UPDATE divknight
-                                    SET delflg = 0,
-                                        lstmdby = :editor,
-                                        lstmdts = CURRENT_TIMESTAMP
-                                    WHERE pkey = :pkey',
-                                    ['editor' => $editor, 'pkey' => $prev_deleted]);
+                        $prev_deleted->pivot->delflg = false;
+                        $prev_deleted->pivot->lstmdby = $editor;
+                        $prev_deleted->pivot->save();
                     } else {
-                        DB::insert('INSERT INTO divknight (fkeyknight, fkeydivision, crtsetid, lstmdby)
-                                    VALUES (?, ?, ?, ?)',
-                                    [$pkey, $div, $editor, $editor]);
+                        $knight->divisions()->attach($div, ['crtsetid' => $editor, 'lstmdby' => $editor]);
                     }
                 }
             }
 
 
             // Update knight, using old values if not set.
-            DB::table('knight')
-                ->where('pkey', $pkey)
-                ->update([
-                    'rname' => $validated['rname'] ?? $knight->rname,
-                    'dname' => $validated['dname'] ?? $knight->dname,
-                    'email' => $validated['email'] ?? $knight->email,
-                    'bio' => $validated['bio'] ?? $knight->bio,
-                    'firstevent' => $validated['firstevent'] ?? $knight->firstevent,
-                    'rlimpact' => $validated['rlimpact'] ?? $knight->rlimpact,
-                    'batt' => $validated['batt'] ?? $knight->batt,
-                    'rnk' => $validated['rank'] ?? $knight->rnk,
-                    'security' => $validated['security'] ?? $knight->security,
-                    'crtsetid' => $editor,
-                    'lstmdby' => $editor,
-                ]);
+            $knight->fill([
+                'rname' => $validated['rname'] ?? $knight->rname,
+                'dname' => $validated['dname'] ?? $knight->dname,
+                'email' => $validated['email'] ?? $knight->email,
+                'bio' => $validated['bio'] ?? $knight->bio,
+                'firstevent' => $validated['firstevent'] ?? $knight->firstevent,
+                'rlimpact' => $validated['rlimpact'] ?? $knight->rlimpact,
+                'batt' => $validated['batt'] ?? $knight->batt,
+                'rnk' => $validated['rank'] ?? $knight->rnk,
+                'security' => $validated['security'] ?? $knight->security,
+                'crtsetid' => $editor,
+                'lstmdby' => $editor,
+            ])->save();
         // Commit
         });
 
@@ -484,24 +399,23 @@ class ProfileController extends Controller
      * Set delete flag for user.
      *
      * @param  int  $rname
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Request $request, $rname)
     {
-        if (!Auth::user()->checkSecurity('cduser')) {
+        if (!Auth::user()->checkSecurity(Knight::getPermission(Knight::PERMISSION_DELETE))) {
             Log::warning('User ' . Auth::user()->rname . ' illegally attempted to delete user ' . $rname . '!');
             abort(401, 'You are not authorized to delete that knight!');
         }
 
-        $knight = DB::select('SELECT * FROM knight WHERE rname = ?', [$rname])[0] ?? null;
+        $knight = Knight::firstWhere('rname', $rname);
 
         if (!$knight) {
             abort(404, 'Knight does not exist!');
         }
 
-        DB::table('knight')
-                ->where('rname', $rname)
-                ->update(['delflg' => 1]);
+        $knight->delflg = true;
+        $knight->save();
 
         $request->session()->flash('success', 'Deleted user ' . $rname . '.');
 

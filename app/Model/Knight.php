@@ -23,7 +23,7 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
     use HasActiveTrait;
 
     protected $table = 'knight';
-    protected string|null $permName = 'user';
+    protected static string|null $permName = 'user';
 
     /**
      * The attributes that are mass assignable.
@@ -31,7 +31,8 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
      * @var array
      */
     protected $fillable = [
-        'rname', 'dname', 'bio', 'firstevent', 'frenemy', 'rlimpact', 'delflg',
+        'knum', 'rname', 'dname', 'email', 'bio', 'firstevent', 'rlimpact', 'batt', 'rnk', 'security', 'crtsetid',
+        'lstmdby', 'frenemy'
     ];
 
     /**
