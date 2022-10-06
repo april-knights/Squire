@@ -138,17 +138,17 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
         return $this->belongsTo(Battalion::class, 'batt', 'pkey');
     }
 
-    public function divisions(): BelongsToMany {
-        return $this->belongsToMany(Division::class, 'divknight', 'fkeyknight', 'fkeydivision')
-            ->withPivot('delflg')->using(DivKnight::class)->deleted(false);
+    public function divisions(?bool $deleted = false): BelongsToMany {
+        return $this->checkDeletedPivot($this->belongsToMany(Division::class, 'divknight', 'fkeyknight', 'fkeydivision')
+            ->withPivot('delflg')->using(DivKnight::class), $deleted);
     }
 
     public function firstEvent(): BelongsTo {
         return $this->belongsTo(Event::class, 'firstevent', 'pkey');
     }
 
-    public function skills(): BelongsToMany {
-        return $this->belongsToMany(Skill::class, 'userskill', 'fkeyuser', 'fkeyskill')
-            ->withPivot('delflg')->deleted(false)->using(UserSkill::class);
+    public function skills(?bool $deleted = false): BelongsToMany {
+        return $this->checkDeletedPivot($this->belongsToMany(Skill::class, 'userskill', 'fkeyuser', 'fkeyskill')
+            ->withPivot('delflg')->using(UserSkill::class), $deleted);
     }
 }

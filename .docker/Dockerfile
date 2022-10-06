@@ -11,5 +11,7 @@ RUN curl https://getcomposer.org/download/2.3.6/composer.phar --output /usr/bin/
 COPY app.sh /app.sh
 RUN chmod +x /app.sh
 
+COPY php.ini /usr/local/etc/php/conf.d/zzz-squire.ini
+
 ENTRYPOINT [ "/app.sh" ]
 CMD [ "php", "artisan", "serve", "--host", "0.0.0.0" ]

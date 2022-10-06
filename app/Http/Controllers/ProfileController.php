@@ -10,6 +10,7 @@ use App\Model\Rank;
 use App\Model\Security;
 use App\Model\Skill;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
 use DB;
@@ -315,11 +316,12 @@ class ProfileController extends Controller
 
             // Update skills
             if(array_key_exists('skills', $validated)) {
+                /** @var Collection $old_skills */
                 $old_skills = $knight->skills->map->pkey;
 
                 // Get deleted and added skills by array intersection
-                $deleted = array_diff($old_skills, $validated['skills']);
-                $added = array_diff($validated['skills'], $old_skills);
+                $deleted = $old_skills->diff($validated['skills']);
+                $added = Collection::wrap($validated['skills'])->diff($old_skills);
 
                 // Set delflag for deleted skills
                 foreach ($deleted as $skill) {
@@ -331,7 +333,7 @@ class ProfileController extends Controller
 
                 // Add skills, reactivate deleted ones if they exist
                 foreach ($added as $skill) {
-                    $prev_deleted = $knight->skills()->wherePivot('delflg', true)->find($skill);
+                    $prev_deleted = $knight->skills(true)->find($skill);
 
                     if ($prev_deleted) {
                         $prev_deleted->pivot->delflg = false;
@@ -348,8 +350,8 @@ class ProfileController extends Controller
                 $old_divs = $knight->divisions->map->pkey;
 
                 // Get deleted and added divisions by array intersection
-                $deleted = array_diff($old_divs, $validated['divs']);
-                $added = array_diff($validated['divs'], $old_divs);
+                $deleted = $old_divs->diff($validated['divs']);
+                $added = Collection::wrap($validated['divs'])->diff($old_divs);
 
 
                 // Set delflag for deleted divisions
@@ -360,9 +362,9 @@ class ProfileController extends Controller
                     $divModel->pivot->save();
                 }
 
-                // Add skills, reactivate deleted ones if they exist
+                // Add divisions, reactivate deleted ones if they exist
                 foreach ($added as $div) {
-                    $prev_deleted = $knight->divisions()->wherePivot('delflg', true)->find($div);
+                    $prev_deleted = $knight->divisions(true)->find($div);
 
                     if ($prev_deleted) {
                         $prev_deleted->pivot->delflg = false;

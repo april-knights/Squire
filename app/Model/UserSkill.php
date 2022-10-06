@@ -9,4 +9,6 @@ class UserSkill extends Pivot {
     use HasDeletedTrait;
 
     protected $primaryKey = 'pkey';
+    const UPDATED_AT = 'lstmdts';
+    const CREATED_AT = 'crtsetdt';
 }

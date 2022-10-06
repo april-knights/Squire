@@ -17,8 +17,8 @@ class Skill extends SquireModel {
         'skilldescr'
     ];
 
-    public function users(): BelongsToMany {
-        return $this->belongsToMany(Knight::class, 'userskill', 'fkeyskill', 'fkeyuser')
-            ->withPivot('delflg')->deleted(false)->using(UserSkill::class);
+    public function users(?bool $deleted = false): BelongsToMany {
+        return $this->checkDeletedPivot($this->belongsToMany(Knight::class, 'userskill', 'fkeyskill', 'fkeyuser')
+            ->withPivot('delflg')->using(UserSkill::class), $deleted);
     }
 }

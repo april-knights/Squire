@@ -3,10 +3,13 @@
 namespace App\Support;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 abstract class SquireModel extends Model {
     protected $primaryKey = 'pkey';
     protected static string|null $permName = null;
+    const UPDATED_AT = 'lstmdts';
+    const CREATED_AT = 'crtsetdt';
 
     /**
      * Raw permission value. Use with ModelClass::getPermission().
@@ -24,5 +27,16 @@ abstract class SquireModel extends Model {
         } else {
             return null;
         }
+    }
+
+    /**
+     * To be used in relations with pivot tables.
+     * @param BelongsToMany $relation The relation to filter
+     * @param bool|null $deleted Filter to deleted or existing relations
+     * @return BelongsToMany The relation
+     */
+    protected function checkDeletedPivot(BelongsToMany $relation, ?bool $deleted) {
+        if ($deleted === null) return $relation;
+        else return $relation->wherePivot('delflg', $deleted);
     }
 }

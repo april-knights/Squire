@@ -23,14 +23,14 @@ class Division extends SquireModel {
         return $this->hasOne(Knight::class, 'pkey', 'divlead');
     }
 
-    public function members(): BelongsToMany {
-        return $this->belongsToMany(Knight::class, 'divknight', 'fkeydivision', 'fkeyknight')
-            ->withPivot('delflg')->using(DivKnight::class)->deleted(false);
+    public function members(?bool $deleted = false): BelongsToMany {
+        return $this->checkDeletedPivot($this->belongsToMany(Knight::class, 'divknight', 'fkeydivision', 'fkeyknight')
+            ->withPivot('delflg')->using(DivKnight::class), $deleted);
     }
 
-    public function officers(): BelongsToMany { // TODO: The same rank is being used for battalions and divisions
-        return $this->members()->whereHas('rank', function (Builder $query) {
+    public function officers(?bool $deleted = false): BelongsToMany { // TODO: The same rank is being used for battalions and divisions
+        return $this->checkDeletedPivot($this->members()->whereHas('rank', function (Builder $query) {
             $query->where('rval', '<=', Rank::HIGHEST_OFFICER_RANK);
-        });
+        }), $deleted);
     }
 }
