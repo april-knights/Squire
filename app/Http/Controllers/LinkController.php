@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\Link;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 use Auth;
 
@@ -12,26 +12,14 @@ class LinkController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function index()
     {
-        $subreddit_links = DB::select('SELECT * FROM link
-                                       WHERE typcd = "subreddit" AND delflg = 0');
-
-        $event_links = DB::select('SELECT * FROM link
-                                   WHERE typcd = "event" AND delflg = 0');
-
-        $discord_links = DB::select('SELECT * FROM link
-                                     WHERE typcd = "discord" AND delflg = 0');
-
-        $document_links = DB::select('SELECT * FROM link
-                                      WHERE typcd = "document" AND delflg = 0');
-
-        return view('link.index', ['subreddit_links' => $subreddit_links,
-                                   'event_links' => $event_links,
-                                   'discord_links' => $discord_links,
-                                   'document_links' => $document_links,
+        return view('link.index', ['subreddit_links' => Link::where('typcd', Link::TYPE_SUBREDDIT)->get(),
+                                   'event_links' => Link::where('typcd', Link::TYPE_EVENT)->get(),
+                                   'discord_links' => Link::where('typcd', Link::TYPE_DISCORD)->get(),
+                                   'document_links' => Link::where('typcd', Link::TYPE_DOCUMENT)->get(),
                                   ]);
     }
 

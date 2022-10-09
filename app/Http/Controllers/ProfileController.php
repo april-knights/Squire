@@ -333,7 +333,7 @@ class ProfileController extends Controller
 
                 // Add skills, reactivate deleted ones if they exist
                 foreach ($added as $skill) {
-                    $prev_deleted = $knight->skills(true)->find($skill);
+                    $prev_deleted = $knight->skills(deleted: true)->find($skill);
 
                     if ($prev_deleted) {
                         $prev_deleted->pivot->delflg = false;
@@ -364,7 +364,7 @@ class ProfileController extends Controller
 
                 // Add divisions, reactivate deleted ones if they exist
                 foreach ($added as $div) {
-                    $prev_deleted = $knight->divisions(true)->find($div);
+                    $prev_deleted = $knight->divisions(deleted: true)->find($div);
 
                     if ($prev_deleted) {
                         $prev_deleted->pivot->delflg = false;

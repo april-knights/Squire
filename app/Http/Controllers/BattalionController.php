@@ -59,7 +59,7 @@ class BattalionController extends Controller
         return view('battalion.show', ['batt' => $batt,
                                        'battlead' => $batt->leader,
                                        'members' => $batt->members()->limit(10)->get(),
-                                       'officers' => $batt->officers()->get()->sortBy(fn(Knight $o) => $o->rank->rval),
+                                       'officers' => $batt->officers->sortBy(fn(Knight $o) => $o->rank->rval),
                                       ]);
     }
 
