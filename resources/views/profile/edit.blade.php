@@ -1,5 +1,6 @@
 @extends('layouts.app')
 
+<?php /** @var \App\Model\Knight $knight */ ?>
 @section('title', 'Edit ' . $knight->rname)
 
 @section('content')
@@ -21,7 +22,7 @@
             <div class="form-group">
                 <label for="rname">Reddit Name</label>
                 <input class="form-control" id="rname" name="rname" type="text"
-                    value="{{ $knight->rname }}"></input>
+                    value="{{ $knight->rname }}">
                 <small id="rnameHelpBlock" class="form-text text-muted">
                     Without the /u/
                 </small>
@@ -57,6 +58,7 @@
                     <div class="form-group">
                         <label>Battalion</label>
                         <select class="form-control" name="batt">
+                            @php /** @var \App\Model\Battalion $batt */ @endphp
                             @foreach ($all_batts as $batt)
                             <option value="{{ $batt->pkey }}" label="{{ $batt->name }}"
                                 @if ($batt->pkey == $knight->batt) selected @endif>
@@ -72,6 +74,7 @@
                     <div class="form-group">
                         <label>Rank</label>
                         <select class="form-control" name="rank">
+                            @php /** @var \App\Model\Rank $rank */ @endphp
                             @foreach ($all_ranks as $rank)
                             <option value="{{ $rank->pkey }}" label="{{ $rank->name }}"
                                 @if ($rank->pkey == $knight->rnk) selected @endif>
@@ -87,6 +90,7 @@
                     <div class="form-group">
                         <label>Security</label>
                         <select class="form-control" name="security">
+                            @php /** @var \App\Model\Security $sec */ @endphp
                             @foreach ($all_secs as $sec)
                             <option value="{{ $sec->pkey }}" label="{{ $sec->secname }}"
                                 @if ($sec->pkey == $knight->security) selected @endif>
@@ -104,10 +108,12 @@
                     <div class="form-group">
                         <label>Divisions</label>
                         <fieldset name="divs">
+                            @php /** @var \App\Model\Division $div */ @endphp
+                            @php /** @var \Illuminate\Support\Collection $cur_divs */ @endphp
                             @foreach ($all_divs as $div)
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="divs[]" id="div_{{ $div->pkey }}"
-                                    value="{{ $div->pkey }}" @if (in_array($div, $cur_divs)) checked @endif>
+                                    value="{{ $div->pkey }}" @if ($cur_divs->contains($div)) checked @endif>
                                 <label class="form-check-label" for="div_{{ $div->pkey }}" title="{{ $div->divdescr }}">
                                     {{ $div->name }}
                                 </label>
@@ -156,6 +162,8 @@
                     @php
                         $in_group = false;
                     @endphp
+                    @php /** @var \App\Model\Skill $skill */ @endphp
+                    @php /** @var \Illuminate\Support\Collection $cur_skills */ @endphp
                     @foreach ($all_skills as $skill)
                     @if (!$skill->parentid)
                         @if ($in_group)
@@ -166,7 +174,7 @@
                             $in_group = true;
                         @endphp
                     @else
-                    <option value="{{ $skill->pkey }}" @if (in_array($skill, $cur_skills)) selected @endif>
+                    <option value="{{ $skill->pkey }}" @if ($cur_skills->contains($skill)) selected @endif>
                         {{ $skill->skillname }}
                     </option>
                     @endif

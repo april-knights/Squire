@@ -1,4 +1,5 @@
 <ul class="links list-unstyled ml-3">
+@php /** @var \App\Model\Link $link */ @endphp
 @foreach ($links as $link)
     <li class="media">
         @if ($link->imgurl)

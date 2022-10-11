@@ -3,6 +3,7 @@
 @section('title', $div->name)
 
 @section('content')
+<?php /** @var \App\Model\Division $div */ ?>
 <div class="row">
     <div class="col">
         <h2>Division Name</h2>
@@ -10,9 +11,9 @@
     </div>
     <div class="col">
         <h2>Division Leader</h2>
-        @if ($divlead)
-        <a href="/profile/{{ $divlead->rname }}">
-            {{ $divlead->rname }}
+        @if ($div->leader)
+        <a href="/profile/{{ $div->leader->rname }}">
+            {{ $div->leader->rname }}
         </a>
         @else
         <p>No one</p>
@@ -24,7 +25,7 @@
     </div>
 </div>
 
-@component('component.membertable', ['members' => $members])
+@component('component.membertable', ['members' => $div->members])
 @endcomponent
 
 @endsection

@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Socialite;
-use DB;
+use App\Model\Knight;
 use Auth;
-
-use App\Knight;
+use Socialite;
 
 class LoginController extends Controller
 {
@@ -23,14 +21,14 @@ class LoginController extends Controller
     /**
      * Obtain the user information from Reddit.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function handleProviderCallback()
     {
         $reddit_user = Socialite::driver('reddit')->user();
 
         // Check if user exists and has not been deleted
-        $knight = Knight::where('rname', $reddit_user->getNickname())->where('delflg', 0)->first();
+        $knight = Knight::where('rname', $reddit_user->getNickname())->first();
 
         if(!$knight) {
             return redirect()->to('/login')->with('error', 'User not registered.');

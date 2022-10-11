@@ -7,6 +7,9 @@ services:
     volumes:
       - ..:/var/www/html
     container_name: squire-app
+    # Linux only
+#    extra_hosts:
+#      - host.docker.internal:host-gateway
   web:
     image: node:10
     user: node

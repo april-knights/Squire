@@ -67,8 +67,8 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
-            'model' => App\Knight::class,
+            'driver' => 'knight',
+            'model' => \App\Model\Knight::class,
         ],
 
         //'users' => [
