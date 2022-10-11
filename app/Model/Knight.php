@@ -5,20 +5,17 @@ namespace App\Model;
 use App\Support\HasActiveTrait;
 use App\Support\SquireModel;
 use Illuminate\Auth\Authenticatable;
-use Illuminate\Auth\MustVerifyEmail;
-use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 
-class Knight extends SquireModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
+class Knight extends SquireModel implements AuthenticatableContract, AuthorizableContract
 {
-    use Authenticatable, Authorizable, CanResetPassword, MustVerifyEmail;
+    use Authenticatable, Authorizable;
     use Notifiable;
     use HasActiveTrait;
 
