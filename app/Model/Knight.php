@@ -7,6 +7,7 @@ use App\Support\SquireModel;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -18,6 +19,7 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
     use Authenticatable, Authorizable;
     use Notifiable;
     use HasActiveTrait;
+    use HasFactory;
 
     protected $table = 'knight';
     protected static string|null $permName = 'user';

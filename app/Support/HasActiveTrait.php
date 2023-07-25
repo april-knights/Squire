@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Auth;
 trait HasActiveTrait {
     use HasDeletedTrait;
 
+    public function __construct()
+    {
+        $this->attributes['activeflg'] = 1;
+    }
+
     public static function bootHasActiveTrait() {
         static::addGlobalScope(new ActiveScope());
     }
