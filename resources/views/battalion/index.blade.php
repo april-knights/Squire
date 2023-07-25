@@ -3,15 +3,15 @@
 @section('title', 'Battalions')
 
 @section('content')
-<?php /** @var iterable<\App\Model\Battalion> $batts */ ?>
-<table class="table table-hover table-borderless">
-    <thead>
+    <?php /** @var iterable<\App\Models\Battalion> $batts */ ?>
+    <table class="table table-hover table-borderless">
+        <thead>
         <tr>
             <th scope="col">Battalion Name</th>
             <th scope="col">Battalion Leader</th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         @forelse ($batts as $batt)
             <tr>
                 <td><a href="/battalion/{{ $batt->battalias }}">{{ $batt->name }}</a></td>
@@ -23,6 +23,6 @@
                 <td>No one</td>
             </tr>
         @endforelse
-    </tbody>
-</table>
+        </tbody>
+    </table>
 @endsection

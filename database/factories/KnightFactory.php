@@ -1,12 +1,13 @@
 <?php
 
-namespace Database\Factories\Model;
+namespace Database\Factories;
 
-use App\Model\Battalion;
-use App\Model\Knight;
-use App\Model\Rank;
-use App\Model\Security;
-use Event;
+use App\Models\Battalion;
+use App\Models\Event;
+use App\Models\Knight;
+use App\Models\Rank;
+use App\Models\Security;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -38,11 +39,15 @@ class KnightFactory extends Factory
 
     private function initRelations(int $security = null): static
     {
-        $fact = $this->hasFirstEvent(Event::inRandomOrder()->first());
+        echo "Relations";
+        $fact = $this->hasFirstAttendedEvent(Event::inRandomOrder()->limit(1));
+        echo "Fact";
         $security ??= Security::inRandomOrder()->first()->id;
+        echo "Security";
         $fact
             ->hasRank(Rank::security(Security::find($security))->inRandomOrder()->first())
             ->hasSecurity($security);
+        echo "HasEverything";
         return $fact;
     }
 
@@ -52,6 +57,7 @@ class KnightFactory extends Factory
      */
     public function grandmaster(): static
     {
+        echo "hmm";
         return $this->initRelations(Security::GRANDMASTER_SECURITY_ID);
     }
 

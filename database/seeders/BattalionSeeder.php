@@ -2,14 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Model\Battalion;
-use App\Model\Knight;
+use App\Models\Battalion;
+use App\Models\Knight;
 use Illuminate\Database\Seeder;
 
 class BattalionSeeder extends Seeder
 {
-    const PER_RANK_COUNT = 10;
-
     /**
      * Run the database seeds.
      */

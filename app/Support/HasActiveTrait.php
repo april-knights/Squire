@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use App\Model\Knight;
+use App\Models\Knight;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;

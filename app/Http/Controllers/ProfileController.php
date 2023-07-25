@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Model\Battalion;
-use App\Model\Division;
-use App\Model\Event;
-use App\Model\Knight;
-use App\Model\Rank;
-use App\Model\Security;
-use App\Model\Skill;
+use App\Models\Battalion;
+use App\Models\Division;
+use App\Models\Event;
+use App\Models\Knight;
+use App\Models\Rank;
+use App\Models\Security;
+use App\Models\Skill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;

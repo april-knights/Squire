@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Model\Knight;
+use App\Models\Knight;
 use Illuminate\Database\Seeder;
 
 class KnightSeeder extends Seeder
@@ -12,9 +12,14 @@ class KnightSeeder extends Seeder
      */
     public function run(): void
     {
+        echo "asd";
         Knight::factory()->grandmaster()->create();
+        echo "asd";
         Knight::factory(10)->commander()->create();
+        echo "asd";
         Knight::factory(10)->councilor()->create();
+        echo "asd";
         Knight::factory(50)->knight()->create();
+        echo "asd";
     }
 }

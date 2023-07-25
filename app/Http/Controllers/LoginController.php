@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Model\Knight;
+use App\Models\Knight;
 use Auth;
 use Socialite;
 

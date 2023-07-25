@@ -3,7 +3,7 @@
 @section('title', 'Divisions')
 
 @section('content')
-    <?php /** @var iterable<\App\Model\Division> $divs */ ?>
+    <?php /** @var iterable<\App\Models\Division> $divs */ ?>
     <table class="table table-hover table-borderless">
         <thead>
         <tr>

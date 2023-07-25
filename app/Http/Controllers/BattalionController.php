@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Model\Battalion;
-use App\Model\Knight;
+use App\Models\Battalion;
+use App\Models\Knight;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 

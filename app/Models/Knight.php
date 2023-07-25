@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Model;
+namespace App\Models;
 
 use App\Support\HasActiveTrait;
 use App\Support\SquireModel;
@@ -142,8 +142,9 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
             ->withPivot('delflg')->using(DivKnight::class), $deleted);
     }
 
-    public function firstEvent(): BelongsTo {
-        return $this->belongsTo(Event::class, 'firstevent', 'pkey');
+    public function firstAttendedEvent(): HasOne {
+        xdebug_break();
+        return $this->hasOne(Event::class, 'pkey', 'firstevent');
     }
 
     public function skills(?bool $deleted = false): BelongsToMany {

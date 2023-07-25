@@ -1,8 +1,8 @@
 <?php
 
-namespace Database\Factories\Model;
+namespace Database\Factories;
 
-use App\Model\Battalion;
+use App\Models\Battalion;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
