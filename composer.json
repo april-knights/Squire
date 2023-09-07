@@ -13,7 +13,8 @@
         "laravel/socialite": "^5.1",
         "laravel/tinker": "^2.0",
         "mews/purifier": "^3.2",
-        "socialiteproviders/reddit": "^4.1"
+        "socialiteproviders/reddit": "^4.1",
+        "ext-xdebug": "*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.6",

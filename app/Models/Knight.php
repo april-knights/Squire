@@ -143,7 +143,6 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
     }
 
     public function firstAttendedEvent(): HasOne {
-        xdebug_break();
         return $this->hasOne(Event::class, 'pkey', 'firstevent');
     }
 

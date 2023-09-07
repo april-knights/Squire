@@ -33,22 +33,22 @@ class KnightFactory extends Factory
             'bio' => $this->faker->text(100),
             'rlimpact' => $this->faker->text(50),
             'frenemy' => $this->faker->boolean,
-            'inttrans' => $this->faker->text // Interview transcript
+            'inttrans' => $this->faker->text, // Interview transcript
+            'crtsetid' => 1, // The grandmaster is created first, make it so everyone is created by them
+            'lstmdby' => 1 // Same for modifying
         ];
     }
 
-    private function initRelations(int $security = null): static
+    private function initRelations(int $securityId = null): static
     {
-        echo "Relations";
-        $fact = $this->hasFirstAttendedEvent(Event::inRandomOrder()->limit(1));
-        echo "Fact";
-        $security ??= Security::inRandomOrder()->first()->id;
-        echo "Security";
-        $fact
-            ->hasRank(Rank::security(Security::find($security))->inRandomOrder()->first())
-            ->hasSecurity($security);
-        echo "HasEverything";
-        return $fact;
+        $securityId ??= Security::inRandomOrder()->first()->pkey;
+        return $this->state(function (array $data) use ($securityId) {
+            return [
+                'firstevent' => Event::inRandomOrder()->first()->pkey,
+                'security' => $securityId,
+                'rnk' => Rank::security(Security::find($securityId))->inRandomOrder()->first()->id
+            ];
+        });
     }
 
     /**
@@ -57,7 +57,6 @@ class KnightFactory extends Factory
      */
     public function grandmaster(): static
     {
-        echo "hmm";
         return $this->initRelations(Security::GRANDMASTER_SECURITY_ID);
     }
 

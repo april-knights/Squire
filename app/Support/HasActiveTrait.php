@@ -11,8 +11,9 @@ use Illuminate\Support\Facades\Auth;
 trait HasActiveTrait {
     use HasDeletedTrait;
 
-    public function __construct()
+    public function __construct($attributes = [])
     {
+        $this->attributes = $attributes;
         $this->attributes['activeflg'] = 1;
     }
 

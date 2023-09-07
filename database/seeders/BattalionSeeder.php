@@ -21,8 +21,10 @@ class BattalionSeeder extends Seeder
                 Knight::whereDoesntHave('battalion')->whereHas('rank', fn($query) => $query->commander()),
                 $knightStateFunc
             )->create();
-            Knight::whereDoesntHave('battalion')->inRandomOrder()->limit(10)
-                ->battalion()->associate($battalion)->save();
+            Knight::whereDoesntHave('battalion')->inRandomOrder()->limit(10)->get()
+                ->each(function (Knight $knight) use ($battalion) {
+                    $knight->battalion()->associate($battalion)->save();
+                });
         }
     }
 }

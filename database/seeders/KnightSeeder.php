@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Knight;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class KnightSeeder extends Seeder
 {
@@ -12,14 +13,14 @@ class KnightSeeder extends Seeder
      */
     public function run(): void
     {
-        echo "asd";
+        // Needed because the grandmaster is created by themselves
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        // If the seeder fails, nothing gets written to the DB, yet the auto increment value is changed
+        DB::statement('ALTER TABLE knight AUTO_INCREMENT = 1');
         Knight::factory()->grandmaster()->create();
-        echo "asd";
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
         Knight::factory(10)->commander()->create();
-        echo "asd";
         Knight::factory(10)->councilor()->create();
-        echo "asd";
         Knight::factory(50)->knight()->create();
-        echo "asd";
     }
 }
