@@ -8,6 +8,8 @@ RUN docker-php-ext-install pdo_mysql
 RUN curl https://getcomposer.org/download/2.3.6/composer.phar --output /usr/bin/composer \
  && chmod +x /usr/bin/composer
 
+RUN apt-get -y install default-mysql-client
+
 COPY app.sh /app.sh
 RUN chmod +x /app.sh
 

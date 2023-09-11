@@ -646,6 +646,17 @@ ALTER TABLE `userskill`
   ADD CONSTRAINT `userskill_ibfk_2` FOREIGN KEY (`crtsetid`) REFERENCES `knight` (`pkey`),
   ADD CONSTRAINT `userskill_ibfk_3` FOREIGN KEY (`lstmdby`) REFERENCES `knight` (`pkey`);
 
+-- Create Laravel migrations table as having this file as a Laravel schema requires this table to be here too
+DROP TABLE IF EXISTS `migrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `migrations` (
+                              `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+                              `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                              `batch` int(11) NOT NULL,
+                              PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS=1;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

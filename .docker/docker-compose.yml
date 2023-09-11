@@ -32,8 +32,6 @@ services:
       - MYSQL_DATABASE=squire
       - MYSQL_USER=squire
       - MYSQL_PASSWORD=DevelopmentPassword
-    volumes:
-      - ./DBInitialize.sql:/docker-entrypoint-initdb.d/init.sql
 
 networks:
   default:
