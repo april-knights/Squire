@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Battalion;
 use App\Models\Knight;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Seeder;
 
 class BattalionSeeder extends Seeder
@@ -14,9 +15,19 @@ class BattalionSeeder extends Seeder
     public function run(): void
     {
         $knightStateFunc = function (array $attrs, Battalion $battalion) {
-            return ['batt' => $battalion->id];
+            return ['batt' => $battalion->pkey];
         };
         foreach (range(1, 5) as $ignored) {
+            Battalion::factory()->state(function ($data) {
+                $knight = Knight::whereDoesntHave('battalion')
+                    ->whereHas('rank', fn($query) => $query->commander())->first();
+                echo "Batt data";
+                var_dump($data);
+                echo "Batt data over";
+                return [
+                    'battlead' => $knight->id
+                ];
+            });
             $battalion = Battalion::factory()->hasLeader(
                 Knight::whereDoesntHave('battalion')->whereHas('rank', fn($query) => $query->commander()),
                 $knightStateFunc
@@ -26,5 +37,11 @@ class BattalionSeeder extends Seeder
                     $knight->battalion()->associate($battalion)->save();
                 });
         }
+        Battalion::factory()->state(function ($data) {
+            return [
+                'pkey' => 99,
+                'name' => 'Unaffiliated'
+            ];
+        });
     }
 }

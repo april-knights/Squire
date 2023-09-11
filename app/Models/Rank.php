@@ -37,7 +37,7 @@ class Rank extends SquireModel
     public function scopeSecurity(Builder $query, Security $security): Builder
     {
         if ($security->isOfficer()) return $this->scopeOfficer($query);
-        return match ($security->id) {
+        return match ($security->pkey) {
             Security::COMMANDER_SECURITY_ID => $this->scopeCommander($query),
             Security::COUNCILOR_SECURINTY_ID => $this->scopeCouncilor($query),
             Security::GRANDMASTER_SECURITY_ID => $query->where('id', self::GRANDMASTER_RANK_ID),

@@ -41,12 +41,12 @@ class KnightFactory extends Factory
 
     private function initRelations(int $securityId = null): static
     {
-        $securityId ??= Security::inRandomOrder()->first()->pkey;
+        $securityId ??= Security::whereNot('pkey', Security::GRANDMASTER_SECURITY_ID)->inRandomOrder()->first()->pkey;
         return $this->state(function (array $data) use ($securityId) {
             return [
                 'firstevent' => Event::inRandomOrder()->first()->pkey,
                 'security' => $securityId,
-                'rnk' => Rank::security(Security::find($securityId))->inRandomOrder()->first()->id
+                'rnk' => Rank::security(Security::find($securityId))->inRandomOrder()->first()->pkey
             ];
         });
     }

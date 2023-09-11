@@ -23,6 +23,6 @@ class Security extends SquireModel {
     public const COMMANDER_SECURITY_ID = 4;
     public function isOfficer() // TODO: Does this make sense with security levels?
     {
-        return $this->id < 8; // ID less than knight security level
+        return $this->pkey < 8; // ID less than knight security level
     }
 }
