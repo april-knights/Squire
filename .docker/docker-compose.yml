@@ -3,10 +3,9 @@ services:
     build:
       dockerfile: Dockerfile
       target: development
-    image: squire-web
+    image: local/squire/app
     volumes:
       - ..:/var/www/html
-    container_name: squire-app
     # Linux only
 #    extra_hosts:
 #      - host.docker.internal:host-gateway
@@ -24,7 +23,6 @@ services:
     environment:
       - APP_HOST=app:8000
       - WEB_PORT=80
-    container_name: squire-web
   database:
     image: mysql:5.7
     ports:
@@ -34,7 +32,6 @@ services:
       - MYSQL_DATABASE=squire
       - MYSQL_USER=squire
       - MYSQL_PASSWORD=DevelopmentPassword
-    container_name: squire-database
     volumes:
       - ./DBInitialize.sql:/docker-entrypoint-initdb.d/init.sql
 
@@ -42,3 +39,5 @@ networks:
   default:
     name: squire
     driver: bridge
+
+name: squire
