@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Model;
+namespace App\Models;
 
 use App\Support\HasDeletedTrait;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class DivKnight extends Pivot {
+class UserSkill extends Pivot {
     use HasDeletedTrait;
 
     protected $primaryKey = 'pkey';

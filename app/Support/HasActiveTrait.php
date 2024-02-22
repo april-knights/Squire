@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use App\Model\Knight;
+use App\Models\Knight;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -10,6 +10,12 @@ use Illuminate\Support\Facades\Auth;
 
 trait HasActiveTrait {
     use HasDeletedTrait;
+
+    public function __construct($attributes = [])
+    {
+        $this->attributes = $attributes;
+        $this->attributes['activeflg'] = 1;
+    }
 
     public static function bootHasActiveTrait() {
         static::addGlobalScope(new ActiveScope());

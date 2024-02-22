@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Model;
+namespace App\Models;
 use App\Support\HasActiveTrait;
 use App\Support\SquireModel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Battalion extends SquireModel {
     use HasActiveTrait;
+    use HasFactory;
 
     /**
      * Unaffiliated
@@ -17,15 +19,26 @@ class Battalion extends SquireModel {
 
     protected static string|null $permName = 'batt';
     protected $table = 'battalion';
+    const UPDATED_AT = 'lstmddt';
 
     protected $fillable = [
         'battalias',
         'name',
-        'rname'
+        'battdescr',
+        'color',
+        'motto'
     ];
 
     public function leader(): HasOne {
         return $this->hasOne(Knight::class, 'pkey', 'battlead');
+    }
+
+    public function sec1(): HasOne {
+        return $this->hasOne(Knight::class, 'pkey', 'battsec1');
+    }
+
+    public function sec2(): HasOne {
+        return $this->hasOne(Knight::class, 'pkey', 'battsec2');
     }
 
     public function officers(): HasMany {

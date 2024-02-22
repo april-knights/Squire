@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Model\Knight;
+use App\Models\Knight;
+use App\Models\Rank;
 use Auth;
 use Socialite;
 
@@ -11,10 +12,13 @@ class LoginController extends Controller
     /**
      * Redirect the user to the Reddit authentication page.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function redirectToProvider()
     {
+        if ($this->isTesting()) {
+            return redirect()->route('loginCallback');
+        }
         return Socialite::driver('reddit')->redirect();
     }
 
@@ -25,10 +29,15 @@ class LoginController extends Controller
      */
     public function handleProviderCallback()
     {
-        $reddit_user = Socialite::driver('reddit')->user();
+        // Grants access to the grandmaster account to everyone when locally testing. Be careful.
+        if ($this->isTesting()) {
+            $knight = Knight::whereRnk(Rank::GRANDMASTER_RANK_ID)->first();
+        } else {
+            $reddit_user = Socialite::driver('reddit')->user();
 
-        // Check if user exists and has not been deleted
-        $knight = Knight::where('rname', $reddit_user->getNickname())->first();
+            // Check if user exists and has not been deleted
+            $knight = Knight::where('rname', $reddit_user->getNickname())->first();
+        }
 
         if(!$knight) {
             return redirect()->to('/login')->with('error', 'User not registered.');
@@ -38,5 +47,12 @@ class LoginController extends Controller
         Auth::login($knight);
 
         return redirect()->to('/');
+    }
+
+    /**
+     * @return bool Whether the site is being tested locally.
+     */
+    private function isTesting() {
+        return config('app.env') === 'local' && config('services.reddit.client_secret') === 'CHANGEME';
     }
 }

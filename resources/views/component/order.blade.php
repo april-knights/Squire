@@ -1,4 +1,4 @@
-@php /** @var \App\Model\Order $order */ @endphp
+@php /** @var \App\Models\Order $order */ @endphp
 <div class="order">
     <h3 class="d-inline-block">{{ $order->title }}</h3>
     by

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Model;
+namespace App\Models;
 
 use App\Support\SquireModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

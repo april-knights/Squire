@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Model\Order;
-use App\Model\Rank;
+use App\Models\Order;
+use App\Models\Rank;
 use Illuminate\Http\Request;
 
 use Auth;

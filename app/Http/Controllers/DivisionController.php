@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Model\Division;
+use App\Models\Division;
 use Illuminate\Http\Request;
 
 class DivisionController extends Controller

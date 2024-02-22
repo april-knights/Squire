@@ -21,7 +21,7 @@ Route::get('/logout', function () {
 
 # Signin
 Route::get('/login/reddit', 'LoginController@redirectToProvider');
-Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback');
+Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback')->name('loginCallback');
 
 
 ## Internal routes
