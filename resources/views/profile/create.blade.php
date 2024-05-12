@@ -44,7 +44,7 @@
         <div class="col-sm">
             <div class="form-group">
                 <label for="dname">Discord Name</label>
-                <input class="form-control" id="dname" name="dname" type="text" pattern=".*#\d{4}"></input>
+                <input class="form-control" id="dname" name="dname" type="text"></input>
                 <small id="dnameHelpBlock" class="form-text text-muted">
                     Format: Username#1234
                 </small>
