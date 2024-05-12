@@ -175,7 +175,6 @@ class ProfileController extends Controller
             'dname' => [
                 'nullable',
                 'max:40',
-                'regex:/^.*#\d{4}/',
                 $unique,
             ],
             'email' => [
