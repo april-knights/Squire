@@ -32,10 +32,10 @@
         <div class="col-md">
             <div class="form-group">
                 <label for="dname">Discord Name</label>
-                <input class="form-control" id="dname" name="dname" type="text" pattern=".*#\d{4}"
+                <input class="form-control" id="dname" name="dname" type="text" 
                      value="{{ $knight->dname }}" @check_disabled('dname')></input>
                 <small id="dnameHelpBlock" class="form-text text-muted">
-                    Format: Username#1234
+                    Format: username
                 </small>
             </div>
         </div>
