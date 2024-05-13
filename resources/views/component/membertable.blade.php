@@ -23,7 +23,7 @@
                 <i class="explainer fas fa-question-circle" data-toggle="tooltip" data-placement="right" title="{{ $member->rank->rankdescr }}"></i>
             @endif
             </td>
-            <td>{{ $member->firstEvent->title }}</td>
+            <td>{{ $member->firstEvent?->title }}</td>
         </tr>
         @empty
         <tr>
