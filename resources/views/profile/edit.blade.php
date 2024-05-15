@@ -32,7 +32,7 @@
         <div class="col-md">
             <div class="form-group">
                 <label for="dname">Discord Name</label>
-                <input class="form-control" id="dname" name="dname" type="text" 
+                <input class="form-control" id="dname" name="dname" type="text"
                      value="{{ $knight->dname }}" @check_disabled('dname')></input>
                 <small id="dnameHelpBlock" class="form-text text-muted">
                     Format: username

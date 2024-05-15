@@ -10,7 +10,6 @@ use App\Model\Rank;
 use App\Model\Security;
 use App\Model\Skill;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
 use DB;
@@ -314,66 +313,10 @@ class ProfileController extends Controller
             $editor = Auth::id();
 
             // Update skills
-            if(array_key_exists('skills', $validated)) {
-                /** @var Collection $old_skills */
-                $old_skills = $knight->skills->map->pkey;
-
-                // Get deleted and added skills by array intersection
-                $deleted = $old_skills->diff($validated['skills']);
-                $added = Collection::wrap($validated['skills'])->diff($old_skills);
-
-                // Set delflag for deleted skills
-                foreach ($deleted as $skill) {
-                    $skillModel = $knight->skills()->find($skill);
-                    $skillModel->pivot->delflg = true;
-                    $skillModel->pivot->lstmdby = $editor; // TODO: Automatic last modified update (time and user ID)
-                    $skillModel->pivot->save();
-                }
-
-                // Add skills, reactivate deleted ones if they exist
-                foreach ($added as $skill) {
-                    $prev_deleted = $knight->skills(deleted: true)->find($skill);
-
-                    if ($prev_deleted) {
-                        $prev_deleted->pivot->delflg = false;
-                        $prev_deleted->pivot->lstmdby = $editor;
-                        $prev_deleted->pivot->save();
-                    } else {
-                        $knight->skills()->attach($skill, ['crtsetid' => $editor, 'lstmdby' => $editor]);
-                    }
-                }
-            }
+            $knight->syncRelation('skills', $validated['skills'] ?? []);
 
             // Update divisions
-            if(array_key_exists('divs', $validated)) {
-                $old_divs = $knight->divisions->map->pkey;
-
-                // Get deleted and added divisions by array intersection
-                $deleted = $old_divs->diff($validated['divs']);
-                $added = Collection::wrap($validated['divs'])->diff($old_divs);
-
-
-                // Set delflag for deleted divisions
-                foreach ($deleted as $div) {
-                    $divModel = $knight->divisions()->find($div);
-                    $divModel->pivot->delflg = true;
-                    $divModel->pivot->lstmdby = $editor;
-                    $divModel->pivot->save();
-                }
-
-                // Add divisions, reactivate deleted ones if they exist
-                foreach ($added as $div) {
-                    $prev_deleted = $knight->divisions(deleted: true)->find($div);
-
-                    if ($prev_deleted) {
-                        $prev_deleted->pivot->delflg = false;
-                        $prev_deleted->pivot->lstmdby = $editor;
-                        $prev_deleted->pivot->save();
-                    } else {
-                        $knight->divisions()->attach($div, ['crtsetid' => $editor, 'lstmdby' => $editor]);
-                    }
-                }
-            }
+            $knight->syncRelation('divisions', $validated['divs'] ?? []);
 
 
             // Update knight, using old values if not set.
