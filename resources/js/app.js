@@ -1,5 +1,5 @@
-require('./bootstrap');
-require('./bootstrap-confirmation');
+import './bootstrap';
+import './bootstrap-confirmation';
 
 $(function () {
     $('[data-toggle="tooltip"]').tooltip()

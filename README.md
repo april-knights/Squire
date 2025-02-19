@@ -29,7 +29,7 @@ php artisan ide-helper:models
 
 ### Compiling CSS/JS changes
 1. Install the required Javascript dependencies using `npm install`.
-2. Run `npm run dev` to recompile css and js files.
+2. Run `npm run build` to recompile css and js files.
 
 ### Automatically recompile CSS/JS and refresh browser
 1. Change the redirect_uri in `.env` and on reddit to `127.0.0.1:3000`.

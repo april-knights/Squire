@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link type="text/css" href="{{ asset('static/css/app.css') }}" rel="stylesheet">
+    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
 
 <body>
@@ -79,8 +79,6 @@
             @yield('content')
         </div>
     @endif
-
-    <script type="text/javascript" src="{{ asset('static/js/app.js') }}"></script>
 </body>
 
 </html>
