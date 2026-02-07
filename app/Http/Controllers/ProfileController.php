@@ -79,6 +79,10 @@ class ProfileController extends Controller
             'security' => 'nullable|integer|exists:security,pkey',
         ]);
 
+        // NEW: compute next available knum
+        $next_knum = Knight::max('knum');
+        $next_knum = $next_knum ? $next_knum + 1 : 1; 
+
         return view('profile.create', [
             'all_ranks' => Rank::get(),
             'all_skills' => Skill::get(),
@@ -89,6 +93,7 @@ class ProfileController extends Controller
             'def_batt' => $validated['batt'] ?? Battalion::DEFAULT_BATTALION,
             'def_rank' => $validated['rank'] ?? Rank::DEFAULT_PROFILE_RANK_ID,
             'def_sec' => $validated['security'] ?? Security::DEFAULT_PROFILE_SECURITY_ID,
+            'next_knum' => $next_knum, 
             ]);
     }
 
