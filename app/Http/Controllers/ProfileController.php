@@ -68,34 +68,44 @@ class ProfileController extends Controller
      * @param integer $def_sec  Default security
      * @return \Illuminate\View\View
      */
-    public function create(Request $request)
-    {
-        // $def_batt=99, $def_rank=13, $def_sec=9
-        abort_if(!Auth::user()->checkSecurity('cmuser'), 401, 'Not authorized to create knight.');
+public function create(Request $request)
+{
+    // $def_batt=99, $def_rank=13, $def_sec=9
+    abort_if(!Auth::user()->checkSecurity('cmuser'), 401, 'Not authorized to create knight.');
 
-        $validated = $request->validate([
-            'batt' => 'nullable|integer|exists:battalion,pkey',
-            'rank' => 'nullable|integer|exists:krank,pkey',
-            'security' => 'nullable|integer|exists:security,pkey',
-        ]);
+    $validated = $request->validate([
+        'batt' => 'nullable|integer|exists:battalion,pkey',
+        'rank' => 'nullable|integer|exists:krank,pkey',
+        'security' => 'nullable|integer|exists:security,pkey',
+    ]);
 
-        // NEW: compute next available knum
-        $next_knum = Knight::max('knum');
-        $next_knum = $next_knum ? $next_knum + 1 : 1; 
+    // Compute next available knum
+    // knum is CHAR(6), so we compute numeric max safely and then format back to 6 chars.
+    // Baseline: ensure we never allocate below 100257 (i.e., floor at 100256)
+    $baseline = 100256;
 
-        return view('profile.create', [
-            'all_ranks' => Rank::get(),
-            'all_skills' => Skill::get(),
-            'all_batts' => Battalion::get(),
-            'all_divs' => Division::get(),
-            'all_events' => Event::get(),
-            'all_secs' => Security::get(),
-            'def_batt' => $validated['batt'] ?? Battalion::DEFAULT_BATTALION,
-            'def_rank' => $validated['rank'] ?? Rank::DEFAULT_PROFILE_RANK_ID,
-            'def_sec' => $validated['security'] ?? Security::DEFAULT_PROFILE_SECURITY_ID,
-            'next_knum' => $next_knum, 
-            ]);
-    }
+    $maxKnum = (int) Knight::query()
+        ->whereRaw("knum REGEXP '^[0-9]{6}$'")
+        ->selectRaw('MAX(CAST(knum AS UNSIGNED)) AS max_knum')
+        ->value('max_knum');
+
+    $next_knum_int = max($maxKnum, $baseline) + 1;
+    $next_knum = str_pad((string) $next_knum_int, 6, '0', STR_PAD_LEFT);
+
+    return view('profile.create', [
+        'all_ranks' => Rank::get(),
+        'all_skills' => Skill::get(),
+        'all_batts' => Battalion::get(),
+        'all_divs' => Division::get(),
+        'all_events' => Event::get(),
+        'all_secs' => Security::get(),
+        'def_batt' => $validated['batt'] ?? Battalion::DEFAULT_BATTALION,
+        'def_rank' => $validated['rank'] ?? Rank::DEFAULT_PROFILE_RANK_ID,
+        'def_sec' => $validated['security'] ?? Security::DEFAULT_PROFILE_SECURITY_ID,
+        'next_knum' => $next_knum,
+    ]);
+}
+
 
     /**
      * Show the form for editing the specified resource.
