@@ -20,7 +20,7 @@
             <div class="form-group">
                 <label for="knum">Knight Number</label>
                 <input class="form-control" id="knum" name="knum" type="text" size="6"
-                    placeholder="100000" pattern="\d{6}" inputmode="numeric" required>
+                    value="{{ $next_knum }}" pattern="\d{6}" inputmode="numeric" readonly required>
                 </input>
             </div>
         </div>
