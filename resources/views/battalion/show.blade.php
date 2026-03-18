@@ -3,8 +3,17 @@
 @section('title', $batt->name)
 
 @section('content')
-@component('component.battoverview', ['batt' => $batt, 'battlead' => $battlead])
-@endcomponent
+<div class="row">
+    <div class="col-md-11">
+        @component('component.battoverview', ['batt' => $batt, 'battlead' => $battlead])
+        @endcomponent
+    </div>
+    @if($can_edit)
+    <div class="col-md-1">
+        <a href="/battalion/{{ $batt->battalias }}/edit"><i class="fas fa-edit"></i></a>
+    </div>
+    @endif
+</div>
 
 <div class="row">
     <div class="col-md-8">
@@ -41,13 +50,4 @@
             <li>No one</li>
         @endforelse
         </ul>
-        <a class="font-italic" href="/battalion/{{ $batt->battalias }}/members">See all…</a>
-    </div>
-</div>
-<div class="row">
-    <div class="col">
-        <h2>Battalion Description</h2>
-        <p>{{ $batt->battdescr }}</p>
-    </div>
-</div>
-@endsection
+        <a class="font-italic" href="/battalion/{{ $batt->battalias }}/members">Se
