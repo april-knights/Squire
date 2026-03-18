@@ -3,24 +3,23 @@
 @section('title', $batt->name)
 
 @section('content')
+@component('component.battoverview', ['batt' => $batt, 'battlead' => $battlead])
+@endcomponent
+
+@if($can_edit)
 <div class="row">
-    <div class="col-md-11">
-        @component('component.battoverview', ['batt' => $batt, 'battlead' => $battlead])
-        @endcomponent
+    <div class="col">
+        <a href="/battalion/{{ $batt->battalias }}/edit"><i class="fas fa-edit"></i> Edit Battalion</a>
     </div>
-    @if($can_edit)
-    <div class="col-md-1">
-        <a href="/battalion/{{ $batt->battalias }}/edit"><i class="fas fa-edit"></i></a>
-    </div>
-    @endif
 </div>
+@endif
 
 <div class="row">
     <div class="col-md-8">
         <div class="row">
             <div class="col-md-6">
                 <h2>Battalion Motto</h2>
-                <p>{{ $batt->motto }}
+                <p>{{ $batt->motto }}</p>
             </div>
             <div class="col-md-6">
                 <h2>Battalion Officers</h2>
@@ -50,4 +49,13 @@
             <li>No one</li>
         @endforelse
         </ul>
-        <a class="font-italic" href="/battalion/{{ $batt->battalias }}/members">Se
+        <a class="font-italic" href="/battalion/{{ $batt->battalias }}/members">See all…</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <h2>Battalion Description</h2>
+        <p>{{ $batt->battdescr }}</p>
+    </div>
+</div>
+@endsection
