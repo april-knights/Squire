@@ -42,6 +42,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/battalion', 'BattalionController@index');
     Route::get('/battalion/{alias}', 'BattalionController@show');
     Route::get('/battalion/{alias}/members', 'BattalionController@members');
+    Route::get('/battalion/{alias}/edit', 'BattalionController@edit');
+    Route::post('/battalion/{alias}/edit', 'BattalionController@update');
+    Route::delete('/battalion/{alias}', 'BattalionController@destroy');
 
     # Division
     Route::get('/division', 'DivisionController@index');
