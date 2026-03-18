@@ -6,12 +6,20 @@
 @component('component.battoverview', ['batt' => $batt, 'battlead' => $battlead])
 @endcomponent
 
+@if($can_edit)
+<div class="row">
+    <div class="col">
+        <a href="/battalion/{{ $batt->battalias }}/edit"><i class="fas fa-edit"></i> Edit Battalion</a>
+    </div>
+</div>
+@endif
+
 <div class="row">
     <div class="col-md-8">
         <div class="row">
             <div class="col-md-6">
                 <h2>Battalion Motto</h2>
-                <p>{{ $batt->motto }}
+                <p>{{ $batt->motto }}</p>
             </div>
             <div class="col-md-6">
                 <h2>Battalion Officers</h2>

@@ -15,17 +15,32 @@ class Battalion extends SquireModel {
      */
     const DEFAULT_BATTALION = 99;
 
+    const UPDATED_AT = 'lstmddt';
+
     protected static string|null $permName = 'batt';
     protected $table = 'battalion';
 
     protected $fillable = [
         'battalias',
         'name',
-        'rname'
+        'battlead',
+        'battsec1',
+        'battsec2',
+        'motto',
+        'battdescr',
+        'color',
     ];
 
     public function leader(): HasOne {
         return $this->hasOne(Knight::class, 'pkey', 'battlead');
+    }
+
+    public function sec1(): HasOne {
+        return $this->hasOne(Knight::class, 'pkey', 'battsec1');
+    }
+
+    public function sec2(): HasOne {
+        return $this->hasOne(Knight::class, 'pkey', 'battsec2');
     }
 
     public function officers(): HasMany {
