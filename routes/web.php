@@ -32,10 +32,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile/new', 'ProfileController@create');
     Route::get('/profile/{rname}', 'ProfileController@show')->name('profile');
     Route::get('/profile/{rname}/edit', 'ProfileController@edit');
-
     Route::post('/profile/new', 'ProfileController@store');
     Route::post('/profile/{rname}/edit', 'ProfileController@update');
-
     Route::delete('profile/{rname}', 'ProfileController@destroy');
 
     # Battalion
@@ -53,6 +51,11 @@ Route::middleware(['auth'])->group(function () {
 
     # Orders
     Route::get('/orders', 'OrdersController@index');
+    Route::get('/orders/create', 'OrdersController@create');       # NEW
+    Route::post('/orders', 'OrdersController@store');              # NEW
+    Route::get('/orders/{id}/edit', 'OrdersController@edit');      # NEW
+    Route::post('/orders/{id}/edit', 'OrdersController@update');   # NEW
+    Route::delete('/orders/{id}', 'OrdersController@destroy');     # NEW
 
     # Links
     Route::get('/links', 'LinkController@index');
