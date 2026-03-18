@@ -1,7 +1,6 @@
 @extends('layouts.app')
-
-<?php /** @var \App\Model\Battalion $batt */ ?>
 @section('title', 'Edit ' . $batt->name)
+<?php /** @var \App\Model\Battalion $batt */ ?>
 
 @section('content')
 @if ($errors->any())
