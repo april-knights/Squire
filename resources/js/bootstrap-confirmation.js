@@ -552,7 +552,7 @@
 
         var _config = typeof config === 'object' ? config : {};
 
-        _config.rootSelector = $(this).selector || _config.rootSelector; // this.selector removed in jQuery > 3
+        _config.rootSelector = _config.rootSelector; // $(this).selector removed in jQuery > 3
 
         if (!data && /destroy|hide/.test(config)) {
           return;
