@@ -37,6 +37,6 @@ class LoginController extends Controller
         // Log in user, handling session etc.
         Auth::login($knight);
 
-        return redirect()->to('/');
+        return redirect()->intended('/');
     }
 }
