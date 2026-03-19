@@ -56,20 +56,21 @@
             <div class="row">
                 <div class="col-md">
                     <div class="form-group">
-                        <label>Rank</label>
+                        <label>Battalion</label>
                         @if ($is_commander)
-                        <input class="form-control" type="text" value="Initiate" readonly>
+                        <input class="form-control" type="text" value="{{ Auth::user()->battalion->name }}" readonly>
+                        <input type="hidden" name="batt" value="{{ $user_batt }}">
                         @else
-                        <select class="custom-select" name="rank">
-                            @foreach ($all_ranks as $rank)
-                            <option value="{{ $rank->pkey }}" label="{{ $rank->name }}"
-                                @if ($rank->pkey == $def_rank) selected @endif>
-                                {{ $rank->name }}
+                        <select class="custom-select" name="batt">
+                            @foreach ($all_batts as $batt)
+                            <option value="{{ $batt->pkey }}" label="{{ $batt->name }}"
+                                @if ($batt->pkey == $def_batt) selected @endif>
+                                {{ $batt->name }}
                             </option>
                             @endforeach
                         </select>
                         @endif
-                    /div>
+                    </div>
                 </div>
                 <div class="col-md">
                     <div class="form-group">
