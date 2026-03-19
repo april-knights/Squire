@@ -104,4 +104,35 @@
         @endif
     </div>
 </div>
+@if ($show_officer_fields)
+<div class="row">
+    <div class="col-md-6">
+        <h2>Discord ID</h2>
+        <p>
+            {{ $knight->discordid ?? 'Not set' }}
+            @if ($knight->discordid)
+            <button class="btn btn-sm btn-secondary ml-2" onclick="navigator.clipboard.writeText('{{ $knight->discordid }}')">
+                <i class="fas fa-copy"></i>
+            </button>
+            @endif
+        </p>
+    </div>
+    <div class="col-md-6">
+        <h2>Interview Transcript</h2>
+        @if ($knight->inttrans)
+        <p><a href="{{ $knight->inttrans }}" target="_blank">Interview Transcript</a></p>
+        @else
+        <p>No transcript available</p>
+        @endif
+    </div>
+</div>
+@if ($show_onote)
+<div class="row">
+    <div class="col">
+        <h2>Officer Note</h2>
+        <p>{{ $knight->onote ?? 'None' }}</p>
+    </div>
+</div>
+@endif
+@endif
 @endsection

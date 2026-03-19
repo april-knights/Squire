@@ -154,6 +154,39 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                @if (in_array('discordid', $editable_fields))
+                <div class="col">
+                    <div class="form-group">
+                        <label for="discordid">Discord ID</label>
+                        <input class="form-control" id="discordid" name="discordid" type="text"
+                            value="{{ $knight->discordid }}" maxlength="30">
+                        <small class="form-text text-muted">
+                            The permanent numeric Discord ID, not the username.
+                        </small>
+                    </div>
+                </div>
+                @endif
+                @if (in_array('inttrans', $editable_fields))
+                <div class="col">
+                    <div class="form-group">
+                        <label for="inttrans">Interview Transcript URL</label>
+                        <input class="form-control" id="inttrans" name="inttrans" type="url"
+                            value="{{ $knight->inttrans }}" maxlength="255">
+                    </div>
+                </div>
+                @endif
+            </div>
+            @if (in_array('onote', $editable_fields))
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="onote">Officer Note</label>
+                        <textarea class="form-control" id="onote" name="onote" maxlength="1000">{{ $knight->onote }}</textarea>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
         <div class="col-md-4">
             <div class="form-group">

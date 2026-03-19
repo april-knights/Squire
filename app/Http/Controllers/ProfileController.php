@@ -35,31 +35,34 @@ class ProfileController extends Controller
      * @param  int  $rname
      * @return \Illuminate\View\View
      */
-    public function show($rname)
-    {
-        $knight = Knight::firstWhere('rname', $rname);
-
-        if(!$knight) {
-            abort(404, 'Knight not found.');
-        }
-
-        // TODO: Show skill parents as well
-
-        $editingSelf = Auth::id() == $knight->pkey;
-
-        // Certain fields are limited to councillors and the user themselves
-        $show_sensitive = Auth::user()->isCouncillor() || $editingSelf;
-
-        // Other fields are limited to officers from this knight's battalion
-        $show_irl = Auth::user()->isOfficer($knight->batt) || $editingSelf;
-
-        return view('profile.show', ['knight' => $knight,
-                                     'show_sensitive' => $show_sensitive,
-                                     'show_irl' => $show_irl,
-                                     'can_edit' => $this->editableFields($knight) !== null,
-                                    ]);
+public function show($rname)
+{
+    $knight = Knight::firstWhere('rname', $rname);
+    if(!$knight) {
+        abort(404, 'Knight not found.');
     }
-
+    $editingSelf = Auth::id() == $knight->pkey;
+    // Certain fields are limited to councillors and the user themselves
+    $show_sensitive = Auth::user()->isCouncillor() || $editingSelf;
+    // Other fields are limited to officers from this knight's battalion
+    $show_irl = Auth::user()->isOfficer($knight->batt) || $editingSelf;
+    // Discord ID and interview transcript visible to any officer+
+    $show_officer_fields = Auth::user()->getRankVal() <= Rank::HIGHEST_OFFICER_RANK;
+    // Officer notes restricted to councillors for anyone, officers for own battalion only
+    $show_onote = Auth::user()->isCouncillor() || Auth::user()->isOfficer($knight->batt);
+    // Editable by councillors for anyone, or officers for their own battalion
+    $can_edit_officer_fields = Auth::user()->isCouncillor() ||
+                               Auth::user()->isOfficer($knight->batt);
+    return view('profile.show', [
+        'knight' => $knight,
+        'show_sensitive' => $show_sensitive,
+        'show_irl' => $show_irl,
+        'show_officer_fields' => $show_officer_fields,
+        'show_onote' => $show_onote,
+        'can_edit_officer_fields' => $can_edit_officer_fields,
+        'can_edit' => $this->editableFields($knight) !== null,
+    ]);
+}
     /**
      * Show the form for creating a new resource.
      *
@@ -142,23 +145,23 @@ public function create(Request $request)
      * @param Knight|null $knight Knight to be edited
      * @return array        Array of editable fields
      */
-    private static function editableFields(Knight $knight = null) {
-        $user = Auth::user();
+private static function editableFields(Knight $knight = null) {
+    $user = Auth::user();
 
-        // Councillor is editing the profile
-        if ($user->checkSecurity(Knight::getPermission(Knight::PERMISSION_MODIFY))) {
-            return array('rname', 'dname', 'email', 'batt', 'rank', 'security', 'divs', 'firstevent', 'skills', 'bio', 'rlimpact');
-            // TODO: implement 'activeflg',
-        // User is editing their own profile
-        } elseif ($knight && $knight->pkey == $user->getAuthIdentifier()) {
-            return array('dname', 'email', 'bio', 'rlimpact', 'skills');
-        // Battalion officer is editing
-        } elseif ($user->checkSecurity('cmbattuser') && $user->isBattMember($knight->batt)) {
-            return null;
-        } else {
-            return null;
-        }
+    // Councillor is editing the profile
+    if ($user->checkSecurity(Knight::getPermission(Knight::PERMISSION_MODIFY))) {
+        return array('rname', 'dname', 'email', 'batt', 'rank', 'security', 'divs', 'firstevent', 'skills', 'bio', 'rlimpact', 'discordid', 'inttrans', 'onote');
+        // TODO: implement 'activeflg',
+    // User is editing their own profile
+    } elseif ($knight && $knight->pkey == $user->getAuthIdentifier()) {
+        return array('dname', 'email', 'bio', 'rlimpact', 'skills');
+    // Battalion officer is editing
+    } elseif ($user->checkSecurity('cmbattuser') && $user->isBattMember($knight->batt)) {
+        return array('discordid', 'inttrans', 'onote');
+    } else {
+        return null;
     }
+}
 
     /**
      * Generate edit rules.
@@ -212,6 +215,9 @@ public function create(Request $request)
             'skills.*' => 'integer|exists:skill,pkey', // TODO: Exclude parent skills.
             'bio' => 'nullable|string|max:255',
             'rlimpact' => 'nullable|string|max:255',
+            'discordid' => 'nullable|string|max:30',
+            'inttrans' => 'nullable|url|max:255',
+            'onote' => 'nullable|string|max:1000',
         ];
 
         if ($fields) {
@@ -342,6 +348,9 @@ public function create(Request $request)
                 'bio' => $validated['bio'] ?? $knight->bio,
                 'firstevent' => $validated['firstevent'] ?? $knight->firstevent,
                 'rlimpact' => $validated['rlimpact'] ?? $knight->rlimpact,
+                'discordid' => $validated['discordid'] ?? $knight->discordid,
+                'inttrans' => $validated['inttrans'] ?? $knight->inttrans,
+                'onote' => $validated['onote'] ?? $knight->onote,
                 'batt' => $validated['batt'] ?? $knight->batt,
                 'rnk' => $validated['rank'] ?? $knight->rnk,
                 'security' => $validated['security'] ?? $knight->security,
