@@ -66,6 +66,7 @@ class BattalionController extends Controller
             'members'  => $batt->members()->limit(10)->get(),
             'officers' => $batt->officers->sortBy(fn(Knight $o) => $o->rank->rval),
             'can_edit' => Auth::user()->checkSecurity(Battalion::getPermission(Battalion::PERMISSION_MODIFY)),
+            'can_add_knight' => Auth::user()->checkSecurity('cmuser') || Auth::user()->isOfficer($batt->pkey),
         ]);
     }
 
