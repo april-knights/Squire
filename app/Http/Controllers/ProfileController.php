@@ -247,7 +247,7 @@ private static function editableFields(Knight $knight = null) {
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+    public function store(Request $request) {    
 if (!Auth::user()->checkSecurity(Knight::getPermission(Knight::PERMISSION_MODIFY)) && !Auth::user()->checkSecurity('cmbattuser')) {
     Log::warning('User ' . Auth::user()->rname . ' illegally attempted to create user!');
     abort(401, 'You are not authorized to create a knight!');
