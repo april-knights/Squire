@@ -74,7 +74,7 @@ public function show($rname)
 public function create(Request $request)
 {
     // $def_batt=99, $def_rank=13, $def_sec=9
-    abort_if(!Auth::user()->checkSecurity('cmuser'), 401, 'Not authorized to create knight.');
+    abort_if(!Auth::user()->checkSecurity('cmuser') && !Auth::user()->checkSecurity('cmbattuser'), 401, 'Not authorized to create knight.');
 
     $validated = $request->validate([
         'batt' => 'nullable|integer|exists:battalion,pkey',
@@ -106,6 +106,8 @@ public function create(Request $request)
         'def_rank' => $validated['rank'] ?? Rank::DEFAULT_PROFILE_RANK_ID,
         'def_sec' => $validated['security'] ?? Security::DEFAULT_PROFILE_SECURITY_ID,
         'next_knum' => $next_knum,
+        'is_commander' => !Auth::user()->checkSecurity('cmuser'),
+        'user_batt' => Auth::user()->batt,
     ]);
 }
 
@@ -246,13 +248,19 @@ private static function editableFields(Knight $knight = null) {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
-    {
-        if (!Auth::user()->checkSecurity(Knight::getPermission(Knight::PERMISSION_MODIFY))) {
-            Log::warning('User ' . Auth::user()->rname . ' illegally attempted to create user!');
-            abort(401, 'You are not authorized to create a knight!');
-        }
+if (!Auth::user()->checkSecurity(Knight::getPermission(Knight::PERMISSION_MODIFY)) && !Auth::user()->checkSecurity('cmbattuser')) {
+    Log::warning('User ' . Auth::user()->rname . ' illegally attempted to create user!');
+    abort(401, 'You are not authorized to create a knight!');
+}
 
         $validated = $request->validate($this->getRules());
+
+// Commander - force battalion, rank and security to defaults
+if (!Auth::user()->checkSecurity('cmuser')) {
+    $validated['batt'] = Auth::user()->batt;
+    $validated['rank'] = Rank::DEFAULT_PROFILE_RANK_ID;
+    $validated['security'] = Security::DEFAULT_PROFILE_SECURITY_ID;
+}
 
         // Start transaction
         DB::transaction(function () use (&$validated) {
