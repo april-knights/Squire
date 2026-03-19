@@ -240,4 +240,46 @@
     @method('DELETE')
 </form>
 @endif
+
+<div class="modal fade" id="emailWarningModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle text-warning"></i> No Email Address</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>This knight has no email address. Knights without an email may miss important communications.</p>
+                <p>Are you sure you want to continue without an email address?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="addEmailBtn" data-dismiss="modal">Add Email</button>
+                <button type="button" class="btn btn-warning" id="continueWithoutEmailBtn">Continue Without Email</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    @if (in_array('email', $editable_fields))
+    document.getElementById('edit').addEventListener('submit', function(e) {
+        var email = document.getElementById('email').value.trim();
+        if (email === '') {
+            e.preventDefault();
+            $('#emailWarningModal').modal('show');
+        }
+    });
+
+    document.getElementById('addEmailBtn').addEventListener('click', function() {
+        document.getElementById('email').focus();
+    });
+
+    document.getElementById('continueWithoutEmailBtn').addEventListener('click', function() {
+        $('#emailWarningModal').modal('hide');
+        document.getElementById('edit').submit();
+    });
+    @endif
+</script>
 @endsection

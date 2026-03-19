@@ -13,7 +13,7 @@
 </div>
 @endif
 <h1>Create new Knight</h1>
-<form method="POST">
+<form method="POST" id="create">
     @csrf
     <div class="row">
         <div class="col-sm">
@@ -151,6 +151,12 @@
                         <label for="rlimpact">Real Life</label>
                         <textarea class="form-control" id="rlimpact" name="rlimpact" maxlength="255"></textarea>
                     </div>
+                    @if (!$is_commander)
+                    <div class="form-group">
+                        <label for="onote">Officer Note</label>
+                        <textarea class="form-control" id="onote" name="onote" maxlength="1000"></textarea>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -190,4 +196,44 @@
         </div>
     </div>
 </form>
+
+<div class="modal fade" id="emailWarningModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle text-warning"></i> No Email Address</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>This knight has no email address. Knights without an email may miss important communications.</p>
+                <p>Are you sure you want to continue without an email address?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="addEmailBtn" data-dismiss="modal">Add Email</button>
+                <button type="button" class="btn btn-warning" id="continueWithoutEmailBtn">Continue Without Email</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('create').addEventListener('submit', function(e) {
+        var email = document.getElementById('email').value.trim();
+        if (email === '') {
+            e.preventDefault();
+            $('#emailWarningModal').modal('show');
+        }
+    });
+
+    document.getElementById('addEmailBtn').addEventListener('click', function() {
+        document.getElementById('email').focus();
+    });
+
+    document.getElementById('continueWithoutEmailBtn').addEventListener('click', function() {
+        $('#emailWarningModal').modal('hide');
+        document.getElementById('create').submit();
+    });
+</script>
 @endsection
