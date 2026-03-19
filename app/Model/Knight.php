@@ -29,7 +29,7 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
      */
     protected $fillable = [
         'knum', 'rname', 'dname', 'email', 'bio', 'firstevent', 'rlimpact', 'batt', 'rnk', 'security', 'crtsetid',
-        'lstmdby', 'frenemy'
+        'lstmdby', 'frenemy', 'discordid', 'inttrans', 'onote'
     ];
 
     /**
