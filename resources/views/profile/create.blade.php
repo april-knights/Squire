@@ -46,7 +46,7 @@
                 <label for="dname">Discord Name</label>
                 <input class="form-control" id="dname" name="dname" type="text"></input>
                 <small id="dnameHelpBlock" class="form-text text-muted">
-                    Format: Username#1234
+                    Format: username
                 </small>
             </div>
         </div>
@@ -56,20 +56,10 @@
             <div class="row">
                 <div class="col-md">
                     <div class="form-group">
-                        <label>Battalion</label>
-                        <select class="custom-select" name="batt">
-                            @foreach ($all_batts as $batt)
-                            <option value="{{ $batt->pkey }}" label="{{ $batt->name }}"
-                                @if ($batt->pkey == $def_batt) selected @endif>
-                                {{ $batt->name }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md">
-                    <div class="form-group">
                         <label>Rank</label>
+                        @if ($is_commander)
+                        <input class="form-control" type="text" value="Initiate" readonly>
+                        @else
                         <select class="custom-select" name="rank">
                             @foreach ($all_ranks as $rank)
                             <option value="{{ $rank->pkey }}" label="{{ $rank->name }}"
@@ -78,11 +68,32 @@
                             </option>
                             @endforeach
                         </select>
+                        @endif
+                    /div>
+                </div>
+                <div class="col-md">
+                    <div class="form-group">
+                        <label>Rank</label>
+                        @if ($is_commander)
+                        <input class="form-control" type="text" value="Initiate" readonly>
+                        @else
+                        <select class="custom-select" name="rank">
+                            @foreach ($all_ranks as $rank)
+                            <option value="{{ $rank->pkey }}" label="{{ $rank->name }}"
+                                @if ($rank->pkey == $def_rank) selected @endif>
+                                {{ $rank->name }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @endif
                     </div>
                 </div>
                 <div class="col-md">
                     <div class="form-group">
                         <label>Security</label>
+                        @if ($is_commander)
+                        <input class="form-control" type="text" value="Initiate" readonly>
+                        @else
                         <select class="custom-select" name="security">
                             @foreach ($all_secs as $sec)
                             <option value="{{ $sec->pkey }}" label="{{ $sec->secname }}"
@@ -91,6 +102,7 @@
                             </option>
                             @endforeach
                         </select>
+                        @endif
                     </div>
                 </div>
             </div>
