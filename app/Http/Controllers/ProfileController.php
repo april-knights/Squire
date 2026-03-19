@@ -106,7 +106,7 @@ public function create(Request $request)
         'def_rank' => $validated['rank'] ?? Rank::DEFAULT_PROFILE_RANK_ID,
         'def_sec' => $validated['security'] ?? Security::DEFAULT_PROFILE_SECURITY_ID,
         'next_knum' => $next_knum,
-        'is_commander' => !Auth::user()->checkSecurity('cmuser'),
+        'is_commander' => !Auth::user()->isCouncillor(),
         'user_batt' => Auth::user()->batt,
     ]);
 }
@@ -256,7 +256,7 @@ if (!Auth::user()->checkSecurity(Knight::getPermission(Knight::PERMISSION_MODIFY
         $validated = $request->validate($this->getRules());
 
 // Commander - force battalion, rank and security to defaults
-if (!Auth::user()->checkSecurity('cmuser')) {
+if (!Auth::user()->isCouncillor()) {
     $validated['batt'] = Auth::user()->batt;
     $validated['rank'] = Rank::DEFAULT_PROFILE_RANK_ID;
     $validated['security'] = Security::DEFAULT_PROFILE_SECURITY_ID;
