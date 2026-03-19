@@ -14,6 +14,14 @@
 </div>
 @endif
 
+@if($can_add_knight)
+<div class="row">
+    <div class="col">
+        <a href="/profile/new?batt={{ $batt->pkey }}"><i class="fas fa-plus"></i> New Knight</a>
+    </div>
+</div>
+@endif
+
 <div class="row">
     <div class="col-md-8">
         <div class="row">
