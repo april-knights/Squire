@@ -253,6 +253,7 @@ if (!Auth::user()->checkSecurity(Knight::getPermission(Knight::PERMISSION_MODIFY
     abort(401, 'You are not authorized to create a knight!');
 }
 
+        $request->merge(['rname' => preg_replace('/^\/u\//', '', $request->input('rname'))]);
         $validated = $request->validate($this->getRules());
 
 // Commander - force battalion, rank and security to defaults
@@ -328,6 +329,8 @@ if (!Auth::user()->isCouncillor()) {
             $min_sec = Auth::user()->security + 1;
         }
 
+        $request->merge(['rname' => preg_replace('/^\/u\//', '', $request->input('rname'))]);
+        
         $validator = Validator::make(
             $request->all(),
             $this->getRules($editable_fields, $knight, $min_sec),
