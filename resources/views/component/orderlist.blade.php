@@ -1,7 +1,7 @@
 @forelse ($orders as $order)
-    <div class="d-flex align-items-start">
+    <div style="position: relative;">
         @if($can_delete ?? false)
-        <div class="mr-2 mt-1">
+        <div style="position: absolute; left: -25px; top: 8px;">
             <input type="checkbox" name="orders[]" value="{{ $order->pkey }}">
         </div>
         @endif
