@@ -1,7 +1,5 @@
 @extends('layouts.app')
-
 @section('title', $div->name)
-
 @section('content')
 <?php /** @var \App\Model\Division $div */ ?>
 <div class="row">
@@ -20,12 +18,20 @@
         @endif
     </div>
     <div class="col">
-             <img class="banner" src="{{ asset('static/img/div_banners/' . $div->divalias . '.png') }}"
-             alt="{{ $div->name }} Banner" title="{{ $div->name }} Banner">
+        <img class="banner" src="{{ asset('static/img/div_banners/' . $div->divalias . '.png') }}"
+        alt="{{ $div->name }} Banner" title="{{ $div->name }} Banner">
     </div>
 </div>
-
-@component('component.membertable', ['members' => $div->members])
+<div class="row mb-3">
+    <div class="col-md-4">
+        <input type="text" id="memberSearch" class="form-control" placeholder="Search by Reddit name, Discord name, rank, or first event...">
+    </div>
+</div>
+@component('component.membertable', [
+    'members'   => $members,
+    'sort'      => $sort,
+    'direction' => $direction,
+    'alias'     => 'div/' . $div->divalias,
+])
 @endcomponent
-
 @endsection

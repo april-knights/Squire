@@ -75,7 +75,21 @@ class DivisionController extends Controller
             abort(404, 'Division not found.');
         }
 
-        return view('division.members', ['div' => $div]);
+        $sort = request('sort', 'rname');
+        $direction = request('direction', 'asc');
+
+        $allowed_sorts = ['rname', 'dname', 'rnk', 'firstevent'];
+        if (!in_array($sort, $allowed_sorts)) {
+            $sort = 'rname';
+        }
+        $direction = $direction === 'desc' ? 'desc' : 'asc';
+
+        return view('division.members', [
+            'div'       => $div,
+            'sort'      => $sort,
+            'direction' => $direction,
+            'members'   => $div->members()->orderBy($sort, $direction)->get(),
+        ]);
     }
 
     /**
