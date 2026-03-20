@@ -313,7 +313,7 @@ public function reorder(Request $request)
 
     $validated = $request->validate([
         'orders'   => 'required|array',
-        'orders.*' => 'integer|exists:order,pkey',
+        'orders.*' => 'integer|exists:orders,pkey',
     ]);
 
     foreach ($validated['orders'] as $index => $id) {
