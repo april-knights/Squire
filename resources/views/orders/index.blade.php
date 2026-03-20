@@ -66,6 +66,32 @@
         @endif
     </div>
     @endif
-
 </form>
+
+@if($can_create)
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<script>
+document.querySelectorAll('.orderlist-container').forEach(function(container) {
+    new Sortable(container, {
+        animation: 150,
+        handle: '.order-item',
+        onEnd: function(evt) {
+            var orders = [];
+            container.querySelectorAll('.order-item').forEach(function(item) {
+                orders.push(item.dataset.id);
+            });
+            fetch('/orders/reorder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ orders: orders })
+            });
+        }
+    });
+});
+</script>
+@endif
+
 @endsection

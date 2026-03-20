@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders', 'OrdersController@index');
     Route::get('/orders/create', 'OrdersController@create');       # NEW
     Route::post('/orders', 'OrdersController@store');              # NEW
+    Route::post('/orders/reorder', 'OrdersController@reorder');        # REORDER
     Route::get('/orders/{id}/edit', 'OrdersController@edit');      # NEW
     Route::post('/orders/{id}/edit', 'OrdersController@update');   # NEW
     Route::delete('/orders/{id}', 'OrdersController@destroy');     # NEW

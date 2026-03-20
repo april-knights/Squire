@@ -24,20 +24,24 @@ class OrdersController extends Controller
         $user = Auth::user();
 
         $knight_orders = Order::where('level', '>', Rank::HIGHEST_OFFICER_RANK)
+            ->orderByRaw('sort_order IS NULL, sort_order ASC')
             ->orderBy('crtsetdt', 'desc')
             ->get();
 
         $officer_orders = Order::where('level', '>', Rank::HIGHEST_COMMANDER_RANK)
             ->where('level', '<=', Rank::HIGHEST_OFFICER_RANK)
+            ->orderByRaw('sort_order IS NULL, sort_order ASC')
             ->orderBy('crtsetdt', 'desc')
             ->get();
 
         $commander_orders = Order::where('level', '<=', Rank::HIGHEST_COMMANDER_RANK)
             ->where('level', '>', 0)
+            ->orderByRaw('sort_order IS NULL, sort_order ASC')
             ->orderBy('crtsetdt', 'desc')
             ->get();
 
         $battalion_orders = Order::where('fkeybattalion', $user->batt)
+            ->orderByRaw('sort_order IS NULL, sort_order ASC')
             ->orderBy('crtsetdt', 'desc')
             ->get();
 
@@ -295,4 +299,27 @@ public function destroy(Request $request, $id)
 
         return redirect('/orders');
     }
+    /**
+ * Update the sort order of orders.
+ *
+ * @param  \Illuminate\Http\Request  $request
+ * @return \Illuminate\Http\JsonResponse
+ */
+public function reorder(Request $request)
+{
+    if (!Auth::user()->checkSecurity('cmorder')) {
+        abort(401, 'Not authorized to reorder orders.');
+    }
+
+    $validated = $request->validate([
+        'orders'   => 'required|array',
+        'orders.*' => 'integer|exists:order,pkey',
+    ]);
+
+    foreach ($validated['orders'] as $index => $id) {
+        Order::where('pkey', $id)->update(['sort_order' => $index]);
+    }
+
+    return response()->json(['success' => true]);
+}
 }
