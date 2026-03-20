@@ -5,7 +5,7 @@
 @endcomponent
 <div class="row mb-3">
     <div class="col-md-4">
-        <input type="text" id="memberSearch" class="form-control" placeholder="Search by name, Discord ID, or skill...">
+        <input type="text" id="memberSearch" class="form-control" placeholder="Search by Reddit name, Discord ID, or event...">
     </div>
 </div>
 @component('component.membertable', [
