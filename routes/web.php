@@ -56,6 +56,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders/{id}/edit', 'OrdersController@edit');      # NEW
     Route::post('/orders/{id}/edit', 'OrdersController@update');   # NEW
     Route::delete('/orders/{id}', 'OrdersController@destroy');     # NEW
+    Route::delete('/orders', 'OrdersController@bulkDestroy');      # BULK DELETE
 
     # Links
     Route::get('/links', 'LinkController@index');

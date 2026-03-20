@@ -5,50 +5,68 @@
 @section('content')
 <?php /** @var \App\Model\Knight $user */ ?>
 
-@if($battalion_orders->isNotEmpty())
-<h2>Battalion Orders</h2>
-@component('component.orderlist', [
-    'orders'         => $battalion_orders,
-    'can_edit_order' => $can_create && Auth::user()->isOfficer(Auth::user()->batt),
-    'can_delete'     => $can_delete,
-])
-@endcomponent
-@endif
+<form method="POST" action="/orders" id="ordersForm">
+    @csrf
+    @method('DELETE')
 
-<h2>Knights</h2>
-@component('component.orderlist', [
-    'orders'         => $knight_orders,
-    'can_edit_order' => $can_create && $user_rank <= \App\Model\Rank::HIGHEST_COUNCILOR_RANK,
-    'can_delete'     => $can_delete,
-])
-@endcomponent
+    @if($battalion_orders->isNotEmpty())
+    <h2>Battalion Orders</h2>
+    @component('component.orderlist', [
+        'orders'         => $battalion_orders,
+        'can_edit_order' => $can_create && Auth::user()->isOfficer(Auth::user()->batt),
+        'can_delete'     => $can_delete,
+    ])
+    @endcomponent
+    @endif
 
-@if($user_rank <= \App\Model\Rank::HIGHEST_OFFICER_RANK)
-<h2>Officers</h2>
-@component('component.orderlist', [
-    'orders'         => $officer_orders,
-    'can_edit_order' => $can_create && $user_rank <= \App\Model\Rank::HIGHEST_COUNCILOR_RANK,
-    'can_delete'     => $can_delete,
-])
-@endcomponent
-@endif
+    <h2>Knights</h2>
+    @component('component.orderlist', [
+        'orders'         => $knight_orders,
+        'can_edit_order' => $can_create && $user_rank <= \App\Model\Rank::HIGHEST_COUNCILOR_RANK,
+        'can_delete'     => $can_delete,
+    ])
+    @endcomponent
 
-@if($user_rank <= \App\Model\Rank::HIGHEST_COMMANDER_RANK)
-<h2>Commanders</h2>
-@component('component.orderlist', [
-    'orders'         => $commander_orders,
-    'can_edit_order' => $can_create && $user_rank <= \App\Model\Rank::HIGHEST_COUNCILOR_RANK,
-    'can_delete'     => $can_delete,
-])
-@endcomponent
-@endif
+    @if($user_rank <= \App\Model\Rank::HIGHEST_OFFICER_RANK)
+    <h2>Officers</h2>
+    @component('component.orderlist', [
+        'orders'         => $officer_orders,
+        'can_edit_order' => $can_create && $user_rank <= \App\Model\Rank::HIGHEST_COUNCILOR_RANK,
+        'can_delete'     => $can_delete,
+    ])
+    @endcomponent
+    @endif
 
-@if($can_create)
-<div class="row mt-3">
-    <div class="col">
-        <a href="/orders/create" class="btn btn-success">New Order</a>
+    @if($user_rank <= \App\Model\Rank::HIGHEST_COMMANDER_RANK)
+    <h2>Commanders</h2>
+    @component('component.orderlist', [
+        'orders'         => $commander_orders,
+        'can_edit_order' => $can_create && $user_rank <= \App\Model\Rank::HIGHEST_COUNCILOR_RANK,
+        'can_delete'     => $can_delete,
+    ])
+    @endcomponent
+    @endif
+
+    @if($can_create)
+    <div class="row mt-3">
+        <div class="col">
+            <a href="/orders/create" class="btn btn-success">New Order</a>
+        </div>
     </div>
-</div>
-@endif
+    @endif
 
+    @if($can_delete)
+    <div class="row mt-3">
+        <div class="col">
+            <button type="submit" class="btn btn-danger float-right" form="ordersForm"
+                data-toggle="confirmation"
+                data-btn-ok-icon-class="fas fa-check"
+                data-btn-cancel-icon-class="fas fa-ban">
+                Delete Selected
+            </button>
+        </div>
+    </div>
+    @endif
+
+</form>
 @endsection

@@ -248,7 +248,7 @@ class OrdersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Request $request, $id)
+public function destroy(Request $request, $id)
     {
         if (!Auth::user()->checkSecurity('cdorder')) {
             Log::warning('User ' . Auth::user()->rname . ' illegally attempted to delete order ' . $id . '!');
@@ -261,6 +261,37 @@ class OrdersController extends Controller
         $order->save();
 
         $request->session()->flash('success', 'Deleted order "' . $order->title . '".');
+
+        return redirect('/orders');
+    }
+
+    /**
+     * Remove multiple orders from storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function bulkDestroy(Request $request)
+    {
+        if (!Auth::user()->checkSecurity('cdorder')) {
+            Log::warning('User ' . Auth::user()->rname . ' illegally attempted to bulk delete orders!');
+            abort(401, 'You are not authorized to delete orders!');
+        }
+
+        $validated = $request->validate([
+            'orders'   => 'required|array',
+            'orders.*' => 'integer|exists:order,pkey',
+        ]);
+
+        $count = 0;
+        foreach ($validated['orders'] as $id) {
+            $order = Order::findOrFail($id);
+            $order->delflg = true;
+            $order->save();
+            $count++;
+        }
+
+        $request->session()->flash('success', 'Deleted ' . $count . ' order(s).');
 
         return redirect('/orders');
     }
