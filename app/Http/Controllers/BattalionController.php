@@ -84,7 +84,21 @@ class BattalionController extends Controller
             abort(404, 'Battalion not found.');
         }
 
-        return view('battalion.members', ['batt' => $batt]);
+        $sort = request('sort', 'rname');
+        $direction = request('direction', 'asc');
+
+        $allowed_sorts = ['rname', 'dname', 'rnk', 'firstevent'];
+        if (!in_array($sort, $allowed_sorts)) {
+            $sort = 'rname';
+        }
+        $direction = $direction === 'desc' ? 'desc' : 'asc';
+
+        return view('battalion.members', [
+            'batt'      => $batt,
+            'sort'      => $sort,
+            'direction' => $direction,
+            'members'   => $batt->members()->orderBy($sort, $direction)->get(),
+        ]);
     }
 
     /**

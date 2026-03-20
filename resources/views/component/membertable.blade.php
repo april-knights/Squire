@@ -1,11 +1,35 @@
 <?php /** @var iterable<\App\Model\Knight> $members */ ?>
+@php
+    $next_direction = $direction === 'asc' ? 'desc' : 'asc';
+    $sort_icon = $direction === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+@endphp
 <table class="table table-hover table-borderless">
     <thead>
         <tr>
-            <th scope="col">Reddit Name</th>
-            <th scope="col">Discord Name</th>
-            <th scope="col">Rank</th>
-            <th scope="col">1st Event</th>
+            <th scope="col">
+                <a href="/battalion/{{ $alias }}/members?sort=rname&direction={{ $sort === 'rname' ? $next_direction : 'asc' }}">
+                    Reddit Name
+                    @if($sort === 'rname') <i class="fas {{ $sort_icon }}"></i> @endif
+                </a>
+            </th>
+            <th scope="col">
+                <a href="/battalion/{{ $alias }}/members?sort=dname&direction={{ $sort === 'dname' ? $next_direction : 'asc' }}">
+                    Discord Name
+                    @if($sort === 'dname') <i class="fas {{ $sort_icon }}"></i> @endif
+                </a>
+            </th>
+            <th scope="col">
+                <a href="/battalion/{{ $alias }}/members?sort=rnk&direction={{ $sort === 'rnk' ? $next_direction : 'asc' }}">
+                    Rank
+                    @if($sort === 'rnk') <i class="fas {{ $sort_icon }}"></i> @endif
+                </a>
+            </th>
+            <th scope="col">
+                <a href="/battalion/{{ $alias }}/members?sort=firstevent&direction={{ $sort === 'firstevent' ? $next_direction : 'asc' }}">
+                    1st Event
+                    @if($sort === 'firstevent') <i class="fas {{ $sort_icon }}"></i> @endif
+                </a>
+            </th>
         </tr>
     </thead>
     <tbody>
