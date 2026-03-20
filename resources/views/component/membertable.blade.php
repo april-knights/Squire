@@ -59,3 +59,13 @@
         @endforelse
     </tbody>
 </table>
+<script>
+document.getElementById('memberSearch').addEventListener('input', function() {
+    var search = this.value.toLowerCase();
+    var rows = document.querySelectorAll('tbody tr');
+    rows.forEach(function(row) {
+        var text = row.textContent.toLowerCase();
+        row.style.display = text.includes(search) ? '' : 'none';
+    });
+});
+</script>
