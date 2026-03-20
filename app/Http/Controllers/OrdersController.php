@@ -284,7 +284,7 @@ public function destroy(Request $request, $id)
 
         $validated = $request->validate([
             'orders'   => 'required|array',
-            'orders.*' => 'integer|exists:order,pkey',
+            'orders.*' => 'integer|exists:orders,pkey',
         ]);
 
         $count = 0;
