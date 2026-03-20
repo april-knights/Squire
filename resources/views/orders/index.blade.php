@@ -47,16 +47,14 @@
     @endcomponent
     @endif
 
-    @if($can_create)
+@if($can_create || $can_delete)
     <div class="row mt-3">
+        @if($can_create)
         <div class="col">
             <a href="/orders/create" class="btn btn-success">New Order</a>
         </div>
-    </div>
-    @endif
-
-    @if($can_delete)
-    <div class="row mt-3">
+        @endif
+        @if($can_delete)
         <div class="col">
             <button type="submit" class="btn btn-danger float-right" form="ordersForm"
                 data-toggle="confirmation"
@@ -65,6 +63,7 @@
                 Delete Selected
             </button>
         </div>
+        @endif
     </div>
     @endif
 
