@@ -242,24 +242,22 @@
 @endif
 
 <div class="modal fade" id="emailWarningModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-exclamation-triangle text-warning"></i> No Email Address</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>This knight has no email address. Knights without an email may miss important communications.</p>
-                <p>Are you sure you want to continue without an email address?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="addEmailBtn" data-dismiss="modal">Add Email</button>
-                <button type="button" class="btn btn-warning" id="continueWithoutEmailBtn">Continue Without Email</button>
-            </div>
-        </div>
+<div class="modal-content" style="background-color: #5a2424; color: #efefef; border: 1px solid #8b3a3a;">
+    <div class="modal-header" style="border-bottom: 1px solid #8b3a3a;">
+        <h5 class="modal-title"><i class="fas fa-exclamation-triangle text-warning"></i> No Email Address</h5>
+        <button type="button" class="close" data-dismiss="modal" style="color: #efefef;">
+            <span>&times;</span>
+        </button>
     </div>
+    <div class="modal-body">
+        <p>This knight has no email address. Knights without an email may miss important communications.</p>
+        <p>Are you sure you want to continue without an email address?</p>
+    </div>
+    <div class="modal-footer" style="border-top: 1px solid #8b3a3a;">
+        <button type="button" class="btn btn-secondary" id="addEmailBtn" data-dismiss="modal">Add Email</button>
+        <button type="button" class="btn btn-warning" id="continueWithoutEmailBtn">Continue Without Email</button>
+    </div>
+</div>
 </div>
 
 <script>
