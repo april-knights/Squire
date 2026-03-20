@@ -37,6 +37,8 @@ class LoginController extends Controller
         // Log in user, handling session etc.
         Auth::login($knight);
 
+        Knight::where('pkey', $knight->pkey)->update(['last_login' => now()]);
+
         return redirect()->intended('/');
     }
 }
