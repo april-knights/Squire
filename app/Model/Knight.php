@@ -97,6 +97,16 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
     }
 
     /**
+     * Whether this knight can manage Inquisition membership.
+     * Limited to Admins, Grandmasters, and the Grand Inquisitor.
+     *
+     * @return bool
+     */
+    public function canManageInquisition() {
+        return in_array($this->security, [1, 2]) || $this->rnk == 15;
+    }
+    
+    /**
      * Whether this knight is an officer of a certain battalion.
      *
      * @var int $batt_key battalion primary key

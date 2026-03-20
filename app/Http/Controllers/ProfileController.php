@@ -255,6 +255,12 @@ if (!Auth::user()->checkSecurity(Knight::getPermission(Knight::PERMISSION_MODIFY
 
         $request->merge(['rname' => preg_replace('/^\/u\//', '', $request->input('rname'))]);
         $validated = $request->validate($this->getRules());
+        // Prevent unauthorised users from adding Inquisition membership on creation
+        if (!Auth::user()->canManageInquisition()) {
+            if (in_array(5, $validated['divs'] ?? [])) {
+                abort(401, 'Not authorized to add Inquisition membership.');
+            }
+        }
 
 // Commander - force battalion, rank and security to defaults
 if (!Auth::user()->isCouncillor()) {
@@ -338,6 +344,14 @@ if (!Auth::user()->isCouncillor()) {
         );
 
         $validated = $validator->validate();
+        // Prevent unauthorised users from modifying Inquisition membership
+        if (!Auth::user()->canManageInquisition()) {
+            $currentInquisition = $knight->divisions->contains('pkey', 5);
+            $newInquisition = in_array(5, $validated['divs'] ?? []);
+            if ($currentInquisition !== $newInquisition) {
+                abort(401, 'Not authorized to modify Inquisition membership.');
+            }
+        }
 
         // Start transaction
         DB::transaction(function () use (&$validated, &$rname, &$knight) {

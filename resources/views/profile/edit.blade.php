@@ -113,7 +113,8 @@
                             @foreach ($all_divs as $div)
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="divs[]" id="div_{{ $div->pkey }}"
-                                    value="{{ $div->pkey }}" @if ($cur_divs->contains($div)) checked @endif>
+                                    value="{{ $div->pkey }}" @if ($cur_divs->contains($div)) checked @endif
+                                    @if ($div->pkey == 5 && !Auth::user()->canManageInquisition()) disabled @endif>
                                 <label class="form-check-label" for="div_{{ $div->pkey }}" title="{{ $div->divdescr }}">
                                     {{ $div->name }}
                                 </label>

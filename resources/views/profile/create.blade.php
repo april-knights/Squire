@@ -112,15 +112,17 @@
                     <div class="form-group">
                         <label>Divisions</label>
                         <fieldset name="divs">
-                            @foreach ($all_divs as $div)
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="divs[]" id="div_{{ $div->pkey }}"
-                                    value="{{ $div->pkey }}">
-                                <label class="form-check-label" for="div_{{ $div->pkey }}" title="{{ $div->divdescr }}">
-                                    {{ $div->name }}
-                                </label>
-                            </div>
-                            @endforeach
+                        @foreach ($all_divs as $div)
+                        @if ($div->pkey != 5 || Auth::user()->canManageInquisition())
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="divs[]" id="div_{{ $div->pkey }}"
+                                value="{{ $div->pkey }}">
+                            <label class="form-check-label" for="div_{{ $div->pkey }}" title="{{ $div->divdescr }}">
+                                {{ $div->name }}
+                            </label>
+                        </div>
+                        @endif
+                        @endforeach
                         </fieldset>
                     </div>
                 </div>
