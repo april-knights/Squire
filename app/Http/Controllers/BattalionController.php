@@ -106,7 +106,7 @@ class BattalionController extends Controller
 
         return view('battalion.edit', [
             'batt'        => $batt,
-            'all_knights' => Knight::orderBy('rname')->get(),
+            'all_knights' => Knight::where('batt', $batt->pkey)->orderBy('rname')->get(),
             'can_delete'  => Auth::user()->checkSecurity(Battalion::getPermission(Battalion::PERMISSION_DELETE)),
         ]);
     }
