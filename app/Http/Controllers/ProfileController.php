@@ -200,7 +200,7 @@ private static function editableFields(Knight $knight = null) {
                 'nullable',
                 'email',
                 'max:50',
-                Rule::unique('knight')->ignore($knight ? $knight->rname : null, 'rname')->whereNotNull('email')->where(fn($q) => $q->where('email', '!=', '')),
+                Rule::unique('knight')->ignore($knight ? $knight->rname : null, 'rname')->whereNotNull('email')->where('email', '!=', ''),
             ],
             ],
             'batt' => 'required|integer|exists:battalion,pkey',
