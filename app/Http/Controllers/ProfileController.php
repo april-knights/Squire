@@ -145,28 +145,25 @@ public function updateBadges(Request $request, $rname)
         ]);
     }
 
-    // Remove badges if requested
-    if ($can_award_badges && !empty($validated['remove'])) {
-        KnightBadge::whereIn('pkey', $validated['remove'])
-            ->where('fkeyknight', $knight->pkey)
-            ->update(['delflg' => 1, 'lstmdby' => $editor]);
-    }
+// Remove badges if requested
+if ($can_award_badges && !empty($validated['remove'])) {
+    DB::table('knightbadge')
+        ->whereIn('pkey', $validated['remove'])
+        ->where('fkeyknight', $knight->pkey)
+        ->update(['delflg' => 1, 'lstmdby' => $editor]);
+}
 
-    // Update featured status — max 3
-    $featured = $validated['featured'] ?? [];
-    if (count($featured) > 3) {
-        $featured = array_slice($featured, 0, 3);
-    }
+// Reset all featured for this knight then set selected ones
+DB::table('knightbadge')
+    ->where('fkeyknight', $knight->pkey)
+    ->update(['featured' => 0, 'lstmdby' => $editor]);
 
-    // Reset all featured for this knight then set selected ones
-    KnightBadge::where('fkeyknight', $knight->pkey)
-        ->update(['featured' => 0, 'lstmdby' => $editor]);
-
-    if (!empty($featured)) {
-        KnightBadge::whereIn('pkey', $featured)
-            ->where('fkeyknight', $knight->pkey)
-            ->update(['featured' => 1, 'lstmdby' => $editor]);
-    }
+if (!empty($featured)) {
+    DB::table('knightbadge')
+        ->whereIn('pkey', $featured)
+        ->where('fkeyknight', $knight->pkey)
+        ->update(['featured' => 1, 'lstmdby' => $editor]);
+}
 
     return redirect()->route('profile', ['rname' => $rname]);
 }
