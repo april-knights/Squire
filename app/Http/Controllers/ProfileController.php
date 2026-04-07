@@ -9,6 +9,8 @@ use App\Model\Knight;
 use App\Model\Rank;
 use App\Model\Security;
 use App\Model\Skill;
+use App\Model\Badge;
+use App\Model\KnightBadge;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -53,15 +55,115 @@ public function show($rname)
     // Editable by councillors for anyone, or officers for their own battalion
     $can_edit_officer_fields = Auth::user()->isCouncillor() ||
                                Auth::user()->isOfficer($knight->batt);
+    $featured_badges = $knight->featuredBadges()->get();
+    
     return view('profile.show', [
         'knight' => $knight,
         'show_sensitive' => $show_sensitive,
         'show_irl' => $show_irl,
+        'featured_badges' => $featured_badges,
         'show_officer_fields' => $show_officer_fields,
         'show_onote' => $show_onote,
         'can_edit_officer_fields' => $can_edit_officer_fields,
         'can_edit' => $this->editableFields($knight) !== null,
     ]);
+}
+    /**
+ * Display the badge management page for a knight.
+ *
+ * @param string $rname
+ * @return \Illuminate\View\View
+ */
+public function badges($rname)
+{
+    $knight = Knight::firstWhere('rname', $rname);
+    abort_if(!$knight, 404, 'Knight not found.');
+
+    $editingSelf = Auth::id() == $knight->pkey;
+    $can_edit_badges = Auth::user()->isCouncillor() || 
+                       Auth::user()->isOfficer($knight->batt) ||
+                       $editingSelf;
+
+    abort_if(!$can_edit_badges, 401, 'Not authorized to view badges.');
+
+    $can_award_badges = Auth::user()->isCouncillor() || 
+                        Auth::user()->isOfficer($knight->batt);
+
+    return view('profile.badges', [
+        'knight'           => $knight,
+        'all_badges'       => Badge::orderBy('typcd')->orderBy('orderid')->get(),
+        'knight_badges'    => $knight->badges()->get(),
+        'can_award_badges' => $can_award_badges,
+        'editing_self'     => $editingSelf,
+    ]);
+}
+
+/**
+ * Update badge assignments and featured status for a knight.
+ *
+ * @param \Illuminate\Http\Request $request
+ * @param string $rname
+ * @return \Illuminate\Http\RedirectResponse
+ */
+public function updateBadges(Request $request, $rname)
+{
+    $knight = Knight::firstWhere('rname', $rname);
+    abort_if(!$knight, 404, 'Knight not found.');
+
+    $editingSelf = Auth::id() == $knight->pkey;
+    $can_award_badges = Auth::user()->isCouncillor() || 
+                        Auth::user()->isOfficer($knight->batt);
+
+    abort_if(!$can_award_badges && !$editingSelf, 401, 'Not authorized.');
+
+    $validated = $request->validate([
+        'featured'   => 'nullable|array|max:3',
+        'featured.*' => 'integer|exists:knightbadge,pkey',
+        'reason'     => 'nullable|array',
+        'reason.*'   => 'nullable|string|max:500',
+        'add_badge'  => 'nullable|integer|exists:badge,pkey',
+        'remove'     => 'nullable|array',
+        'remove.*'   => 'integer|exists:knightbadge,pkey',
+    ]);
+
+    $editor = Auth::id();
+
+    // Add new badge if requested
+    if ($can_award_badges && !empty($validated['add_badge'])) {
+        KnightBadge::create([
+            'fkeybadge'  => $validated['add_badge'],
+            'fkeyknight' => $knight->pkey,
+            'bdgreason'  => $validated['reason'][$validated['add_badge']] ?? null,
+            'featured'   => 0,
+            'crtsetid'   => $editor,
+            'lstmdby'    => $editor,
+        ]);
+    }
+
+    // Remove badges if requested
+    if ($can_award_badges && !empty($validated['remove'])) {
+        KnightBadge::whereIn('pkey', $validated['remove'])
+            ->where('fkeyknight', $knight->pkey)
+            ->update(['delflg' => 1, 'lstmdby' => $editor]);
+    }
+
+    // Update featured status — max 3
+    $featured = $validated['featured'] ?? [];
+    if (count($featured) > 3) {
+        $featured = array_slice($featured, 0, 3);
+    }
+
+    // Reset all featured for this knight then set selected ones
+    KnightBadge::where('fkeyknight', $knight->pkey)
+        ->update(['featured' => 0, 'lstmdby' => $editor]);
+
+    if (!empty($featured)) {
+        KnightBadge::whereIn('pkey', $featured)
+            ->where('fkeyknight', $knight->pkey)
+            ->update(['featured' => 1, 'lstmdby' => $editor]);
+    }
+
+    return redirect()->route('profile', ['rname' => $rname]);
 }
     /**
      * Show the form for creating a new resource.
