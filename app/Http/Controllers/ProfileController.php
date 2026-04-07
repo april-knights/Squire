@@ -50,6 +50,7 @@ class ProfileController extends Controller
         $show_sensitive = Auth::user()->isCouncillor() || $editingSelf;
         $show_irl = Auth::user()->isOfficer($knight->batt) || $editingSelf;
        $show_officer_fields = Auth::user()->isCouncillor();
+       $show_onote = Auth::user()->isCouncillor() || Auth::user()->isOfficer($knight->batt);
 
         $all_badges_count = $knight->badges()->count();
 
@@ -71,6 +72,7 @@ class ProfileController extends Controller
                                  'can_edit' => $this->editableFields($knight) !== null,
                                  'featured_badges' => $featured_badges,
                                  'all_badges_count' => $all_badges_count,
+                                 'show_onote' => $show_onote,
                                 ]);
 }
     /**
