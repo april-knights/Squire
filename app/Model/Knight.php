@@ -170,6 +170,8 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
             ->wherePivot('featured', 1)
             ->wherePivot('delflg', 0)
             ->wherePivot('activeflg', 1)
+            ->where('badge.activeflg', 1)
+            ->where('badge.delflg', 0)
             ->orderBy('badge.orderid', 'asc')
             ->limit(3);
     }
