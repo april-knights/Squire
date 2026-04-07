@@ -14,6 +14,13 @@
 </div>
 @endif
 <h1>Edit {{ $knight->rname }}</h1>
+@if(Auth::user()->isCouncillor() || Auth::user()->isOfficer($knight->batt))
+<div class="row mb-3">
+    <div class="col">
+        <a href="/profile/{{ $knight->rname }}/badges" class="btn btn-secondary">Edit Badges</a>
+    </div>
+</div>
+@endif
 <form method="POST" id="edit">
     @csrf
     <div class="row">
