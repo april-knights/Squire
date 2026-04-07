@@ -79,6 +79,24 @@
             </div>
         </div>
     </div>
+    @if($featured_badges->isNotEmpty())
+    <div class="row">
+        <div class="col">
+            <h2>Badges</h2>
+            <div class="d-flex flex-wrap">
+                @foreach($featured_badges as $badge)
+                <div class="mr-2 mb-2">
+                    <img src="{{ asset($badge->imgurl ?? 'static/img/badges/NoArtYet.jpg') }}"
+                        width="64" alt="{{ $badge->bdg_title }}"
+                        title="{{ $badge->bdg_title }}"
+                        class="img-fluid">
+                </div>
+                @endforeach
+            </div>
+            <a class="font-italic" href="/profile/{{ $knight->rname }}/badges">See all…</a>
+        </div>
+    </div>
+    @endif
     <div class="col-md-4">
         <h2>Skills</h2>
         <ul class="skills">
