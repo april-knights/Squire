@@ -10,6 +10,7 @@ class KnightBadge extends Pivot
     protected $table = 'knightbadge';
 
     public $incrementing = true;
+    public $timestamps = false;
 
     protected $fillable = [
         'fkeybadge', 'fkeyknight', 'bdgreason', 'featured',
