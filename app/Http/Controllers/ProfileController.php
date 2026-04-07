@@ -55,10 +55,13 @@ public function show($rname)
     // Editable by councillors for anyone, or officers for their own battalion
     $can_edit_officer_fields = Auth::user()->isCouncillor() ||
                                Auth::user()->isOfficer($knight->batt);
+    $featured_badges = $knight->featuredBadges()->get();
+    
     return view('profile.show', [
         'knight' => $knight,
         'show_sensitive' => $show_sensitive,
         'show_irl' => $show_irl,
+        'featured_badges' => $featured_badges,
         'show_officer_fields' => $show_officer_fields,
         'show_onote' => $show_onote,
         'can_edit_officer_fields' => $can_edit_officer_fields,
