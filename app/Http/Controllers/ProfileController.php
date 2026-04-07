@@ -37,36 +37,41 @@ class ProfileController extends Controller
      * @param  int  $rname
      * @return \Illuminate\View\View
      */
-public function show($rname)
-{
-    $knight = Knight::firstWhere('rname', $rname);
-    if(!$knight) {
-        abort(404, 'Knight not found.');
-    }
-    $editingSelf = Auth::id() == $knight->pkey;
-    // Certain fields are limited to councillors and the user themselves
-    $show_sensitive = Auth::user()->isCouncillor() || $editingSelf;
-    // Other fields are limited to officers from this knight's battalion
-    $show_irl = Auth::user()->isOfficer($knight->batt) || $editingSelf;
-    // Discord ID and interview transcript visible to any officer+
-    $show_officer_fields = Auth::user()->getRankVal() <= Rank::HIGHEST_OFFICER_RANK;
-    // Officer notes restricted to councillors for anyone, officers for own battalion only
-    $show_onote = Auth::user()->isCouncillor() || Auth::user()->isOfficer($knight->batt);
-    // Editable by councillors for anyone, or officers for their own battalion
-    $can_edit_officer_fields = Auth::user()->isCouncillor() ||
-                               Auth::user()->isOfficer($knight->batt);
-    $featured_badges = $knight->featuredBadges()->get();
-    
-    return view('profile.show', [
-        'knight' => $knight,
-        'show_sensitive' => $show_sensitive,
-        'show_irl' => $show_irl,
-        'featured_badges' => $featured_badges,
-        'show_officer_fields' => $show_officer_fields,
-        'show_onote' => $show_onote,
-        'can_edit_officer_fields' => $can_edit_officer_fields,
-        'can_edit' => $this->editableFields($knight) !== null,
-    ]);
+    public function show($rname)
+   {
+        $knight = Knight::firstWhere('rname', $rname);
+
+        if(!$knight) {
+            abort(404, 'Knight not found.');
+        }
+
+        $editingSelf = Auth::id() == $knight->pkey;
+
+        $show_sensitive = Auth::user()->isCouncillor() || $editingSelf;
+        $show_irl = Auth::user()->isOfficer($knight->batt) || $editingSelf;
+       $show_officer_fields = Auth::user()->isCouncillor();
+
+        $all_badges_count = $knight->badges()->count();
+
+        $featured_badges = $knight->featuredBadges()->get();
+
+        if ($featured_badges->isEmpty()) {
+            $featured_badges = $knight->badges()
+                ->where('badge.activeflg', 1)
+                ->where('badge.delflg', 0)
+                ->orderBy('badge.orderid', 'asc')
+                ->take(3)
+                ->get();
+        }
+
+    return view('profile.show', ['knight' => $knight,
+                                 'show_sensitive' => $show_sensitive,
+                                 'show_irl' => $show_irl,
+                                 'show_officer_fields' => $show_officer_fields,
+                                 'can_edit' => $this->editableFields($knight) !== null,
+                                 'featured_badges' => $featured_badges,
+                                 'all_badges_count' => $all_badges_count,
+                                ]);
 }
     /**
  * Display the badge management page for a knight.
