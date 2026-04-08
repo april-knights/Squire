@@ -40,7 +40,6 @@
                 </div>
                 <div class="col">
                     <strong>{{ $kb->bdg_title }}</strong>
-                    <span class="text-muted">({{ $kb->typcd }})</span>
                     @if($kb->pivot->bdgreason)
                     <br><small>{{ $kb->pivot->bdgreason }}</small>
                     @endif
