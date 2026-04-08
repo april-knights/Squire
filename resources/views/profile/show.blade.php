@@ -84,7 +84,7 @@
         <ul class="skills" id="skills-list">
         @forelse ($knight->skills as $index => $skill)
             <?php /** @var \App\Model\Skill $skill */ ?>
-            <li @if($index >= 5) style="display:none;" class="skill-extra" @endif>
+            <li @if($index >= 5) class="skill-extra" style="display:none;" @endif>
                 {{ $skill->skillname }}
             </li>
         @empty
@@ -92,14 +92,7 @@
         @endforelse
         </ul>
         @if($knight->skills->count() > 5)
-        <button
-            type="button"
-            id="skills-toggle"
-            onclick="toggleSkills()"
-            style="background:none; border:none; padding:0; color:inherit; cursor:pointer; font-size:0.875rem; text-decoration:underline;"
-        >
-            Show more
-        </button>
+        <a href="#" id="skills-toggle" class="font-italic" onclick="toggleSkills(); return false;">See more…</a>
         <script>
             function toggleSkills() {
                 var extras = document.querySelectorAll('.skill-extra');
@@ -107,7 +100,7 @@
                 var expanded = btn.dataset.expanded === 'true';
                 extras.forEach(function(el) { el.style.display = expanded ? 'none' : ''; });
                 btn.dataset.expanded = expanded ? 'false' : 'true';
-                btn.textContent = expanded ? 'Show more' : 'Show less';
+                btn.textContent = expanded ? 'See more…' : 'See less…';
             }
         </script>
         @endif
