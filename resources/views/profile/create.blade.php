@@ -77,6 +77,7 @@
                         <label>Rank</label>
                         @if ($is_commander)
                         <input class="form-control" type="text" value="Initiate" readonly>
+                        <input type="hidden" name="rank" value="{{ $def_rank }}">
                         @else
                         <select class="custom-select" name="rank">
                             @foreach ($all_ranks as $rank)
@@ -94,6 +95,7 @@
                         <label>Security</label>
                         @if ($is_commander)
                         <input class="form-control" type="text" value="Initiate" readonly>
+                        <input type="hidden" name="security" value="{{ $def_sec }}">
                         @else
                         <select class="custom-select" name="security">
                             @foreach ($all_secs as $sec)
