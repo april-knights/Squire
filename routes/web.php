@@ -37,6 +37,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('profile/{rname}', 'ProfileController@destroy');
     Route::get('/profile/{rname}/badges', 'ProfileController@badges');
     Route::post('/profile/{rname}/badges', 'ProfileController@updateBadges');
+    Route::get('/profile/{rname}/badges', 'ProfileController@badges')->name('profile.badges');
+    Route::post('/profile/{rname}/badges', 'ProfileController@updateBadges')->name('profile.badges.update');
 
     # Battalion
     Route::get('/battalion', 'BattalionController@index');
