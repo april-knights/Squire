@@ -17,7 +17,7 @@
                 <select class="form-control" name="add_badge">
                     <option value="">— Select Badge —</option>
                     @foreach($all_badges as $badge)
-                    <option value="{{ $badge->pkey }}">{{ $badge->typcd }} — {{ $badge->bdg_title }}</option>
+                    <option value="{{ $badge->pkey }}">{{ $badge->bdg_title }}</option>
                     @endforeach
                 </select>
             </div>
