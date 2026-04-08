@@ -81,15 +81,36 @@
     </div>
     <div class="col-md-4">
         <h2>Skills</h2>
-        <ul class="skills">
-        @forelse ($knight->skills as $skill)
+        <ul class="skills" id="skills-list">
+        @forelse ($knight->skills as $index => $skill)
             <?php /** @var \App\Model\Skill $skill */ ?>
-
-            <li>{{ $skill->skillname }}</li>
+            <li @if($index >= 5) style="display:none;" class="skill-extra" @endif>
+                {{ $skill->skillname }}
+            </li>
         @empty
             <li>None</li>
         @endforelse
         </ul>
+        @if($knight->skills->count() > 5)
+        <button
+            type="button"
+            id="skills-toggle"
+            onclick="toggleSkills()"
+            style="background:none; border:none; padding:0; color:inherit; cursor:pointer; font-size:0.875rem; text-decoration:underline;"
+        >
+            Show more
+        </button>
+        <script>
+            function toggleSkills() {
+                var extras = document.querySelectorAll('.skill-extra');
+                var btn = document.getElementById('skills-toggle');
+                var expanded = btn.dataset.expanded === 'true';
+                extras.forEach(function(el) { el.style.display = expanded ? 'none' : ''; });
+                btn.dataset.expanded = expanded ? 'false' : 'true';
+                btn.textContent = expanded ? 'Show more' : 'Show less';
+            }
+        </script>
+        @endif
     </div>
 </div>
 @if($featured_badges->isNotEmpty())
