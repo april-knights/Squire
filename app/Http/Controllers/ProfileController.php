@@ -134,6 +134,7 @@ public function updateBadges(Request $request, $rname)
     ]);
 
     $editor = Auth::id();
+    $featured = $validated['featured'] ?? [];
 
     // Add new badge if requested
     if ($can_award_badges && !empty($validated['add_badge'])) {
