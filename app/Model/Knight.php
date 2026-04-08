@@ -57,7 +57,7 @@ class Knight extends SquireModel implements AuthenticatableContract, Authorizabl
      * @return bool
      */
     public function isBattMember($batt_key) {
-        return $this->battalion->pkey === $batt_key;
+        return $this->battalion->pkey == $batt_key;
     }
 
     /**
