@@ -71,7 +71,8 @@
     <div class="row mt-3">
         <div class="col">
             <a href="/profile/{{ $knight->rname }}" class="btn btn-secondary">Cancel</a>
-            <button type="submit" class="btn btn-success float-right">Save</button>
+            <button type="submit" name="stay" value="1" class="btn btn-primary float-right ml-2">Save & Stay</button>
+            <button type="submit" class="btn btn-success float-right">Save & Return</button>
         </div>
     </div>
 </form>
@@ -90,7 +91,6 @@
                 </div>
                 <div class="col">
                     <strong>{{ $kb->bdg_title }}</strong>
-                    <span class="text-muted">({{ $kb->typcd }})</span>
                     @if($kb->pivot->bdgreason)
                     <br><small>{{ $kb->pivot->bdgreason }}</small>
                     @endif
@@ -108,13 +108,12 @@
             <p>No badges awarded yet.</p>
             @endforelse
         </div>
-<div class="row mt-3">
+    </div>
+    <div class="row mt-3">
         <div class="col">
             <a href="/profile/{{ $knight->rname }}" class="btn btn-secondary">Cancel</a>
-            @if($editing_self || $can_award_badges)
             <button type="submit" name="stay" value="1" class="btn btn-primary float-right ml-2">Save & Stay</button>
             <button type="submit" class="btn btn-success float-right">Save & Return</button>
-            @endif
         </div>
     </div>
 </form>
