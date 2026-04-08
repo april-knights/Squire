@@ -99,7 +99,7 @@ public function badges($rname)
     return view('profile.badges', [
         'knight'           => $knight,
         'all_badges'       => Badge::orderBy('typcd')->orderBy('orderid')->get(),
-        'knight_badges'    => $knight->badges()->get(),
+        'knight_badges' => $knight->badges()->orderBy('badge.orderid', 'asc')->get(),
         'can_award_badges' => $can_award_badges,
         'editing_self'     => $editingSelf,
     ]);
