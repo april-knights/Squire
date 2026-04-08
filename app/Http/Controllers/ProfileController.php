@@ -167,6 +167,10 @@ if (!empty($featured)) {
         ->update(['featured' => 1, 'lstmdby' => $editor]);
 }
 
+   if ($request->input('stay')) {
+        return redirect()->route('profile.badges', ['rname' => $rname]);
+    }
+
     return redirect()->route('profile', ['rname' => $rname]);
 }
     /**

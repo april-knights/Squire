@@ -108,12 +108,12 @@
             <p>No badges awarded yet.</p>
             @endforelse
         </div>
-    </div>
-    <div class="row mt-3">
+<div class="row mt-3">
         <div class="col">
             <a href="/profile/{{ $knight->rname }}" class="btn btn-secondary">Cancel</a>
-            @if($editing_self)
-            <button type="submit" class="btn btn-success float-right">Save Featured</button>
+            @if($editing_self || $can_award_badges)
+            <button type="submit" name="stay" value="1" class="btn btn-primary float-right ml-2">Save & Stay</button>
+            <button type="submit" class="btn btn-success float-right">Save & Return</button>
             @endif
         </div>
     </div>
