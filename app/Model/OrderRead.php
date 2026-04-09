@@ -2,34 +2,17 @@
 
 namespace App\Model;
 
-use App\Support\SquireModel;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Model;
 
-class KnightBadge extends Pivot
+class OrderRead extends Model
 {
-    protected $table = 'knightbadge';
-
-    public $incrementing = true;
-    public $timestamps = false;
+    protected $table      = 'order_read';
+    public    $timestamps = false;
 
     protected $fillable = [
-        'fkeybadge', 'fkeyknight', 'bdgreason', 'featured',
-        'crtsetid', 'lstmdby'
+        'fkeyorder',
+        'fkeyknight',
     ];
 
-    protected $casts = [
-        'featured'  => 'boolean',
-        'crtsetdt'  => 'datetime',
-        'lstmdts'   => 'datetime',
-    ];
-
-    public function badge()
-    {
-        return $this->belongsTo(Badge::class, 'fkeybadge', 'pkey');
-    }
-
-    public function knight()
-    {
-        return $this->belongsTo(Knight::class, 'fkeyknight', 'pkey');
-    }
+    protected $dates = ['read_at'];
 }
