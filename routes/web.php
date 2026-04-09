@@ -55,13 +55,19 @@ Route::middleware(['auth'])->group(function () {
 
     # Orders
     Route::get('/orders', 'OrdersController@index');
-    Route::get('/orders/create', 'OrdersController@create');       # NEW
-    Route::post('/orders', 'OrdersController@store');              # NEW
-    Route::post('/orders/reorder', 'OrdersController@reorder');        # REORDER
-    Route::get('/orders/{id}/edit', 'OrdersController@edit');      # NEW
-    Route::post('/orders/{id}/edit', 'OrdersController@update');   # NEW
-    Route::delete('/orders/{id}', 'OrdersController@destroy');     # NEW
-    Route::delete('/orders', 'OrdersController@bulkDestroy');      # BULK DELETE
+    Route::get('/orders/create', 'OrdersController@create');
+    Route::post('/orders', 'OrdersController@store');
+    Route::post('/orders/reorder', 'OrdersController@reorder');
+    Route::get('/orders/{id}/edit', 'OrdersController@edit');
+    Route::post('/orders/{id}/edit', 'OrdersController@update');
+    Route::delete('/orders/{id}', 'OrdersController@destroy');
+    Route::delete('/orders', 'OrdersController@bulkDestroy');
+    Route::post('/orders/{id}/read', 'OrdersController@markRead');  # READ TRACKING
+
+    # Notifications
+    Route::get('/notifications', 'NotificationController@index');
+    Route::post('/notifications/read-all', 'NotificationController@markAllRead');
+    Route::post('/notifications/{id}/read', 'NotificationController@markRead');
 
     # Links
     Route::get('/links', 'LinkController@index');

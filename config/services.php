@@ -36,4 +36,6 @@ return [
         'redirect' => env('REDDIT_REDIRECT_URI'),
     ],
 
+    'squire_api_token' => env('SQUIRE_API_TOKEN'),
+
 ];

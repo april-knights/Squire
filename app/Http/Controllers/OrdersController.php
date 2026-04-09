@@ -7,6 +7,7 @@ use App\Model\Order;
 use App\Model\Rank;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Services\NotificationService;
 
 use DB;
 use Log;
@@ -21,38 +22,59 @@ class OrdersController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
+        $user   = Auth::user();
+        $userId = Auth::id();
 
         $knight_orders = Order::where('level', '>', Rank::HIGHEST_OFFICER_RANK)
+            ->with(['reads' => fn($q) => $q->where('fkeyknight', $userId)])
             ->orderByRaw('sort_order IS NULL, sort_order ASC')
             ->orderBy('crtsetdt', 'desc')
             ->get();
 
-        $officer_orders = Order::where('level', '>', Rank::HIGHEST_COMMANDER_RANK)
-            ->where('level', '<=', Rank::HIGHEST_OFFICER_RANK)
-            ->orderByRaw('sort_order IS NULL, sort_order ASC')
-            ->orderBy('crtsetdt', 'desc')
-            ->get();
+        $officer_orders = collect();
+        if ($user->getRankVal() <= Rank::HIGHEST_OFFICER_RANK) {
+            $officer_orders = Order::where('level', '>', Rank::HIGHEST_COMMANDER_RANK)
+                ->where('level', '<=', Rank::HIGHEST_OFFICER_RANK)
+                ->with(['reads' => fn($q) => $q->where('fkeyknight', $userId)])
+                ->orderByRaw('sort_order IS NULL, sort_order ASC')
+                ->orderBy('crtsetdt', 'desc')
+                ->get();
+        }
 
-        $commander_orders = Order::where('level', '<=', Rank::HIGHEST_COMMANDER_RANK)
-            ->where('level', '>', 0)
-            ->orderByRaw('sort_order IS NULL, sort_order ASC')
-            ->orderBy('crtsetdt', 'desc')
-            ->get();
+        $commander_orders = collect();
+        if ($user->getRankVal() <= Rank::HIGHEST_COMMANDER_RANK) {
+            $commander_orders = Order::where('level', '<=', Rank::HIGHEST_COMMANDER_RANK)
+                ->where('level', '>', 0)
+                ->with(['reads' => fn($q) => $q->where('fkeyknight', $userId)])
+                ->orderByRaw('sort_order IS NULL, sort_order ASC')
+                ->orderBy('crtsetdt', 'desc')
+                ->get();
+        }
 
         $battalion_orders = Order::where('fkeybattalion', $user->batt)
+            ->with(['reads' => fn($q) => $q->where('fkeyknight', $userId)])
             ->orderByRaw('sort_order IS NULL, sort_order ASC')
             ->orderBy('crtsetdt', 'desc')
             ->get();
 
+        $readIds = fn($collection) => $collection
+            ->filter(fn($o) => $o->reads->isNotEmpty())
+            ->pluck('pkey')
+            ->flip()
+            ->all();
+
         return view('orders.index', [
-            'knight_orders'    => $knight_orders,
-            'officer_orders'   => $officer_orders,
-            'commander_orders' => $commander_orders,
-            'battalion_orders' => $battalion_orders,
-            'can_create'       => $user->checkSecurity('cmorder'),
-            'can_delete'       => $user->checkSecurity('cdorder'),
-            'user_rank'        => $user->getRankVal(),
+            'knight_orders'      => $knight_orders,
+            'officer_orders'     => $officer_orders,
+            'commander_orders'   => $commander_orders,
+            'battalion_orders'   => $battalion_orders,
+            'knight_read_ids'    => $readIds($knight_orders),
+            'officer_read_ids'   => $readIds($officer_orders),
+            'commander_read_ids' => $readIds($commander_orders),
+            'battalion_read_ids' => $readIds($battalion_orders),
+            'can_create'         => $user->checkSecurity('cmorder'),
+            'can_delete'         => $user->checkSecurity('cdorder'),
+            'user_rank'          => $user->getRankVal(),
         ]);
     }
 
@@ -161,9 +183,9 @@ class OrdersController extends Controller
             abort_if(!$validated['fkeybattalion'], 422, 'Battalion orders must be assigned to a battalion.');
         }
 
-        DB::transaction(function () use (&$validated) {
+        DB::transaction(function () use (&$validated, &$order) {
             $editor = Auth::id();
-            $order = new Order([
+            $order  = new Order([
                 'title'         => $validated['title'],
                 'body'          => clean($validated['body']),
                 'level'         => $validated['level'],
@@ -174,6 +196,10 @@ class OrdersController extends Controller
             ]);
             $order->save();
         });
+
+        // Fan-out outside the transaction — notification failure should not
+        // roll back the order itself
+        NotificationService::notifyNewOrder($order, Auth::id());
 
         return redirect('/orders');
     }
@@ -252,21 +278,21 @@ class OrdersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse
      */
-public function destroy(Request $request, $id)
+    public function destroy(Request $request, $id)
     {
-        if (!Auth::user()->checkSecurity('cdorder')) {
-            Log::warning('User ' . Auth::user()->rname . ' illegally attempted to delete order ' . $id . '!');
-            abort(401, 'You are not authorized to delete that order!');
-        }
+            if (!Auth::user()->checkSecurity('cdorder')) {
+                Log::warning('User ' . Auth::user()->rname . ' illegally attempted to delete order ' . $id . '!');
+                abort(401, 'You are not authorized to delete that order!');
+            }
 
-        $order = Order::findOrFail($id);
+            $order = Order::findOrFail($id);
 
-        $order->delflg = true;
-        $order->save();
+            $order->delflg = true;
+            $order->save();
 
-        $request->session()->flash('success', 'Deleted order "' . $order->title . '".');
+            $request->session()->flash('success', 'Deleted order "' . $order->title . '".');
 
-        return redirect('/orders');
+            return redirect('/orders');
     }
 
     /**
@@ -277,7 +303,7 @@ public function destroy(Request $request, $id)
      */
     public function bulkDestroy(Request $request)
     {
-        if (!Auth::user()->checkSecurity('cdorder')) {
+         if (!Auth::user()->checkSecurity('cdorder')) {
             Log::warning('User ' . Auth::user()->rname . ' illegally attempted to bulk delete orders!');
             abort(401, 'You are not authorized to delete orders!');
         }
@@ -300,26 +326,41 @@ public function destroy(Request $request, $id)
         return redirect('/orders');
     }
     /**
- * Update the sort order of orders.
- *
- * @param  \Illuminate\Http\Request  $request
- * @return \Illuminate\Http\JsonResponse
- */
-public function reorder(Request $request)
-{
-    if (!Auth::user()->checkSecurity('cmorder')) {
-        abort(401, 'Not authorized to reorder orders.');
+     * Update the sort order of orders.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reorder(Request $request)
+    {
+        if (!Auth::user()->checkSecurity('cmorder')) {
+            abort(401, 'Not authorized to reorder orders.');
+        }
+
+        $validated = $request->validate([
+            'orders'   => 'required|array',
+            'orders.*' => 'integer|exists:orders,pkey',
+        ]);
+
+        foreach ($validated['orders'] as $index => $id) {
+            Order::where('pkey', $id)->update(['sort_order' => $index]);
+        }
+
+        return response()->json(['success' => true]);
     }
+    /**
+     * POST /orders/{id}/read
+     * Marks a single order as read by the current knight. Idempotent.
+     */
+    public function markRead(int $id)
+    {
+        $order = Order::findOrFail($id);
 
-    $validated = $request->validate([
-        'orders'   => 'required|array',
-        'orders.*' => 'integer|exists:orders,pkey',
-    ]);
+        \App\Model\OrderRead::firstOrCreate([
+            'fkeyorder'  => $order->pkey,
+            'fkeyknight' => Auth::id(),
+        ]);
 
-    foreach ($validated['orders'] as $index => $id) {
-        Order::where('pkey', $id)->update(['sort_order' => $index]);
+        return response()->json(['ok' => true]);
     }
-
-    return response()->json(['success' => true]);
-}
 }
