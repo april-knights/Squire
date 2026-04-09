@@ -99,28 +99,30 @@ document.querySelectorAll('.orderlist-container').forEach(function(container) {
 @endif
 
 <script>
-// Order read tracking — fire once on first expand
-$(document).on('show.bs.collapse', '.orderlist-container .collapse', function () {
-    var bodyId  = $(this).attr('id');
-    var orderId = bodyId.replace('order-body-', '');
-    var $item   = $(this).closest('.order-item');
+document.addEventListener('DOMContentLoaded', function () {
+    // Order read tracking — fire once on first expand
+    $(document).on('show.bs.collapse', '.orderlist-container .collapse', function () {
+        var bodyId  = $(this).attr('id');
+        var orderId = bodyId.replace('order-body-', '');
+        var $item   = $(this).closest('.order-item');
 
-    if ($item.data('read') === 'true') return;
+        if ($item.data('read') === 'true') return;
 
-    $item.data('read', 'true');
-    $item.removeClass('order-unread');
-    $item.find('.fa-exclamation-circle').remove();
-    $item.find('.order-title').removeClass('font-weight-bold');
+        $item.data('read', 'true');
+        $item.removeClass('order-unread');
+        $item.find('.fa-exclamation-circle').remove();
+        $item.find('.order-title').removeClass('font-weight-bold');
 
-    $.post('/orders/' + orderId + '/read', {
-        _token: $('meta[name="csrf-token"]').attr('content')
+        $.post('/orders/' + orderId + '/read', {
+            _token: $('meta[name="csrf-token"]').attr('content')
+        });
     });
-});
 
-// Rotate chevron on expand/collapse
-$(document).on('show.bs.collapse hide.bs.collapse', '.orderlist-container .collapse', function (e) {
-    var $icon = $(this).closest('.order-item').find('.order-toggle-icon');
-    $icon.html(e.type === 'show' ? '&#9650;' : '&#9660;');
+    // Rotate chevron on expand/collapse
+    $(document).on('show.bs.collapse hide.bs.collapse', '.orderlist-container .collapse', function (e) {
+        var $icon = $(this).closest('.order-item').find('.order-toggle-icon');
+        $icon.html(e.type === 'show' ? '&#9650;' : '&#9660;');
+    });
 });
 </script>
 
