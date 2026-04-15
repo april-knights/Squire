@@ -250,4 +250,48 @@ class KnightApiController extends Controller
             'ticket_needed' => $ticketNeeded,
         ]);
     }
+
+    /**
+     * POST /api/knight/{discordid}/reactivate
+     * Reactivates an inactive knight if not deleted.
+     * Returns error if knight is deleted — requires Commander intervention.
+     */
+    public function reactivate(string $discordid)
+{
+        $knight = Knight::withoutGlobalScopes()
+            ->where('discordid', $discordid)
+            ->firstOrFail();
+
+        // Deleted knights cannot self-reactivate
+        if ($knight->delflg) {
+            return response()->json([
+                'ok'      => false,
+                'deleted' => true,
+                'message' => 'This knight record has been deleted. Please contact your Commander to review and restore your record.',
+            ], 403);
+        }
+
+        // Already active — nothing to do
+        if ($knight->activeflg) {
+            return response()->json([
+                'ok'     => true,
+                'active' => true,
+            ]);
+        }
+
+        // Inactive but not deleted — reactivate
+        $knight->activeflg = 1;
+        $knight->save();
+
+        Log::info('Knight reactivated via Discord /restore', [
+            'discordid'   => $discordid,
+            'knight_pkey' => $knight->pkey,
+    ]);
+
+        return response()->json([
+            'ok'          => true,
+            'reactivated' => true,
+            'knight'      => $this->publicProfile($knight),
+        ]);
+    }
 }

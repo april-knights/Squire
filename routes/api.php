@@ -16,5 +16,6 @@ Route::middleware(['api.token', 'throttle:60,1'])->group(function () {
     Route::put('/knight/{discordid}/roles',         [KnightApiController::class, 'syncRoles']);
     Route::get('/knight/{discordid}/profile',       [KnightApiController::class, 'profile']);
     Route::post('/knight/{discordid}/restore',      [KnightApiController::class, 'restore']);
+    Route::post('/knight/{discordid}/reactivate',   [KnightApiController::class, 'reactivate']);
 
 });
