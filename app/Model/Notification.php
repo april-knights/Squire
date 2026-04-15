@@ -42,7 +42,7 @@ class Notification extends Model
 
     public function scopePendingDiscord($query)
     {
-        return $query->where('delivered_to_discord', 0)->where('delflg', 0);
+        return $query->where('delivered_to_discord', 0)->where('notification.delflg', 0);
     }
 
     // ---------------------------------------------------------------
