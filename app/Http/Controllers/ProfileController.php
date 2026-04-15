@@ -138,7 +138,7 @@ public function updateBadges(Request $request, $rname)
 
     // Add new badge if requested
     if ($can_award_badges && !empty($validated['add_badge'])) {
-        KnightBadge::create([
+        DB::table('knightbadge')->insert([
             'fkeybadge'  => $validated['add_badge'],
             'fkeyknight' => $knight->pkey,
             'bdgreason'  => $validated['reason'][$validated['add_badge']] ?? null,
