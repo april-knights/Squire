@@ -40,6 +40,7 @@ class KnightApiController extends Controller
             'dname'     => $knight->dname,
             'discordid' => $knight->discordid,
             'batt'      => $knight->batt,
+            'batt_name' => $knight->battalion ? $knight->battalion->name : 'Unknown',
             'rnk'       => $knight->rnk,
             'rank_name' => $knight->getRankName(),
             'rank_val'  => $knight->getRankVal(),
