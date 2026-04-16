@@ -26,7 +26,7 @@ class NotificationApiController extends Controller
                 'notification.message',
                 'notification.url',
                 'notification.crtsetdt',
-                'knight.discordid'
+                \DB::raw('CAST(knight.discordid AS CHAR) as discordid')
             )
             ->orderBy('notification.crtsetdt')
             ->limit(100)

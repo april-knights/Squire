@@ -38,7 +38,7 @@ class KnightApiController extends Controller
             'knum'      => $knight->knum,
             'rname'     => $knight->rname,
             'dname'     => $knight->dname,
-            'discordid' => $knight->discordid,
+            'discordid' => (string) $knight->discordid,
             'batt'      => $knight->batt,
             'batt_name' => $knight->battalion ? $knight->battalion->name : 'Unknown',
             'rnk'       => $knight->rnk,
