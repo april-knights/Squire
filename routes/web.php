@@ -4,15 +4,9 @@
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
 */
 
 ## Public routes
-
 Route::view('/login', 'login')->name('login');
 Route::get('/logout', function () {
     Auth::logout();
@@ -22,7 +16,6 @@ Route::get('/logout', function () {
 # Signin
 Route::get('/login/reddit', 'LoginController@redirectToProvider');
 Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback');
-
 
 ## Internal routes
 Route::middleware(['auth'])->group(function () {
@@ -62,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/{id}/edit', 'OrdersController@update');
     Route::delete('/orders/{id}', 'OrdersController@destroy');
     Route::delete('/orders', 'OrdersController@bulkDestroy');
-    Route::post('/orders/{id}/read', 'OrdersController@markRead');  # READ TRACKING
+    Route::post('/orders/{id}/read', 'OrdersController@markRead');
 
     # Notifications
     Route::get('/notifications', 'NotificationController@index');
@@ -72,18 +65,14 @@ Route::middleware(['auth'])->group(function () {
     # Links
     Route::get('/links', 'LinkController@index');
 
-Route::middleware(['admin'])->prefix('admin')->group(function () {
-
-        // Dashboard
+    # Admin
+    Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('/', 'Admin\AdminController@index')->name('admin.index');
-
-        // Knight management
-        Route::get('/knights',                'Admin\KnightController@index')->name('admin.knights.index');
-        Route::get('/knights/{pkey}',         'Admin\KnightController@show')->name('admin.knights.show');
-        Route::get('/knights/{pkey}/edit',    'Admin\KnightController@edit')->name('admin.knights.edit');
-        Route::put('/knights/{pkey}/edit',    'Admin\KnightController@update')->name('admin.knights.update');
+        Route::get('/knights', 'Admin\KnightController@index')->name('admin.knights.index');
+        Route::get('/knights/{pkey}', 'Admin\KnightController@show')->name('admin.knights.show');
+        Route::get('/knights/{pkey}/edit', 'Admin\KnightController@edit')->name('admin.knights.edit');
+        Route::put('/knights/{pkey}/edit', 'Admin\KnightController@update')->name('admin.knights.update');
         Route::post('/knights/{pkey}/toggle', 'Admin\KnightController@toggle')->name('admin.knights.toggle');
-
     }); // end admin group
 
 }); // end auth group

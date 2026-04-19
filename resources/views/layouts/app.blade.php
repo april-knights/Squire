@@ -76,9 +76,13 @@
       </nav>
 
     @if (Auth::check())
-        <div class="container-xl">
+<div class="container-xl">
             <div class="row">
-                <div class="content {{ yield('full_width') ? 'col-12' : 'col-lg-9' }}">
+                @hasSection('full_width')
+                <div class="content col-12">
+                @else
+                <div class="content col-lg-9">
+                @endif
                     @if(session()->has('success'))
                     <div class="alert alert-success" role="alert">
                         {{ session()->get('success') }}
@@ -91,7 +95,7 @@
                     @endif
                     @yield('content')
                 </div>
-                @unless(yield('full_width'))
+                @unless(View::hasSection('full_width'))
                 <div class="discord col-lg-3 d-none d-lg-block">
                     <iframe src="https://discordapp.com/widget?id=295643919553921035&theme=dark" width="250" height="500px" align="right" allowtransparency="true" frameborder="0"></iframe>
                 </div>
