@@ -1,6 +1,36 @@
 @extends('layouts.app')
 @section('title', 'Admin — Knights')
+@section('full_width', true)
 @section('content')
+
+@push('styles')
+<style>
+/* Admin table row states — dark-theme appropriate */
+#knightTable tr.row-inactive {
+    opacity: 0.6;
+    border-left: 3px solid #c8a000;
+}
+#knightTable tr.row-deleted {
+    opacity: 0.45;
+    border-left: 3px solid #8b2020;
+    text-decoration: line-through;
+}
+/* Breadcrumb dark theme */
+.breadcrumb {
+    background-color: rgba(0,0,0,0.25);
+    border: 1px solid #8b3a3a;
+}
+.breadcrumb-item a {
+    color: #efefef;
+}
+.breadcrumb-item.active {
+    color: #c9a0a0;
+}
+.breadcrumb-item + .breadcrumb-item::before {
+    color: #8b3a3a;
+}
+</style>
+@endpush
 
 {{-- Breadcrumb --}}
 <nav aria-label="breadcrumb">
@@ -45,7 +75,7 @@
 @endphp
 
 <div class="table-responsive">
-<table class="table table-hover table-borderless" id="knightTable">
+<table class="table table-sm table-hover table-borderless" id="knightTable">
     <thead>
         <tr>
             <th><a href="{{ $sh('rname') }}">Reddit Name @if($sort==='rname')<i class="fas {{ $icon }}"></i>@endif</a></th>
@@ -65,7 +95,7 @@
         @forelse ($knights as $knight)
         @php
             $skillList = $knight->skills->pluck('skillname')->implode(' ');
-            $rowClass  = $knight->delflg ? 'table-danger' : (!$knight->activeflg ? 'table-warning' : '');
+            $rowClass  = $knight->delflg ? 'row-deleted' : (!$knight->activeflg ? 'row-inactive' : '');
         @endphp
         <tr class="{{ $rowClass }}"
             data-rname="{{ strtolower($knight->rname) }}"

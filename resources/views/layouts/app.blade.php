@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link type="text/css" href="{{ asset('static/css/app.css') }}" rel="stylesheet">
+    @stack('styles')
 </head>
 
 <body>
@@ -77,17 +78,24 @@
     @if (Auth::check())
         <div class="container-xl">
             <div class="row">
-                <div class="content col-lg-9">
+                <div class="content {{ yield('full_width') ? 'col-12' : 'col-lg-9' }}">
                     @if(session()->has('success'))
-                    <div class="alert alert-sucess" role="alert">
+                    <div class="alert alert-success" role="alert">
                         {{ session()->get('success') }}
+                    </div>
+                    @endif
+                    @if(session()->has('error'))
+                    <div class="alert alert-danger" role="alert">
+                        {{ session()->get('error') }}
                     </div>
                     @endif
                     @yield('content')
                 </div>
+                @unless(yield('full_width'))
                 <div class="discord col-lg-3 d-none d-lg-block">
                     <iframe src="https://discordapp.com/widget?id=295643919553921035&theme=dark" width="250" height="500px" align="right" allowtransparency="true" frameborder="0"></iframe>
                 </div>
+                @endunless
             </div>
         </div>
     @else

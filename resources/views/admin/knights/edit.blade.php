@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Admin — Edit ' . $knight->rname)
 @section('content')
+@section('full_width', true)
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
