@@ -13,22 +13,23 @@ class NotificationService
      * Fan out a "new order" notification to every knight who can see it.
      * Called from OrdersController::store() after the order is saved.
      */
-    public static function notifyNewOrder(Order $order, int $actorId): void
-    {
-        $recipientIds = self::recipientsForOrder($order, $actorId);
+     public static function notifyNewOrder(Order $order, int $actorId, bool $notifyDiscord = false): void
+     {
+         $recipientIds = self::recipientsForOrder($order, $actorId);
 
-        if (empty($recipientIds)) {
-            return;
-        }
+         if (empty($recipientIds)) {
+             return;
+         }
 
-        Notification::dispatch(
-            knightIds: $recipientIds,
-            type:      'new_order',
-            message:   'New order posted: ' . $order->title,
-            url:       '/orders',
-            actorId:   $actorId,
-        );
-    }
+         Notification::dispatch(
+             knightIds:     $recipientIds,
+             type:          'new_order',
+             message:       'New order posted: ' . $order->title,
+             url:           '/orders',
+             actorId:       $actorId,
+             notifyDiscord: $notifyDiscord,
+         );
+     }
 
     /**
      * Resolve the set of knight pkeys who should receive a notification

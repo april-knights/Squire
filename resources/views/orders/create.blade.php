@@ -59,18 +59,16 @@
     </div>
     <div class="row">
         <div class="col">
-            <div class="form-group">
-                <label for="body">Order</label>
-                <textarea class="form-control" id="body" name="body">{{ old('body') }}</textarea>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
             <a href="/orders" class="btn btn-secondary">Cancel</a>
         </div>
-        <div class="col">
-            <button type="submit" class="btn btn-success float-right">Post Order</button>
+        <div class="col text-right">
+            <div class="form-check form-check-inline mr-3">
+                <input class="form-check-input" type="checkbox" id="notify_discord" name="notify_discord" value="1">
+                <label class="form-check-label" for="notify_discord">
+                    Send Discord DM notifications
+                </label>
+            </div>
+            <button type="submit" class="btn btn-success">Post Order</button>
         </div>
     </div>
 </form>

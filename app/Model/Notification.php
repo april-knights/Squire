@@ -67,30 +67,33 @@ class Notification extends Model
      * @param string|null $url
      * @param int         $actorId    Knight pkey triggering the event (crtsetid)
      */
-    public static function dispatch(
-        array $knightIds,
-        string $type,
-        string $message,
-        ?string $url,
-        int $actorId
-    ): void {
-        if (empty($knightIds)) {
-            return;
-        }
+      public static function dispatch(
+         array $knightIds,
+         string $type,
+         string $message,
+         ?string $url,
+         int $actorId,
+         bool $notifyDiscord = false
+     ): void {
+         if (empty($knightIds)) {
+             return;
+         }
 
-        $now  = now();
-        $rows = array_map(fn($id) => [
-            'fkeyknight' => $id,
-            'type'       => $type,
-            'message'    => $message,
-            'url'        => $url,
-            'crtsetid'   => $actorId,
-            'crtsetdt'   => $now,
-        ], $knightIds);
+         $now             = now();
+         $discordDelivered = $notifyDiscord ? 0 : 1; // 1 = skip Discord delivery
 
-        // Chunk to avoid hitting MySQL max_allowed_packet on large rosters
-        foreach (array_chunk($rows, 500) as $chunk) {
-            \DB::table('notification')->insert($chunk);
-        }
-    }
+         $rows = array_map(fn($id) => [
+             'fkeyknight'           => $id,
+             'type'                 => $type,
+             'message'              => $message,
+             'url'                  => $url,
+             'crtsetid'             => $actorId,
+             'crtsetdt'             => $now,
+             'delivered_to_discord' => $discordDelivered,
+         ], $knightIds);
+
+         foreach (array_chunk($rows, 500) as $chunk) {
+             \DB::table('notification')->insert($chunk);
+         }
+     }
 }

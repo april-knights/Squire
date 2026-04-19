@@ -199,7 +199,7 @@ class OrdersController extends Controller
 
         // Fan-out outside the transaction — notification failure should not
         // roll back the order itself
-        NotificationService::notifyNewOrder($order, Auth::id());
+        NotificationService::notifyNewOrder($order, Auth::id(), $request->boolean('notify_discord'));
 
         return redirect('/orders');
     }
