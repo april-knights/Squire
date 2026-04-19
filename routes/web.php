@@ -71,4 +71,27 @@ Route::middleware(['auth'])->group(function () {
 
     # Links
     Route::get('/links', 'LinkController@index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Routes — add inside the existing auth middleware group
+    |--------------------------------------------------------------------------
+    | Paste this block inside the Route::middleware(['auth'])->group(...)
+    | closure, after the existing routes.
+    |
+    | Also add to app/Http/Kernel.php $routeMiddleware:
+    |   'admin' => \App\Http\Middleware\AdminMiddleware::class,
+    */
+ 
+    Route::middleware(['admin'])->prefix('admin')->group(function () {
+ 
+        // Dashboard
+        Route::get('/', 'Admin\AdminController@index')->name('admin.index');
+ 
+        // Knight management
+        Route::get('/knights',                    'Admin\KnightController@index')->name('admin.knights.index');
+        Route::get('/knights/{pkey}',             'Admin\KnightController@show')->name('admin.knights.show');
+        Route::get('/knights/{pkey}/edit',        'Admin\KnightController@edit')->name('admin.knights.edit');
+        Route::put('/knights/{pkey}/edit',        'Admin\KnightController@update')->name('admin.knights.update');
+        Route::post('/knights/{pkey}/toggle',     'Admin\KnightController@toggle')->name('admin.knights.toggle');
 });
