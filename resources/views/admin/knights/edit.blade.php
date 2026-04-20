@@ -3,6 +3,51 @@
 @section('content')
 @section('full_width', true)
 
+@push('styles')
+<style>
+/* Dark theme cards */
+.card {
+    background-color: rgba(0,0,0,0.25);
+    border: 1px solid #8b3a3a;
+}
+.card-header {
+    background-color: rgba(0,0,0,0.3);
+    border-bottom: 1px solid #8b3a3a;
+    color: #efefef;
+    font-weight: 600;
+}
+.card-body {
+    color: #efefef;
+}
+.col-form-label {
+    color: #efefef;
+}
+.form-control {
+    background-color: rgba(0,0,0,0.3);
+    border: 1px solid #8b3a3a;
+    color: #efefef;
+}
+.form-control:focus {
+    background-color: rgba(0,0,0,0.4);
+    border-color: #c9a0a0;
+    color: #efefef;
+    box-shadow: 0 0 0 0.2rem rgba(139,58,58,0.4);
+}
+select.form-control option {
+    background-color: #5a2424;
+    color: #efefef;
+}
+/* Breadcrumb */
+.breadcrumb {
+    background-color: rgba(0,0,0,0.25);
+    border: 1px solid #8b3a3a;
+}
+.breadcrumb-item a        { color: #efefef; }
+.breadcrumb-item.active   { color: #c9a0a0; }
+.breadcrumb-item + .breadcrumb-item::before { color: #8b3a3a; }
+</style>
+@endpush
+
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
