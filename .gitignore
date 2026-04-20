@@ -15,3 +15,4 @@ _ide_helper_models.php
 .phpstorm.meta.php
 .idea
 database/*.sqlite
+/public/static/img/
