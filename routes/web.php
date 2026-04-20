@@ -65,33 +65,50 @@ Route::middleware(['auth'])->group(function () {
     # Links
     Route::get('/links', 'LinkController@index');
 
-    # Admin
+# Admin
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('/', 'Admin\AdminController@index')->name('admin.index');
-    # Knight management
-        Route::get('/knights', 'Admin\KnightController@index')->name('admin.knights.index');
-        Route::get('/knights/{pkey}', 'Admin\KnightController@show')->name('admin.knights.show');
-        Route::get('/knights/{pkey}/edit', 'Admin\KnightController@edit')->name('admin.knights.edit');
-        Route::put('/knights/{pkey}/edit', 'Admin\KnightController@update')->name('admin.knights.update');
-        Route::post('/knights/{pkey}/toggle', 'Admin\KnightController@toggle')->name('admin.knights.toggle');
-   # Security profiles
-        Route::get('/security',                    'Admin\SecurityController@index')->name('admin.security.index');
-        Route::get('/security/create',             'Admin\SecurityController@create')->name('admin.security.create');
-        Route::post('/security',                   'Admin\SecurityController@store')->name('admin.security.store');
-        Route::get('/security/{pkey}',             'Admin\SecurityController@show')->name('admin.security.show');
-        Route::get('/security/{pkey}/edit',        'Admin\SecurityController@edit')->name('admin.security.edit');
-        Route::put('/security/{pkey}/edit',        'Admin\SecurityController@update')->name('admin.security.update');
-        Route::post('/security/{pkey}/delete',     'Admin\SecurityController@destroy')->name('admin.security.destroy');
-        Route::post('/security/{pkey}/toggle',     'Admin\SecurityController@toggle')->name('admin.security.toggle');
-    # Rank management
-        Route::get('/ranks',                 'Admin\RankController@index')->name('admin.ranks.index');
-        Route::get('/ranks/create',          'Admin\RankController@create')->name('admin.ranks.create');
-        Route::post('/ranks',                'Admin\RankController@store')->name('admin.ranks.store');
-        Route::get('/ranks/{pkey}',          'Admin\RankController@show')->name('admin.ranks.show');
-        Route::get('/ranks/{pkey}/edit',     'Admin\RankController@edit')->name('admin.ranks.edit');
-        Route::put('/ranks/{pkey}/edit',     'Admin\RankController@update')->name('admin.ranks.update');
-        Route::post('/ranks/{pkey}/delete',  'Admin\RankController@destroy')->name('admin.ranks.destroy');
-        Route::post('/ranks/{pkey}/toggle',  'Admin\RankController@toggle')->name('admin.ranks.toggle');   
-        });// end admin group
+
+        # Knight management
+        Route::get('/knights/search',            'Admin\DivisionController@knightSearch')->name('admin.knights.search');
+        Route::get('/knights',                   'Admin\KnightController@index')->name('admin.knights.index');
+        Route::get('/knights/{pkey}',            'Admin\KnightController@show')->name('admin.knights.show');
+        Route::get('/knights/{pkey}/edit',       'Admin\KnightController@edit')->name('admin.knights.edit');
+        Route::put('/knights/{pkey}/edit',       'Admin\KnightController@update')->name('admin.knights.update');
+        Route::post('/knights/{pkey}/toggle',    'Admin\KnightController@toggle')->name('admin.knights.toggle');
+
+        # Security profiles
+        Route::get('/security',                  'Admin\SecurityController@index')->name('admin.security.index');
+        Route::get('/security/create',           'Admin\SecurityController@create')->name('admin.security.create');
+        Route::post('/security',                 'Admin\SecurityController@store')->name('admin.security.store');
+        Route::get('/security/{pkey}',           'Admin\SecurityController@show')->name('admin.security.show');
+        Route::get('/security/{pkey}/edit',      'Admin\SecurityController@edit')->name('admin.security.edit');
+        Route::put('/security/{pkey}/edit',      'Admin\SecurityController@update')->name('admin.security.update');
+        Route::post('/security/{pkey}/delete',   'Admin\SecurityController@destroy')->name('admin.security.destroy');
+        Route::post('/security/{pkey}/toggle',   'Admin\SecurityController@toggle')->name('admin.security.toggle');
+
+        # Rank management
+        Route::get('/ranks',                     'Admin\RankController@index')->name('admin.ranks.index');
+        Route::get('/ranks/create',              'Admin\RankController@create')->name('admin.ranks.create');
+        Route::post('/ranks',                    'Admin\RankController@store')->name('admin.ranks.store');
+        Route::get('/ranks/{pkey}',              'Admin\RankController@show')->name('admin.ranks.show');
+        Route::get('/ranks/{pkey}/edit',         'Admin\RankController@edit')->name('admin.ranks.edit');
+        Route::put('/ranks/{pkey}/edit',         'Admin\RankController@update')->name('admin.ranks.update');
+        Route::post('/ranks/{pkey}/delete',      'Admin\RankController@destroy')->name('admin.ranks.destroy');
+        Route::post('/ranks/{pkey}/toggle',      'Admin\RankController@toggle')->name('admin.ranks.toggle');
+
+        # Division management
+        Route::get('/divisions',                                    'Admin\DivisionController@index')->name('admin.divisions.index');
+        Route::get('/divisions/create',                             'Admin\DivisionController@create')->name('admin.divisions.create');
+        Route::post('/divisions',                                   'Admin\DivisionController@store')->name('admin.divisions.store');
+        Route::get('/divisions/{pkey}',                             'Admin\DivisionController@show')->name('admin.divisions.show');
+        Route::get('/divisions/{pkey}/edit',                        'Admin\DivisionController@edit')->name('admin.divisions.edit');
+        Route::put('/divisions/{pkey}/edit',                        'Admin\DivisionController@update')->name('admin.divisions.update');
+        Route::post('/divisions/{pkey}/delete',                     'Admin\DivisionController@destroy')->name('admin.divisions.destroy');
+        Route::post('/divisions/{pkey}/toggle',                     'Admin\DivisionController@toggle')->name('admin.divisions.toggle');
+        Route::post('/divisions/{pkey}/members',                    'Admin\DivisionController@addMember')->name('admin.divisions.members.add');
+        Route::post('/divisions/{pkey}/members/{pivotPkey}/remove', 'Admin\DivisionController@removeMember')->name('admin.divisions.members.remove');
+
+    }); // end admin group
 
 }); // end auth group
