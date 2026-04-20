@@ -139,6 +139,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/events/{pkey}/delete', 'Admin\EventController@destroy')->name('admin.events.destroy');
         Route::post('/events/{pkey}/toggle', 'Admin\EventController@toggle')->name('admin.events.toggle');
 
+        # Link management
+        Route::get('/links',                'Admin\LinkController@index')->name('admin.links.index');
+        Route::get('/links/create',         'Admin\LinkController@create')->name('admin.links.create');
+        Route::post('/links',               'Admin\LinkController@store')->name('admin.links.store');
+        Route::get('/links/{pkey}',         'Admin\LinkController@show')->name('admin.links.show');
+        Route::get('/links/{pkey}/edit',    'Admin\LinkController@edit')->name('admin.links.edit');
+        Route::put('/links/{pkey}/edit',    'Admin\LinkController@update')->name('admin.links.update');
+        Route::post('/links/{pkey}/delete', 'Admin\LinkController@destroy')->name('admin.links.destroy');
+        Route::post('/links/{pkey}/toggle', 'Admin\LinkController@toggle')->name('admin.links.toggle');
+
     }); // end admin group
 
 }); // end auth group
