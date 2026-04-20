@@ -137,7 +137,7 @@
             <td>{{ $knight->dname }}</td>
             <td>{{ $knight->battalion?->name ?? '—' }}</td>
             <td>{{ $knight->rank?->name ?? '—' }}</td>
-            <td>{{ $knight->security?->secname ?? '—' }}</td>
+            <td>{{ $knight->secname ?? '—' }}</td>
             <td>{{ $knight->last_login ? \Carbon\Carbon::parse($knight->last_login)->diffForHumans() : '—' }}</td>
             <td>{!! $statusBadge !!}</td>
             <td><a href="/admin/knights/{{ $knight->pkey }}/edit" class="btn btn-sm btn-outline-secondary">Edit</a></td>

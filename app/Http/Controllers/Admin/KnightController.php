@@ -30,12 +30,13 @@ class KnightController extends Controller
         // withoutGlobalScopes() on each eager load bypasses HasActiveTrait filters
         $knights = Knight::withoutGlobalScopes()
             ->with([
-                'rank'       => fn($q) => $q->withoutGlobalScopes(),
-                'battalion'  => fn($q) => $q->withoutGlobalScopes(),
-                'security'   => fn($q) => $q->withoutGlobalScopes(),
-                'skills'     => fn($q) => $q->withoutGlobalScopes(),
+                'rank'      => fn($q) => $q->withoutGlobalScopes(),
+                'battalion' => fn($q) => $q->withoutGlobalScopes(),
+                'skills'    => fn($q) => $q->withoutGlobalScopes(),
             ])
-            ->orderBy($sort, $direction)
+            ->leftJoin('security', 'security.pkey', '=', 'knight.security')
+            ->select('knight.*', 'security.secname as secname')
+            ->orderBy($sort === 'security' ? 'security.secname' : "knight.{$sort}", $direction)
             ->get();
 
         $battalions = Battalion::orderBy('name')->get();
