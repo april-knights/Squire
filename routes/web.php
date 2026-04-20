@@ -149,6 +149,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/links/{pkey}/delete', 'Admin\LinkController@destroy')->name('admin.links.destroy');
         Route::post('/links/{pkey}/toggle', 'Admin\LinkController@toggle')->name('admin.links.toggle');
 
+        # Image management
+        Route::get('/images',               'Admin\ImageController@index')->name('admin.images.index');
+        Route::get('/images/upload',        'Admin\ImageController@create')->name('admin.images.create');
+        Route::post('/images',              'Admin\ImageController@store')->name('admin.images.store');
+        Route::get('/images/delete',        'Admin\ImageController@confirmDelete')->name('admin.images.confirm-delete');
+        Route::post('/images/delete',       'Admin\ImageController@destroy')->name('admin.images.destroy');
+
     }); // end admin group
 
 }); // end auth group
