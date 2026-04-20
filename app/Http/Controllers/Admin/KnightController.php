@@ -107,7 +107,7 @@ public function show($pkey)
             'onote'     => 'nullable|string',
         ]);
 
-        $validated['lstmdby'] = auth()->user()->rname;
+        $validated['lstmdby'] = auth()->user()->pkey;
         $validated['lstmdts'] = now();
 
         $knight->fill($validated)->save();
