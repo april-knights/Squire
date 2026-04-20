@@ -109,6 +109,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/divisions/{pkey}/members',                    'Admin\DivisionController@addMember')->name('admin.divisions.members.add');
         Route::post('/divisions/{pkey}/members/{pivotPkey}/remove', 'Admin\DivisionController@removeMember')->name('admin.divisions.members.remove');
 
+        # Badge management
+        Route::get('/badges',                'Admin\BadgeController@index')->name('admin.badges.index');
+        Route::get('/badges/create',         'Admin\BadgeController@create')->name('admin.badges.create');
+        Route::post('/badges',               'Admin\BadgeController@store')->name('admin.badges.store');
+        Route::get('/badges/{pkey}',         'Admin\BadgeController@show')->name('admin.badges.show');
+        Route::get('/badges/{pkey}/edit',    'Admin\BadgeController@edit')->name('admin.badges.edit');
+        Route::put('/badges/{pkey}/edit',    'Admin\BadgeController@update')->name('admin.badges.update');
+        Route::post('/badges/{pkey}/delete', 'Admin\BadgeController@destroy')->name('admin.badges.destroy');
+        Route::post('/badges/{pkey}/toggle', 'Admin\BadgeController@toggle')->name('admin.badges.toggle');
+
     }); // end admin group
 
 }); // end auth group
