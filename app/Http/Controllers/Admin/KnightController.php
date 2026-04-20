@@ -46,24 +46,34 @@ class KnightController extends Controller
         return view('admin.knights.index', compact('knights', 'sort', 'direction', 'battalions', 'ranks', 'securities'));
     }
 
-    /**
-     * Show a read-only admin summary for a single knight.
-     */
-    public function show($pkey)
-    {
-        $knight = Knight::withoutGlobalScopes()
-            ->with([
-                'rank'      => fn($q) => $q->withoutGlobalScopes(),
-                'battalion' => fn($q) => $q->withoutGlobalScopes(),
-                'security'  => fn($q) => $q->withoutGlobalScopes(),
-                'divisions' => fn($q) => $q->withoutGlobalScopes(),
-                'skills'    => fn($q) => $q->withoutGlobalScopes(),
-                'badges'    => fn($q) => $q->withoutGlobalScopes(),
-            ])
-            ->findOrFail($pkey);
+/**
+ * Show a read-only admin summary for a single knight.
+ */
+public function show($pkey)
+{
+    $knight = Knight::withoutGlobalScopes()
+        ->with([
+            'rank'      => fn($q) => $q->withoutGlobalScopes(),
+            'battalion' => fn($q) => $q->withoutGlobalScopes(),
+            'divisions' => fn($q) => $q->withoutGlobalScopes(),
+            'skills'    => fn($q) => $q->withoutGlobalScopes(),
+            'badges'    => fn($q) => $q->withoutGlobalScopes(),
+        ])
+        ->leftJoin('security', 'security.pkey', '=', 'knight.security')
+        ->select('knight.*', 'security.secname as secname')
+        ->where('knight.pkey', $pkey)
+        ->firstOrFail();
 
-        return view('admin.knights.show', compact('knight'));
+    // Resolve lstmdby int (pkey) to a display name
+    $lstmdby_name = null;
+    if ($knight->lstmdby) {
+        $lstmdby_name = \App\Model\Knight::withoutGlobalScopes()
+            ->where('pkey', $knight->lstmdby)
+            ->value('dname');
     }
+
+    return view('admin.knights.show', compact('knight', 'lstmdby_name'));
+}
 
     /**
      * Show the edit form for a knight.

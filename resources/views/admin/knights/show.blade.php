@@ -1,7 +1,35 @@
 @extends('layouts.app')
 @section('title', 'Admin — ' . $knight->rname)
-@section('content')
 @section('full_width', true)
+
+@push('styles')
+<style>
+.card {
+    background-color: rgba(0,0,0,0.25);
+    border: 1px solid #8b3a3a;
+}
+.card-header {
+    background-color: rgba(0,0,0,0.3);
+    border-bottom: 1px solid #8b3a3a;
+    color: #efefef;
+    font-weight: 600;
+}
+.card-body {
+    color: #efefef;
+}
+dt { color: #c9a0a0; }
+dd { color: #efefef; }
+.breadcrumb {
+    background-color: rgba(0,0,0,0.25);
+    border: 1px solid #8b3a3a;
+}
+.breadcrumb-item a        { color: #efefef; }
+.breadcrumb-item.active   { color: #c9a0a0; }
+.breadcrumb-item + .breadcrumb-item::before { color: #8b3a3a; }
+</style>
+@endpush
+
+@section('content')
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -47,7 +75,7 @@
             <dd class="col-sm-9">{{ $knight->rank?->name ?? '—' }}</dd>
 
             <dt class="col-sm-3">Security Profile</dt>
-            <dd class="col-sm-9">{{ $knight->security?->secname ?? '—' }}</dd>
+            <dd class="col-sm-9">{{ $knight->secname ?? '—' }}</dd>
 
             <dt class="col-sm-3">Internal Transfer</dt>
             <dd class="col-sm-9">{{ $knight->inttrans ?? '—' }}</dd>
@@ -64,7 +92,10 @@
             <dd class="col-sm-9">{{ $knight->crtsetdt?->format('Y-m-d') ?? '—' }}</dd>
 
             <dt class="col-sm-3">Last Modified</dt>
-            <dd class="col-sm-9">{{ $knight->lstmdts?->format('Y-m-d H:i') ?? '—' }} {{ $knight->lstmdby ? 'by ' . $knight->lstmdby : '' }}</dd>
+            <dd class="col-sm-9">
+                {{ $knight->lstmdts?->format('Y-m-d H:i') ?? '—' }}
+                {{ $lstmdby_name ? 'by ' . $lstmdby_name : '' }}
+            </dd>
         </dl>
     </div>
 </div>
@@ -90,11 +121,11 @@
 @endif
 
 {{-- Status toggles --}}
-<div class="card mb-3 border-warning">
-    <div class="card-header text-warning">Status Controls</div>
+<div class="card mb-3" style="border-color: #7a6a00;">
+    <div class="card-header" style="color: #c8a000;">Status Controls</div>
     <div class="card-body">
         <p class="text-muted small">These actions take effect immediately and are logged.</p>
-        <div class="d-flex gap-2">
+        <div class="d-flex">
 
             {{-- Toggle activeflg --}}
             <form method="POST" action="/admin/knights/{{ $knight->pkey }}/toggle" class="d-inline">

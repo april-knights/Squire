@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Admin — Edit ' . $knight->rname)
-@section('content')
 @section('full_width', true)
+@section('content')
 
 @push('styles')
 <style>
