@@ -45,6 +45,7 @@ tr.row-deleted  { opacity: 0.45; border-left: 3px solid #8b2020; text-decoration
         <tr>
             <th>Image</th>
             <th><a href="/admin/links?sort=typcd&direction={{ $sort==='typcd' ? $nd : 'asc' }}">Type @if($sort==='typcd')<i class="fas {{ $icon }}"></i>@endif</a></th>
+            <th><a href="/admin/links?sort=orderid&direction={{ $sort==='orderid' ? $nd : 'asc' }}">Order @if($sort==='orderid')<i class="fas {{ $icon }}"></i>@endif</a></th>
             <th><a href="/admin/links?sort=linknm&direction={{ $sort==='linknm' ? $nd : 'asc' }}">Name @if($sort==='linknm')<i class="fas {{ $icon }}"></i>@endif</a></th>
             <th>Description</th>
             <th>URL</th>
@@ -68,6 +69,7 @@ tr.row-deleted  { opacity: 0.45; border-left: 3px solid #8b2020; text-decoration
                 @endif
             </td>
             <td><span class="type-badge">{{ $link->typcd }}</span></td>
+            <td>{{ $link->orderid }}</td>
             <td><a href="/admin/links/{{ $link->pkey }}">{{ $link->linknm }}</a></td>
             <td>{{ Str::limit($link->linkdesc, 60) }}</td>
             <td>
@@ -92,7 +94,7 @@ tr.row-deleted  { opacity: 0.45; border-left: 3px solid #8b2020; text-decoration
             </td>
         </tr>
         @empty
-        <tr><td colspan="7" class="text-muted">No links found.</td></tr>
+        <tr><td colspan="8" class="text-muted">No links found.</td></tr>
         @endforelse
     </tbody>
 </table>

@@ -25,12 +25,13 @@ class LinkController extends Controller
         $sort      = $request->get('sort', 'typcd');
         $direction = $request->get('direction', 'asc');
 
-        $allowed_sorts = ['pkey', 'typcd', 'linknm', 'activeflg', 'delflg'];
+        $allowed_sorts = ['pkey', 'typcd', 'linknm', 'orderid', 'activeflg', 'delflg'];
         if (!in_array($sort, $allowed_sorts)) $sort = 'typcd';
         if (!in_array($direction, ['asc', 'desc'])) $direction = 'asc';
 
         $links = DB::table('link')
             ->orderBy($sort, $direction)
+            ->orderBy('orderid')
             ->orderBy('linknm')
             ->get();
 
@@ -83,6 +84,7 @@ class LinkController extends Controller
             'typcd'    => $request->input('typcd'),
             'linknm'   => $request->input('linknm'),
             'linkdesc' => $request->input('linkdesc'),
+            'orderid'  => $request->input('orderid', 0),
             'linkurl'  => trim($request->input('linkurl')),
             'imgurl'   => $request->input('imgurl'),
             'crtsetdt' => $now,
@@ -130,6 +132,7 @@ class LinkController extends Controller
             'typcd'    => $request->input('typcd'),
             'linknm'   => $request->input('linknm'),
             'linkdesc' => $request->input('linkdesc'),
+            'orderid'  => $request->input('orderid', 0),
             'linkurl'  => trim($request->input('linkurl')),
             'imgurl'   => $request->input('imgurl'),
             'lstmdby'  => auth()->user()->pkey,

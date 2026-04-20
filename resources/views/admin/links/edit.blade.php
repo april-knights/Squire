@@ -53,6 +53,16 @@ select.form-control option { background-color: #5a2424; color: #efefef; }
             </div>
 
             <div class="form-group row">
+                <label class="col-sm-3 col-form-label" for="orderid">Order</label>
+                <div class="col-sm-2">
+                    <input type="number" class="form-control @error('orderid') is-invalid @enderror"
+                        id="orderid" name="orderid" value="{{ old('orderid', $link->orderid ?? 0) }}">
+                    <small class="form-text text-muted">Display order within type group.</small>
+                    @error('orderid')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+            </div>
+
+            <div class="form-group row">
                 <label class="col-sm-3 col-form-label" for="linknm">Name</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control @error('linknm') is-invalid @enderror"
