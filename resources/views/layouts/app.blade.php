@@ -43,6 +43,11 @@
                 <li class="nav-item {{ Request::is('links') ? 'active' : '' }}">
                     <a class="nav-link" href="/links">Links</a>
                 </li>
+                @if(Auth::user()->security === 1)
+                <li class="nav-item {{ Request::is('admin*') ? 'active' : '' }}">
+                    <a class="nav-link" href="/admin">Admin</a>
+                </li>
+                @endif
             </ul>
             <form class="form-inline my-2 my-lg-0">
                 <div class="username">{{ Auth::user()->getRankName() . ' ' . Auth::user()->rname }}</div>
