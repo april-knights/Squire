@@ -27,9 +27,14 @@ class KnightController extends Controller
             $direction = 'asc';
         }
 
-        // withoutGlobalScopes() bypasses HasActiveTrait (activeflg/delflg filters)
+        // withoutGlobalScopes() on each eager load bypasses HasActiveTrait filters
         $knights = Knight::withoutGlobalScopes()
-            ->with(['rank', 'battalion', 'security', 'skills'])
+            ->with([
+                'rank'       => fn($q) => $q->withoutGlobalScopes(),
+                'battalion'  => fn($q) => $q->withoutGlobalScopes(),
+                'security'   => fn($q) => $q->withoutGlobalScopes(),
+                'skills'     => fn($q) => $q->withoutGlobalScopes(),
+            ])
             ->orderBy($sort, $direction)
             ->get();
 
@@ -46,7 +51,14 @@ class KnightController extends Controller
     public function show($pkey)
     {
         $knight = Knight::withoutGlobalScopes()
-            ->with(['rank', 'battalion', 'security', 'divisions', 'skills', 'badges'])
+            ->with([
+                'rank'      => fn($q) => $q->withoutGlobalScopes(),
+                'battalion' => fn($q) => $q->withoutGlobalScopes(),
+                'security'  => fn($q) => $q->withoutGlobalScopes(),
+                'divisions' => fn($q) => $q->withoutGlobalScopes(),
+                'skills'    => fn($q) => $q->withoutGlobalScopes(),
+                'badges'    => fn($q) => $q->withoutGlobalScopes(),
+            ])
             ->findOrFail($pkey);
 
         return view('admin.knights.show', compact('knight'));
@@ -58,9 +70,9 @@ class KnightController extends Controller
     public function edit($pkey)
     {
         $knight     = Knight::withoutGlobalScopes()->findOrFail($pkey);
-        $battalions = Battalion::orderBy('name')->get();
-        $ranks      = Rank::orderBy('rval')->get();
-        $securities = Security::orderBy('pkey')->get();
+        $battalions = Battalion::withoutGlobalScopes()->orderBy('name')->get();
+        $ranks      = Rank::withoutGlobalScopes()->orderBy('rval')->get();
+        $securities = Security::withoutGlobalScopes()->orderBy('pkey')->get();
 
         return view('admin.knights.edit', compact('knight', 'battalions', 'ranks', 'securities'));
     }
