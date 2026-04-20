@@ -58,7 +58,7 @@ select.form-control option { background-color: #5a2424; color: #efefef; }
                 <div class="col-sm-5">
                     <input type="file" class="form-control @error('image') is-invalid @enderror"
                            id="image" name="image" accept="image/*" required>
-                    <small class="form-text text-muted">PNG, JPG, GIF, WebP — max 4MB. Uploading a file with the same name as an existing file will overwrite it.</small>
+                    <small class="form-text text-muted">PNG, JPG, GIF, WebP — max 10MB. Uploading a file with the same name as an existing file will overwrite it.</small>
                     @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     <img id="imgPreview" class="img-preview" src="" alt="Preview">
                 </div>

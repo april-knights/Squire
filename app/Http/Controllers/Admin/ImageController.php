@@ -47,7 +47,7 @@ class ImageController extends Controller
 	public function store(Request $request)
 	{
 		$request->validate([
-			'image'      => 'required|file|image|max:4096',
+			'image'      => 'required|file|image|max:10240',
 			'subdir'     => 'nullable|string|max:50',
 			'new_subdir' => 'nullable|string|max:50',
 		]);
