@@ -82,7 +82,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/security/{pkey}/edit',        'Admin\SecurityController@edit')->name('admin.security.edit');
         Route::put('/security/{pkey}/edit',        'Admin\SecurityController@update')->name('admin.security.update');
         Route::post('/security/{pkey}/delete',     'Admin\SecurityController@destroy')->name('admin.security.destroy');
-        Route::post('/security/{pkey}/toggle',     'Admin\SecurityController@toggle')->name('admin.security.toggle');   
+        Route::post('/security/{pkey}/toggle',     'Admin\SecurityController@toggle')->name('admin.security.toggle');
+    # Rank management
+        Route::get('/ranks',                 'Admin\RankController@index')->name('admin.ranks.index');
+        Route::get('/ranks/create',          'Admin\RankController@create')->name('admin.ranks.create');
+        Route::post('/ranks',                'Admin\RankController@store')->name('admin.ranks.store');
+        Route::get('/ranks/{pkey}',          'Admin\RankController@show')->name('admin.ranks.show');
+        Route::get('/ranks/{pkey}/edit',     'Admin\RankController@edit')->name('admin.ranks.edit');
+        Route::put('/ranks/{pkey}/edit',     'Admin\RankController@update')->name('admin.ranks.update');
+        Route::post('/ranks/{pkey}/delete',  'Admin\RankController@destroy')->name('admin.ranks.destroy');
+        Route::post('/ranks/{pkey}/toggle',  'Admin\RankController@toggle')->name('admin.ranks.toggle');   
         });// end admin group
 
 }); // end auth group
