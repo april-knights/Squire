@@ -81,27 +81,28 @@ class SecurityController extends Controller
     /**
      * Show a single security profile with its flag grid.
      */
-    public function show($pkey)
-    {
-        $profile = DB::table('security')->where('pkey', $pkey)->firstOrFail();
-        $knight_count = DB::table('knight')->where('security', $pkey)->where('delflg', 0)->count();
-        $flag_groups  = self::FLAG_GROUPS;
-        $flag_labels  = self::FLAG_LABELS;
+     public function show($pkey)
+     {
+         $profile = DB::table('security')->where('pkey', $pkey)->first();
+         if (!$profile) abort(404);
 
-        // Resolve audit names
-        $lstmdby_name = null;
-        if ($profile->lstmdby) {
-            $lstmdby_name = Knight::withoutGlobalScopes()->where('pkey', $profile->lstmdby)->value('dname');
-        }
-        $crtsetid_name = null;
-        if ($profile->crtsetid) {
-            $crtsetid_name = Knight::withoutGlobalScopes()->where('pkey', $profile->crtsetid)->value('dname');
-        }
+         $knight_count  = DB::table('knight')->where('security', $pkey)->where('delflg', 0)->count();
+         $flag_groups   = self::FLAG_GROUPS;
+         $flag_labels   = self::FLAG_LABELS;
 
-        return view('admin.security.show', compact(
-            'profile', 'knight_count', 'flag_groups', 'flag_labels', 'lstmdby_name', 'crtsetid_name'
-        ));
-    }
+         $lstmdby_name = null;
+         if ($profile->lstmdby) {
+             $lstmdby_name = Knight::withoutGlobalScopes()->where('pkey', $profile->lstmdby)->value('dname');
+         }
+         $crtsetid_name = null;
+         if ($profile->crtsetid) {
+             $crtsetid_name = Knight::withoutGlobalScopes()->where('pkey', $profile->crtsetid)->value('dname');
+         }
+
+         return view('admin.security.show', compact(
+             'profile', 'knight_count', 'flag_groups', 'flag_labels', 'lstmdby_name', 'crtsetid_name'
+         ));
+     }
 
     /**
      * Show the create form.
@@ -155,9 +156,12 @@ class SecurityController extends Controller
      */
     public function edit($pkey)
     {
-        $profile     = DB::table('security')->where('pkey', $pkey)->firstOrFail();
+        $profile     = DB::table('security')->where('pkey', $pkey)->first();
+        if (!$profile) abort(404);
+
         $flag_groups = self::FLAG_GROUPS;
         $flag_labels = self::FLAG_LABELS;
+
         return view('admin.security.edit', compact('profile', 'flag_groups', 'flag_labels'));
     }
 
@@ -166,6 +170,9 @@ class SecurityController extends Controller
      */
     public function update(Request $request, $pkey)
     {
+        $profile = DB::table('security')->where('pkey', $pkey)->first();
+        if (!$profile) abort(404);
+
         $request->validate([
             'secname'  => 'required|string|max:30',
             'secdescr' => 'nullable|string|max:255',
