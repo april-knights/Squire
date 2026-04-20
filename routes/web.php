@@ -119,6 +119,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/badges/{pkey}/delete', 'Admin\BadgeController@destroy')->name('admin.badges.destroy');
         Route::post('/badges/{pkey}/toggle', 'Admin\BadgeController@toggle')->name('admin.badges.toggle');
 
+        # Skill library
+        Route::get('/skills',                'Admin\SkillController@index')->name('admin.skills.index');
+        Route::get('/skills/create',         'Admin\SkillController@create')->name('admin.skills.create');
+        Route::post('/skills',               'Admin\SkillController@store')->name('admin.skills.store');
+        Route::get('/skills/{pkey}',         'Admin\SkillController@show')->name('admin.skills.show');
+        Route::get('/skills/{pkey}/edit',    'Admin\SkillController@edit')->name('admin.skills.edit');
+        Route::put('/skills/{pkey}/edit',    'Admin\SkillController@update')->name('admin.skills.update');
+        Route::post('/skills/{pkey}/delete', 'Admin\SkillController@destroy')->name('admin.skills.destroy');
+        Route::post('/skills/{pkey}/toggle', 'Admin\SkillController@toggle')->name('admin.skills.toggle');
+
     }); // end admin group
 
 }); // end auth group
