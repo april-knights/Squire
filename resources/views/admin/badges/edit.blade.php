@@ -25,6 +25,15 @@ select.form-control option { background-color: #5a2424; color: #efefef; }
 .img-picker-dir-title { color: #c9a0a0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; margin: 0.75rem 0 0.25rem; border-bottom: 1px solid #8b3a3a; padding-bottom: 0.2rem; }
 .img-preview-wrap { text-align: center; }
 .img-preview-wrap img { max-width: 100px; max-height: 100px; object-fit: contain; border: 1px solid #8b3a3a; border-radius: 4px; padding: 0.25rem; background: rgba(0,0,0,0.2); }
+/* Dark theme nav tabs */
+#imgTabs { border-bottom: 1px solid #8b3a3a; }
+#imgTabs .nav-link { color: #c9a0a0; border-color: transparent; background: transparent; }
+#imgTabs .nav-link:hover { color: #efefef; border-color: transparent; }
+#imgTabs .nav-link.active {
+    color: #efefef !important;
+    background-color: rgba(0,0,0,0.3) !important;
+    border-color: #8b3a3a #8b3a3a transparent !important;
+}
 </style>
 @endpush
 
