@@ -85,6 +85,8 @@ select.form-control option { background-color: #5a2424; color: #efefef; }
                 <div class="col-sm-3">
                     <input type="number" class="form-control @error('orderid') is-invalid @enderror"
                            id="orderid" name="orderid" value="{{ old('orderid', $badge->orderid) }}" required>
+                    <small class="form-text text-muted">Controls display order — lower appears first.</small>
+                    <small class="form-text" id="orderid-hint" style="color:#c8a000;"></small>
                     @error('orderid')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
             </div>
@@ -256,6 +258,45 @@ select.form-control option { background-color: #5a2424; color: #efefef; }
         document.getElementById('img_subdir_new').value = sel.value;
     }
 })();
+
+// orderid range hints
+    var rangeMap = {
+        'position': { min: 1,   max: 50,  label: '1–50 (Position/pin-to-top)' },
+        'gm':       { min: 51,  max: 100, label: '51–100 (Grandmaster series)' },
+        'title':    { min: 151, max: 199, label: '151–199 (Title awards)' },
+        'rank':     { min: 200, max: 299, label: '200–299 (Rank badges)' },
+        'event':    { min: 500, max: null, label: '500+ (Event badges)' },
+        'misc':     { min: 800, max: null, label: '800+ (Miscellaneous)' },
+    };
+
+    function updateOrderHint() {
+        var typcd   = document.getElementById('typcd').value;
+        var orderid = parseInt(document.getElementById('orderid').value, 10);
+        var hint    = document.getElementById('orderid-hint');
+        var range   = rangeMap[typcd];
+
+        if (!range) {
+            hint.textContent = '';
+            return;
+        }
+
+        hint.textContent = 'Suggested range: ' + range.label;
+
+        if (!isNaN(orderid)) {
+            var inRange = orderid >= range.min && (range.max === null || orderid <= range.max);
+            if (!inRange) {
+                hint.textContent += ' ⚠ Current value is outside the expected range.';
+                hint.style.color = '#e57373';
+            } else {
+                hint.style.color = '#c8a000';
+            }
+        }
+    }
+
+    document.getElementById('typcd').addEventListener('change', updateOrderHint);
+    document.getElementById('orderid').addEventListener('input', updateOrderHint);
+    updateOrderHint();
+
 </script>
 
 @endsection
