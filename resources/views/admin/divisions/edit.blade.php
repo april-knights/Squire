@@ -28,7 +28,14 @@
 }
 .knight-result-item { padding: 0.4rem 0.75rem; cursor: pointer; color: #efefef; font-size: 0.875rem; }
 .knight-result-item:hover { background-color: rgba(139,58,58,0.4); }
-.alias-locked { background-color: rgba(0,0,0,0.4); color: #c9a0a0; border: 1px solid #5a2424; }
+.alias-locked,
+.alias-locked:disabled,
+input[disabled].alias-locked {
+    background-color: rgba(0,0,0,0.4) !important;
+    color: #c9a0a0 !important;
+    border: 1px solid #5a2424 !important;
+    opacity: 1 !important;
+}
 </style>
 @endpush
 
