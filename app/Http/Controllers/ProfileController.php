@@ -211,7 +211,7 @@ public function create(Request $request)
         'all_skills' => Skill::get(),
         'all_batts' => Battalion::get(),
         'all_divs' => Division::get(),
-        'all_events' => Event::get(),
+        'all_events' => Event::where('profileflg', 1)->orderBy('livedate')->get(),
         'all_secs' => Security::get(),
         'def_batt' => $validated['batt'] ?? Battalion::DEFAULT_BATTALION,
         'def_rank' => $validated['rank'] ?? Rank::DEFAULT_PROFILE_RANK_ID,
@@ -246,7 +246,7 @@ public function create(Request $request)
                                      'all_skills' => Skill::get(),
                                      'all_batts' => Battalion::get(),
                                      'all_divs' => Division::get(),
-                                     'all_events' => Event::get(),
+                                     'all_events' => Event::where('profileflg', 1)->orderBy('livedate')->get(),
                                      'editable_fields' => $editable_fields,
                                      'can_delete' => Auth::user()->checkSecurity('cduser'),
                                     ]);
@@ -323,7 +323,7 @@ private static function editableFields(Knight $knight = null) {
             ],
             'divs' => 'nullable',
             'divs.*' => 'integer|exists:division,pkey',
-            'firstevent' => 'nullable|integer|exists:event,pkey',
+            'firstevent' => ['nullable', 'integer', Rule::exists('event', 'pkey')->where('profileflg', 1)->where('activeflg', 1)->where('delflg', 0)],
             'skills' => 'nullable',
             'skills.*' => 'integer|exists:skill,pkey', // TODO: Exclude parent skills.
             'bio' => 'nullable|string|max:255',

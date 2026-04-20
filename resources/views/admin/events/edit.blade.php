@@ -112,7 +112,7 @@ select.form-control option { background-color: #5a2424; color: #efefef; }
                         <input type="checkbox" class="form-check-input" id="profileflg" name="profileflg" value="1"
                                {{ old('profileflg', $event->profileflg) ? 'checked' : '' }}>
                         <label class="form-check-label" for="profileflg">
-                            Show on profiles — selectable as a knight's first event cohort
+                            Show on profiles — selectable as a knight's first event
                         </label>
                     </div>
                 </div>
