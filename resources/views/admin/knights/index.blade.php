@@ -5,7 +5,26 @@
 
 @push('styles')
 <style>
-/* Admin table row states — dark-theme appropriate */
+/* Scrollable table container — horizontal bar stays docked at viewport bottom */
+.admin-table-container {
+    max-height: 72vh;
+    overflow-x: auto;
+    overflow-y: auto;
+    border: 1px solid #8b3a3a;
+    border-radius: 4px;
+}
+
+/* Sticky header */
+#knightTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #5a2424;
+    border-bottom: 2px solid #8b3a3a;
+    white-space: nowrap;
+}
+
+/* Row states */
 #knightTable tr.row-inactive {
     opacity: 0.6;
     border-left: 3px solid #c8a000;
@@ -15,20 +34,20 @@
     border-left: 3px solid #8b2020;
     text-decoration: line-through;
 }
+
+/* Status badges */
+.badge-active   { background-color: #2d6a2d; color: #fff; }
+.badge-inactive { background-color: #7a6a00; color: #fff; }
+.badge-deleted  { background-color: #6a1a1a; color: #fff; }
+
 /* Breadcrumb dark theme */
 .breadcrumb {
     background-color: rgba(0,0,0,0.25);
     border: 1px solid #8b3a3a;
 }
-.breadcrumb-item a {
-    color: #efefef;
-}
-.breadcrumb-item.active {
-    color: #c9a0a0;
-}
-.breadcrumb-item + .breadcrumb-item::before {
-    color: #8b3a3a;
-}
+.breadcrumb-item a        { color: #efefef; }
+.breadcrumb-item.active   { color: #c9a0a0; }
+.breadcrumb-item + .breadcrumb-item::before { color: #8b3a3a; }
 </style>
 @endpush
 
@@ -74,28 +93,36 @@
     };
 @endphp
 
-<div class="table-responsive">
+<div class="admin-table-container">
 <table class="table table-sm table-hover table-borderless" id="knightTable">
     <thead>
         <tr>
             <th><a href="{{ $sh('rname') }}">Reddit Name @if($sort==='rname')<i class="fas {{ $icon }}"></i>@endif</a></th>
             <th><a href="{{ $sh('dname') }}">Discord Name @if($sort==='dname')<i class="fas {{ $icon }}"></i>@endif</a></th>
-            <th><a href="{{ $sh('email') }}">Email @if($sort==='email')<i class="fas {{ $icon }}"></i>@endif</a></th>
-            <th><a href="{{ $sh('discordid') }}">Discord ID @if($sort==='discordid')<i class="fas {{ $icon }}"></i>@endif</a></th>
             <th><a href="{{ $sh('batt') }}">Battalion @if($sort==='batt')<i class="fas {{ $icon }}"></i>@endif</a></th>
             <th><a href="{{ $sh('rnk') }}">Rank @if($sort==='rnk')<i class="fas {{ $icon }}"></i>@endif</a></th>
             <th><a href="{{ $sh('security') }}">Security @if($sort==='security')<i class="fas {{ $icon }}"></i>@endif</a></th>
             <th><a href="{{ $sh('last_login') }}">Last Login @if($sort==='last_login')<i class="fas {{ $icon }}"></i>@endif</a></th>
-            <th><a href="{{ $sh('activeflg') }}">Active @if($sort==='activeflg')<i class="fas {{ $icon }}"></i>@endif</a></th>
-            <th><a href="{{ $sh('delflg') }}">Deleted @if($sort==='delflg')<i class="fas {{ $icon }}"></i>@endif</a></th>
+            <th><a href="{{ $sh('activeflg') }}">Status @if($sort==='activeflg')<i class="fas {{ $icon }}"></i>@endif</a></th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         @forelse ($knights as $knight)
         @php
+            $isDeleted  = (bool)$knight->delflg;
+            $isInactive = !$knight->activeflg && !$isDeleted;
+            $rowClass   = $isDeleted ? 'row-deleted' : ($isInactive ? 'row-inactive' : '');
+
+            if ($isDeleted) {
+                $statusBadge = '<span class="badge badge-deleted">Deleted</span>';
+            } elseif ($isInactive) {
+                $statusBadge = '<span class="badge badge-inactive">Inactive</span>';
+            } else {
+                $statusBadge = '<span class="badge badge-active">Active</span>';
+            }
+
             $skillList = $knight->skills->pluck('skillname')->implode(' ');
-            $rowClass  = $knight->delflg ? 'row-deleted' : (!$knight->activeflg ? 'row-inactive' : '');
         @endphp
         <tr class="{{ $rowClass }}"
             data-rname="{{ strtolower($knight->rname) }}"
@@ -108,32 +135,15 @@
             data-deleted="{{ $knight->delflg }}">
             <td><a href="/admin/knights/{{ $knight->pkey }}">{{ $knight->rname }}</a></td>
             <td>{{ $knight->dname }}</td>
-            <td>{{ $knight->email }}</td>
-            <td>{{ $knight->discordid }}</td>
             <td>{{ $knight->battalion?->name ?? '—' }}</td>
             <td>{{ $knight->rank?->name ?? '—' }}</td>
             <td>{{ $knight->security?->secname ?? '—' }}</td>
             <td>{{ $knight->last_login ? \Carbon\Carbon::parse($knight->last_login)->diffForHumans() : '—' }}</td>
-            <td>
-                @if($knight->activeflg)
-                    <span class="badge badge-success">Active</span>
-                @else
-                    <span class="badge badge-secondary">Inactive</span>
-                @endif
-            </td>
-            <td>
-                @if($knight->delflg)
-                    <span class="badge badge-danger">Deleted</span>
-                @else
-                    <span class="badge badge-light">No</span>
-                @endif
-            </td>
-            <td>
-                <a href="/admin/knights/{{ $knight->pkey }}/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
-            </td>
+            <td>{!! $statusBadge !!}</td>
+            <td><a href="/admin/knights/{{ $knight->pkey }}/edit" class="btn btn-sm btn-outline-secondary">Edit</a></td>
         </tr>
         @empty
-        <tr><td colspan="11" class="text-muted">No knights found.</td></tr>
+        <tr><td colspan="8" class="text-muted">No knights found.</td></tr>
         @endforelse
     </tbody>
 </table>
