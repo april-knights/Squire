@@ -68,11 +68,21 @@ Route::middleware(['auth'])->group(function () {
     # Admin
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('/', 'Admin\AdminController@index')->name('admin.index');
+    # Knight management
         Route::get('/knights', 'Admin\KnightController@index')->name('admin.knights.index');
         Route::get('/knights/{pkey}', 'Admin\KnightController@show')->name('admin.knights.show');
         Route::get('/knights/{pkey}/edit', 'Admin\KnightController@edit')->name('admin.knights.edit');
         Route::put('/knights/{pkey}/edit', 'Admin\KnightController@update')->name('admin.knights.update');
         Route::post('/knights/{pkey}/toggle', 'Admin\KnightController@toggle')->name('admin.knights.toggle');
-    }); // end admin group
+   # Security profiles
+        Route::get('/security',                    'Admin\SecurityController@index')->name('admin.security.index');
+        Route::get('/security/create',             'Admin\SecurityController@create')->name('admin.security.create');
+        Route::post('/security',                   'Admin\SecurityController@store')->name('admin.security.store');
+        Route::get('/security/{pkey}',             'Admin\SecurityController@show')->name('admin.security.show');
+        Route::get('/security/{pkey}/edit',        'Admin\SecurityController@edit')->name('admin.security.edit');
+        Route::put('/security/{pkey}/edit',        'Admin\SecurityController@update')->name('admin.security.update');
+        Route::post('/security/{pkey}/delete',     'Admin\SecurityController@destroy')->name('admin.security.destroy');
+        Route::post('/security/{pkey}/toggle',     'Admin\SecurityController@toggle')->name('admin.security.toggle');   
+        });// end admin group
 
 }); // end auth group
