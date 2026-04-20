@@ -129,6 +129,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/skills/{pkey}/delete', 'Admin\SkillController@destroy')->name('admin.skills.destroy');
         Route::post('/skills/{pkey}/toggle', 'Admin\SkillController@toggle')->name('admin.skills.toggle');
 
+        # Event management
+        Route::get('/events',                'Admin\EventController@index')->name('admin.events.index');
+        Route::get('/events/create',         'Admin\EventController@create')->name('admin.events.create');
+        Route::post('/events',               'Admin\EventController@store')->name('admin.events.store');
+        Route::get('/events/{pkey}',         'Admin\EventController@show')->name('admin.events.show');
+        Route::get('/events/{pkey}/edit',    'Admin\EventController@edit')->name('admin.events.edit');
+        Route::put('/events/{pkey}/edit',    'Admin\EventController@update')->name('admin.events.update');
+        Route::post('/events/{pkey}/delete', 'Admin\EventController@destroy')->name('admin.events.destroy');
+        Route::post('/events/{pkey}/toggle', 'Admin\EventController@toggle')->name('admin.events.toggle');
+
     }); // end admin group
 
 }); // end auth group
