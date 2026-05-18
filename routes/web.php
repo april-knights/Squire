@@ -13,9 +13,6 @@ Route::get('/logout', function () {
     return redirect('/login');
 });
 
-# Reddit OAuth callback for AKSquire2
-Route::get('/admin/elections/reddit-callback', [App\Http\Controllers\Admin\ElectionController::class, 'redditAuthCallback'])->name('admin.elections.reddit-callback');
-
 # Signin
 Route::get('/login/reddit', 'LoginController@redirectToProvider');
 Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback');

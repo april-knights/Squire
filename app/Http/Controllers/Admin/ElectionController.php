@@ -331,7 +331,7 @@ class ElectionController extends Controller
         $params = http_build_query([
             'client_id'     => config('services.reddit.client_id'),
             'response_type' => 'code',
-            'state'         => csrf_token(),
+            'state'         => 'aksquire2_auth_' . csrf_token(),
             'redirect_uri'  => config('services.reddit.redirect'),
             'duration'      => 'permanent',
             'scope'         => 'submit modposts identity',
