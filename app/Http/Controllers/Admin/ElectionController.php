@@ -334,7 +334,7 @@ class ElectionController extends Controller
             'state'         => 'aksquire2_auth_' . csrf_token(),
             'redirect_uri'  => config('services.reddit.redirect'),
             'duration'      => 'permanent',
-            'scope'         => 'submit modposts identity',
+            'scope'         => 'submit modposts identity read',
         ]);
 
         return redirect('https://www.reddit.com/api/v1/authorize?' . $params);
