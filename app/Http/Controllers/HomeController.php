@@ -60,7 +60,7 @@ class HomeController extends Controller
                 ->exists();
 
             // Battalion stats for Commanders, FOs, and accepted candidates
-            $showBattalionStats = $knight->krank->rval <= 5 || $isCandidate;
+            $showBattalionStats = $knight->rank->rval <= 5 || $isCandidate;
 
             if ($showBattalionStats && $knight->fkeybattalion) {
                 $battalionStats = $this->getBattalionStats(
