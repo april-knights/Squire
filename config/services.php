@@ -34,8 +34,12 @@ return [
         'client_id' => env('REDDIT_CLIENT_ID'),
         'client_secret' => env('REDDIT_CLIENT_SECRET'),
         'redirect' => env('REDDIT_REDIRECT_URI'),
+        'user_agent'    => env('REDDIT_USER_AGENT', 'Squire/2.0 by AKSquire2'),
+        'subreddit'     => env('REDDIT_SUBREDDIT', 'AprilKnights'),
     ],
 
     'squire_api_token' => env('SQUIRE_API_TOKEN'),
+    'squire_bot_webhook_url'    => env('SQUIRE_BOT_WEBHOOK_URL'),
+    'squire_bot_webhook_secret' => env('SQUIRE_BOT_WEBHOOK_SECRET'),
 
 ];
