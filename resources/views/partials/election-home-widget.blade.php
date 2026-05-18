@@ -1,4 +1,3 @@
-@if($election)
 <style>
 .election-widget {
     margin-bottom: 1.5rem;
@@ -121,30 +120,10 @@
 
 <div class="election-widget">
 
-    {{-- EA / Assistant EA prompt --}}
-    @if($isEA || $isAssistantEA)
+    {{-- Oath status card — always visible year-round --}}
     <div class="election-card">
-        <h5><i class="fas fa-crown mr-1"></i> Election Administrator</h5>
-        <div class="election-status-row">
-            <span class="status-icon info"><i class="fas fa-tasks"></i></span>
-            <span>
-                Active election — Phase: <strong>{{ ucfirst($election->phase) }}</strong>
-                @if($election->voting_paused && $election->phase === 'voting')
-                    <span class="phase-badge" style="background-color:#c0392b;">Voting Paused</span>
-                @endif
-            </span>
-        </div>
-        <a href="{{ route('election.dashboard') }}" class="btn-election">
-            <i class="fas fa-tachometer-alt mr-1"></i> Go to EA Dashboard
-        </a>
-    </div>
-    @endif
+        <h5><i class="fas fa-scroll mr-1"></i> Annual Oath</h5>
 
-    {{-- Knight status card --}}
-    <div class="election-card">
-        <h5><i class="fas fa-vote-yea mr-1"></i> Election {{ $election->election_year }}</h5>
-
-        {{-- Oath status --}}
         <div class="election-status-row">
             @if($oath && $oath->verified)
                 <span class="status-icon ok"><i class="fas fa-check-circle"></i></span>
@@ -190,10 +169,37 @@
             </form>
         </div>
         @endif
+    </div>
 
-        {{-- Registration status --}}
-        @if(in_array($election->phase, ['nominations','debate','voting','counting']))
-        <div class="election-status-row" style="margin-top:0.75rem;">
+    {{-- Election section — only when active election exists --}}
+    @if($election)
+
+    {{-- EA / Assistant EA prompt --}}
+    @if($isEA || $isAssistantEA)
+    <div class="election-card">
+        <h5><i class="fas fa-crown mr-1"></i> Election Administrator</h5>
+        <div class="election-status-row">
+            <span class="status-icon info"><i class="fas fa-tasks"></i></span>
+            <span>
+                Active election — Phase: <strong>{{ ucfirst($election->phase) }}</strong>
+                @if($election->voting_paused && $election->phase === 'voting')
+                    <span class="phase-badge" style="background-color:#c0392b;">Voting Paused</span>
+                @endif
+            </span>
+        </div>
+        <a href="{{ route('election.dashboard') }}" class="btn-election">
+            <i class="fas fa-tachometer-alt mr-1"></i> Go to EA Dashboard
+        </a>
+    </div>
+    @endif
+
+    {{-- Knight election status card --}}
+    <div class="election-card">
+        <h5><i class="fas fa-vote-yea mr-1"></i> Election {{ $election->election_year }}</h5>
+
+        {{-- Registration status — visible all phases except complete --}}
+        @if($election->phase !== 'complete')
+        <div class="election-status-row">
             @if($registered)
                 <span class="status-icon ok"><i class="fas fa-check-circle"></i></span>
                 <span>Registered to vote</span>
@@ -203,7 +209,7 @@
             @endif
         </div>
 
-        @if(!$registered && !in_array($election->phase, ['counting','complete']))
+        @if(!$registered)
         <form method="POST" action="{{ route('election.register') }}" style="margin-top:0.5rem;">
             @csrf
             <button type="submit" class="btn-election">Register to Vote</button>
@@ -302,5 +308,7 @@
     </div>
     @endif
 
+    @endif
+    {{-- end @if($election) --}}
+
 </div>
-@endif
