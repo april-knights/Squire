@@ -90,6 +90,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/debate-thread', [App\Http\Controllers\ElectionController::class, 'postDebateThread'])->name('debate-thread');
     });
 
+    # TEMP DEBUG — remove after testing
+Route::get('/admin/debug-oath-scan', function () {
+    $service = app(\App\Services\RedditService::class);
+    $result  = $service->getAllOathCommenters();
+    dd($result);
+});
+
 # Admin
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('/', 'Admin\AdminController@index')->name('admin.index');
