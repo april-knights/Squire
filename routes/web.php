@@ -111,6 +111,27 @@ Route::get('/admin/debug-oath-scan', function () {
     ]);
 });
 */
+
+# TEMP DEBUG — remove after testing
+Route::get('/admin/debug-webhook', function () {
+    $knight = auth()->user();
+    try {
+        $response = \Illuminate\Support\Facades\Http::timeout(5)
+            ->post(config('services.squire_bot_webhook_url') . '/webhook/election-audit', [
+                'discordid' => (string) $knight->discordid,
+                'payload'   => "**April Knights — Webhook Test**\nIf you can read this, the audit DM webhook is working.",
+                'silent'    => false,
+                'token'     => config('services.squire_bot_webhook_secret'),
+            ]);
+        dd([
+            'status'   => $response->status(),
+            'response' => $response->json(),
+        ]);
+    } catch (\Exception $e) {
+        dd(['error' => $e->getMessage()]);
+    }
+});
+
 # Admin
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('/', 'Admin\AdminController@index')->name('admin.index');
