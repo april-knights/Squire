@@ -96,15 +96,6 @@
                 value="{{ $oathThreadUrl }}"
                 placeholder="https://www.reddit.com/r/AprilKnights/comments/...">
         </div>
-        <div style="margin-bottom:1rem;">
-            <label class="form-label-ea">Oath Post ID</label>
-            <input type="text" name="oath_post_id" class="ea-input"
-                value="{{ $oathPostId }}"
-                placeholder="e.g. abc123">
-            <span style="font-size:0.75rem;color:#c0a0a0;display:block;margin-top:0.25rem;">
-                The Reddit post ID from the oath thread URL. Updating this resets the oath year timestamp.
-            </span>
-        </div>
         <button type="submit" class="btn-admin">
             <i class="fas fa-save mr-1"></i> Save Settings
         </button>

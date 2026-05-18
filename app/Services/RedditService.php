@@ -218,7 +218,7 @@ class RedditService
      *
      * Returns ['valid' => bool, 'reason' => string|null]
      */
-    public function verifyOathComment(string $commentUrl, string $expectedAuthor, string $oathPostId): array
+    public function verifyOathComment(string $commentUrl, string $expectedAuthor): array
     {
         $token = $this->getAccessToken();
 
@@ -265,6 +265,8 @@ class RedditService
 
         // Verify it's on the correct post
         $linkId         = $comment['link_id'] ?? null; // format: t3_postid
+        $oathThreadUrl  = \App\Model\Setting::get('oath_thread_url');
+        $oathPostId     = $this->extractPostId($oathThreadUrl);
         $expectedLinkId = 't3_' . $oathPostId;
 
         if ($linkId !== $expectedLinkId) {
@@ -285,6 +287,11 @@ class RedditService
         // https://www.reddit.com/r/sub/comments/postid/title/commentid/
         $pattern = '/\/comments\/[^\/]+\/[^\/]+\/([a-z0-9]+)/i';
         preg_match($pattern, $url, $matches);
+        return $matches[1] ?? null;
+    }
+    protected function extractPostId(string $url): ?string
+    {
+        preg_match('/\/comments\/([a-z0-9]+)/i', $url, $matches);
         return $matches[1] ?? null;
     }
 

@@ -42,8 +42,6 @@ class OathController extends Controller
             return back()->with('info', 'You have already submitted an oath for ' . $oathYear . '.');
         }
 
-        $oathPostId = Setting::get('oath_post_id');
-
         if (! $oathPostId) {
             return back()->with('error', 'The oath thread has not been configured yet. Please contact an Admin.');
         }
@@ -66,8 +64,7 @@ class OathController extends Controller
         // Attempt verification immediately
         $result = $this->reddit->verifyOathComment(
             $request->comment_url,
-            $knight->rname,
-            $oathPostId
+            $knight->rname
         );
 
         if ($result['valid']) {
@@ -107,8 +104,6 @@ class OathController extends Controller
         if ($oath->verified) {
             return back()->with('info', 'Your oath is already verified.');
         }
-
-        $oathPostId = Setting::get('oath_post_id');
 
         if (! $oathPostId) {
             return back()->with('error', 'The oath thread has not been configured yet. Please contact an Admin.');
@@ -157,8 +152,6 @@ class OathController extends Controller
         if ($oath->verified) {
             return back()->with('error', 'Your oath is already verified and cannot be changed.');
         }
-
-        $oathPostId = Setting::get('oath_post_id');
 
         if (! $oathPostId) {
             return back()->with('error', 'The oath thread has not been configured yet. Please contact an Admin.');

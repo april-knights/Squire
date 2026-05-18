@@ -382,29 +382,21 @@ class ElectionController extends Controller
 
         return view('admin.elections.settings', compact(
             'redditAuthorized',
-            'oathThreadUrl',
-            'oathPostId'
+            'oathThreadUrl'
         ));
     }
 
     public function updateSettings(Request $request)
-    {
-        $request->validate([
-            'oath_thread_url' => 'nullable|url|max:500',
-            'oath_post_id'    => 'nullable|string|max:20',
-        ]);
-
-        if ($request->filled('oath_thread_url')) {
-            Setting::set('oath_thread_url', $request->oath_thread_url);
+        {
+            $request->validate([
+                'oath_thread_url' => 'nullable|url|max:500',
+            ]);
+            if ($request->filled('oath_thread_url')) {
+                Setting::set('oath_thread_url', $request->oath_thread_url);
+                Setting::set('oath_thread_crtsetdt', now()->toDateTimeString());
+            }
+            return back()->with('success', 'Settings updated.');
         }
-
-        if ($request->filled('oath_post_id')) {
-            Setting::set('oath_post_id', $request->oath_post_id);
-            Setting::set('oath_thread_crtsetdt', now()->toDateTimeString());
-        }
-
-        return back()->with('success', 'Settings updated.');
-    }
 
     // -------------------------------------------------------------------------
     // Admin Test Mode Toggle
