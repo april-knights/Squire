@@ -387,16 +387,28 @@ class ElectionController extends Controller
     }
 
     public function updateSettings(Request $request)
-        {
-            $request->validate([
-                'oath_thread_url' => 'nullable|url|max:500',
-            ]);
-            if ($request->filled('oath_thread_url')) {
-                Setting::set('oath_thread_url', $request->oath_thread_url);
-                Setting::set('oath_thread_crtsetdt', now()->toDateTimeString());
+    {
+        $request->validate([
+            'oath_thread_url' => 'nullable|url|max:500',
+        ]);
+
+        if ($request->filled('oath_thread_url')) {
+            $existing = Setting::get('oath_thread_url');
+
+            // If thread URL is changing, reset unverified current-year oaths
+            if ($existing !== $request->oath_thread_url) {
+                $oathYear = \App\Model\Oath::currentOathYear();
+                \App\Model\Oath::where('oath_year', $oathYear)
+                    ->where('verified', 0)
+                    ->delete();
             }
-            return back()->with('success', 'Settings updated.');
+
+            Setting::set('oath_thread_url', $request->oath_thread_url);
+            Setting::set('oath_thread_crtsetdt', now()->toDateTimeString());
         }
+
+        return back()->with('success', 'Settings updated.');
+    }
 
     // -------------------------------------------------------------------------
     // Admin Test Mode Toggle

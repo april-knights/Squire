@@ -132,7 +132,7 @@
                 <span class="status-icon warn"><i class="fas fa-exclamation-circle"></i></span>
                 <span>
                     Oath submitted but not yet verified.
-                    <form method="POST" action="{{ route('oath.reverify') }}" style="display:inline;">
+                    <form method="POST" action="{{ route('oath.verify') }}" style="display:inline;">
                         @csrf
                         <button type="submit" class="btn-election" style="padding:0.15rem 0.6rem;margin-top:0;">Re-verify</button>
                     </form>
@@ -151,22 +151,24 @@
         </div>
 
         {{-- Oath submit form --}}
-        @if(!$oath)
+        @if(!$oath || !$oath->verified)
+        @if($oath && !$oath->verified)
+        {{-- Already tried, re-scan --}}
+        @endif
         <div style="margin-top:0.75rem;">
-            <form method="POST" action="{{ route('oath.store') }}">
+            <form method="POST" action="{{ route('oath.verify') }}">
                 @csrf
-                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                    <input
-                        type="url"
-                        name="comment_url"
-                        class="form-control form-control-sm"
-                        style="max-width:340px;background:#3a1a1a;border-color:#8b3a3a;color:#efefef;"
-                        placeholder="Paste your oath comment URL..."
-                        required
-                    >
-                    <button type="submit" class="btn-election" style="margin-top:0;">Submit Oath</button>
-                </div>
+                <button type="submit" class="btn-election" style="margin-top:0;">
+                    <i class="fas fa-search mr-1"></i>
+                    {{ $oath ? 'Re-scan Oath Thread' : 'Verify My Oath' }}
+                </button>
             </form>
+            @if(\App\Model\Setting::get('oath_thread_url'))
+            <a href="{{ \App\Model\Setting::get('oath_thread_url') }}" target="_blank"
+                style="font-size:0.8rem;color:#c0a0a0;margin-left:0.75rem;">
+                View oath thread <i class="fas fa-external-link-alt"></i>
+            </a>
+            @endif
         </div>
         @endif
     </div>

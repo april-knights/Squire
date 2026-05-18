@@ -207,76 +207,197 @@ class RedditService
     }
 
     // -------------------------------------------------------------------------
-    // Oath Comment Verification
+    // Oath Thread Scanning
     // -------------------------------------------------------------------------
 
     /**
-     * Verify that a Reddit comment URL:
-     * - Exists
-     * - Is on the correct oath post
-     * - Was authored by the knight's registered Reddit username
-     *
-     * Returns ['valid' => bool, 'reason' => string|null]
+     * Scan the oath thread for a comment by a specific author.
+     * Returns ['valid' => bool, 'comment_url' => string|null, 'reason' => string|null]
      */
-    public function verifyOathComment(string $commentUrl, string $expectedAuthor): array
+    public function findOathComment(string $rname): array
     {
-        $token = $this->getAccessToken();
+        $oathThreadUrl = Setting::get('oath_thread_url');
 
-        // Extract comment ID from URL
-        // URL format: https://www.reddit.com/r/sub/comments/{post_id}/title/{comment_id}/
-        $commentId = $this->extractCommentId($commentUrl);
-
-        if (! $commentId) {
-            return ['valid' => false, 'reason' => 'Could not parse comment ID from URL.'];
+        if (! $oathThreadUrl) {
+            return ['valid' => false, 'comment_url' => null, 'reason' => 'Oath thread not configured. Contact an Admin.'];
         }
 
+        $postId = $this->extractPostId($oathThreadUrl);
+
+        if (! $postId) {
+            return ['valid' => false, 'comment_url' => null, 'reason' => 'Could not parse oath thread URL. Contact an Admin.'];
+        }
+
+        $comments = $this->fetchAllComments($postId);
+
+        if ($comments === null) {
+            return ['valid' => false, 'comment_url' => null, 'reason' => 'Reddit API request failed. Try again later.'];
+        }
+
+        foreach ($comments as $comment) {
+            if (strtolower($comment['author'] ?? '') === strtolower($rname)) {
+                // Build comment URL from post ID and comment ID
+                $commentUrl = 'https://www.reddit.com/r/' . $this->subreddit
+                    . '/comments/' . $postId
+                    . '/_/' . $comment['id'] . '/';
+
+                return [
+                    'valid'       => true,
+                    'comment_url' => $commentUrl,
+                    'comment_id'  => $comment['id'],
+                    'reason'      => null,
+                ];
+            }
+        }
+
+        return [
+            'valid'       => false,
+            'comment_url' => null,
+            'reason'      => 'No comment found on the oath thread for /u/' . $rname . '. Make sure you have commented on the thread.',
+        ];
+    }
+
+    /**
+     * Fetch all top-level comments from a Reddit post, handling pagination.
+     * Returns flat array of comment data arrays, or null on API failure.
+     */
+    protected function fetchAllComments(string $postId): ?array
+    {
+        $token   = $this->getAccessToken();
+        $headers = ['User-Agent' => $this->userAgent];
+
+        if ($token) {
+            $headers['Authorization'] = 'Bearer ' . $token;
+        }
+
+        $baseUrl  = 'https://oauth.reddit.com/r/' . $this->subreddit . '/comments/' . $postId;
+        $comments = [];
+        $after    = null;
+
+        // Reddit comment trees can have 'more' objects — we follow them
+        // For oath threads (flat top-level replies) one request is almost always enough
+        do {
+            $params = ['limit' => 500, 'depth' => 1];
+            if ($after) {
+                $params['after'] = $after;
+            }
+
+            $response = Http::withHeaders($headers)
+                ->get($baseUrl, $params);
+
+            if (! $response->successful()) {
+                Log::error('RedditService: Failed to fetch oath thread comments.', [
+                    'post_id'  => $postId,
+                    'response' => $response->body(),
+                ]);
+                return null;
+            }
+
+            $data = $response->json();
+
+            // Reddit returns [post_listing, comments_listing]
+            $commentListing = $data[1]['data']['children'] ?? [];
+
+            foreach ($commentListing as $child) {
+                if (($child['kind'] ?? '') === 't1') {
+                    $comments[] = $child['data'];
+                }
+            }
+
+            // Check for 'more' object for pagination
+            $last = end($commentListing);
+            if ($last && ($last['kind'] ?? '') === 'more' && ! empty($last['data']['children'])) {
+                // For oath threads we won't typically hit this
+                // If we do, fetch remaining via /api/morechildren
+                $moreIds  = array_slice($last['data']['children'], 0, 100);
+                $moreData = $this->fetchMoreComments($postId, $moreIds, $token);
+                if ($moreData) {
+                    $comments = array_merge($comments, $moreData);
+                }
+                $after = null; // stop pagination loop — morechildren handled above
+            } else {
+                $after = null;
+            }
+
+        } while ($after);
+
+        return $comments;
+    }
+
+    /**
+     * Fetch additional comments via /api/morechildren for paginated threads.
+     */
+    protected function fetchMoreComments(string $postId, array $childIds, ?string $token): array
+    {
         $headers = ['User-Agent' => $this->userAgent];
         if ($token) {
             $headers['Authorization'] = 'Bearer ' . $token;
         }
 
         $response = Http::withHeaders($headers)
-            ->get('https://oauth.reddit.com/api/info', [
-                'id' => 't1_' . $commentId,
+            ->get('https://oauth.reddit.com/api/morechildren', [
+                'link_id'  => 't3_' . $postId,
+                'children' => implode(',', $childIds),
+                'api_type' => 'json',
             ]);
 
         if (! $response->successful()) {
-            Log::error('RedditService: Comment verification request failed.', ['response' => $response->body()]);
-            return ['valid' => false, 'reason' => 'Reddit API request failed. Try again later.'];
+            return [];
         }
 
-        $data     = $response->json();
-        $children = $data['data']['children'] ?? [];
+        $things = $response->json()['json']['data']['things'] ?? [];
+        $result = [];
 
-        if (empty($children)) {
-            return ['valid' => false, 'reason' => 'Comment not found on Reddit.'];
+        foreach ($things as $thing) {
+            if (($thing['kind'] ?? '') === 't1') {
+                $result[] = $thing['data'];
+            }
         }
 
-        $comment = $children[0]['data'] ?? [];
+        return $result;
+    }
 
-        // Verify author
-        $author = $comment['author'] ?? null;
-        if (strtolower($author) !== strtolower($expectedAuthor)) {
-            return [
-                'valid'  => false,
-                'reason' => 'Comment author (' . $author . ') does not match your registered Reddit username.',
+    /**
+     * Scan the entire oath thread and return all comment authors.
+     * Used for batch verification and non-Squire commenter report.
+     * Returns array of ['author' => string, 'comment_id' => string, 'comment_url' => string]
+     */
+    public function getAllOathCommenters(): ?array
+    {
+        $oathThreadUrl = Setting::get('oath_thread_url');
+
+        if (! $oathThreadUrl) {
+            return null;
+        }
+
+        $postId = $this->extractPostId($oathThreadUrl);
+
+        if (! $postId) {
+            return null;
+        }
+
+        $comments = $this->fetchAllComments($postId);
+
+        if ($comments === null) {
+            return null;
+        }
+
+        $result = [];
+        foreach ($comments as $comment) {
+            $author = $comment['author'] ?? null;
+            if (! $author || $author === '[deleted]' || $author === 'AutoModerator') {
+                continue;
+            }
+            $result[] = [
+                'author'      => $author,
+                'comment_id'  => $comment['id'],
+                'comment_url' => 'https://www.reddit.com/r/' . $this->subreddit
+                    . '/comments/' . $postId
+                    . '/_/' . $comment['id'] . '/',
             ];
         }
 
-        // Verify it's on the correct post
-        $linkId         = $comment['link_id'] ?? null; // format: t3_postid
-        $oathThreadUrl  = \App\Model\Setting::get('oath_thread_url');
-        $oathPostId     = $this->extractPostId($oathThreadUrl);
-        $expectedLinkId = 't3_' . $oathPostId;
-
-        if ($linkId !== $expectedLinkId) {
-            return [
-                'valid'  => false,
-                'reason' => 'Comment is not on the current oath thread.',
-            ];
-        }
-
-        return ['valid' => true, 'reason' => null];
+        return $result;
     }
 
     /**

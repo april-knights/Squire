@@ -95,6 +95,32 @@
 </div>
 
 <div class="admin-card">
+
+    {{-- Batch verify --}}
+    <form method="POST" action="{{ route('admin.oaths.batch-verify') }}" style="margin-bottom:1rem;">
+        @csrf
+        <button type="submit" class="btn-sm-admin"
+            onclick="return confirm('Scan the oath thread and verify all matching knights?')">
+            <i class="fas fa-sync mr-1"></i> Run Batch Verification
+        </button>
+    </form>
+
+    @if(session('batch_results'))
+    @php $br = session('batch_results'); @endphp
+    <div style="background:#3a1a1a;border:1px solid #8b3a3a;border-radius:4px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;">
+        <strong>Batch Results:</strong>
+        <span style="color:#5cb85c;margin-left:0.75rem;"><i class="fas fa-check mr-1"></i>{{ $br['verified'] }} newly verified</span>
+        <span style="color:#c0a0a0;margin-left:0.75rem;"><i class="fas fa-check-double mr-1"></i>{{ $br['alreadyOk'] }} already verified</span>
+        <span style="color:#f0ad4e;margin-left:0.75rem;"><i class="fas fa-times mr-1"></i>{{ $br['notFound'] }} not found on thread</span>
+        @if(!empty($br['noSquire']))
+        <div style="margin-top:0.5rem;color:#f0ad4e;">
+            <i class="fas fa-user-times mr-1"></i> {{ count($br['noSquire']) }} commenter(s) not in Squire:
+            <span style="color:#c0a0a0;">{{ implode(', ', array_map(fn($r) => '/u/' . $r, $br['noSquire'])) }}</span>
+        </div>
+        @endif
+    </div>
+    @endif
+
     <div style="display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:1rem;">
         <div>
             <span style="font-size:1.4rem;font-weight:bold;color:#5cb85c;">{{ $oaths->where('verified', true)->count() }}</span>

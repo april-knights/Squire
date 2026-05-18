@@ -66,9 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/links', 'LinkController@index');
 
     # Oath
-    Route::post('/oath', [App\Http\Controllers\OathController::class, 'store'])->name('oath.store');
-    Route::post('/oath/reverify', [App\Http\Controllers\OathController::class, 'reverify'])->name('oath.reverify');
-    Route::post('/oath/update', [App\Http\Controllers\OathController::class, 'update'])->name('oath.update');
+    Route::post('/oath/verify', [App\Http\Controllers\OathController::class, 'verify'])->name('oath.verify');
 
     # Election — knight facing
     Route::post('/election/register', [App\Http\Controllers\ElectionController::class, 'register'])->name('election.register');
@@ -207,6 +205,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [App\Http\Controllers\OathController::class, 'adminIndex'])->name('index');
             Route::post('/{pkey}/verify', [App\Http\Controllers\OathController::class, 'adminVerify'])->name('verify');
             Route::post('/{pkey}/unverify', [App\Http\Controllers\OathController::class, 'adminUnverify'])->name('unverify');
+            Route::post('/batch-verify', [App\Http\Controllers\OathController::class, 'adminBatchVerify'])->name('admin.oaths.batch-verify');
         });
 
     }); // end admin group
