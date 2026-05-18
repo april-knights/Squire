@@ -285,7 +285,7 @@
                 <tr>
                     <td>
                         <a href="{{ route('profile', $member['rname']) }}" style="color:#efefef;">
-                            {{ $member['kname'] }}
+                            {{ $member['rname'] }}
                         </a>
                     </td>
                     <td>

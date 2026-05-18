@@ -107,7 +107,7 @@
 @if($winner)
 <div class="winner-banner">
     <i class="fas fa-crown" style="font-size:1.75rem;color:#f0ad4e;margin-bottom:0.5rem;display:block;"></i>
-    <h3>{{ $winner->knight->kname }}</h3>
+    <h3>{{ $winner->knight->rname }}</h3>
     <p style="color:#c0a0a0;margin:0;">/u/{{ $winner->knight->rname }} — {{ $election->election_year }} Grandmaster</p>
 </div>
 @endif
@@ -122,7 +122,7 @@
         @elseif(!empty($round['eliminated']))
             — Eliminated:
             @foreach((array)$round['eliminated'] as $elimPkey)
-                <span style="color:#c0392b;">{{ $candidates[$elimPkey]->knight->kname ?? 'Unknown' }}</span>
+                <span style="color:#c0392b;">{{ $candidates[$elimPkey]->knight->rname ?? 'Unknown' }}</span>
             @endforeach
         @endif
     </div>
@@ -138,7 +138,7 @@
     @endphp
     <div class="candidate-result-row">
         <div class="candidate-result-name">
-            {{ $candidate?->knight?->kname ?? 'Unknown' }}
+            {{ $candidate?->knight?->rname ?? 'Unknown' }}
             @if($isEliminated)
                 <span class="eliminated-tag">Out</span>
             @endif

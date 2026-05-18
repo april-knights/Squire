@@ -93,7 +93,7 @@ class HomeController extends Controller
             ->where('fkeybattalion', $battalionPkey)
             ->where('activeflg', 1)
             ->where('delflg', 0)
-            ->get(['pkey', 'kname', 'rname']);
+            ->get(['pkey', 'rname', 'dname']);
 
         $battalionPkeys = $battalionKnights->pluck('pkey')->toArray();
         $total          = count($battalionPkeys);
@@ -132,7 +132,7 @@ class HomeController extends Controller
             $namedList = $battalionKnights->map(function ($k) use ($registeredPkeys, $votedPkeys) {
                 return [
                     'pkey'       => $k->pkey,
-                    'kname'      => $k->kname,
+                    'rname'      => $k->rname,
                     'rname'      => $k->rname,
                     'registered' => in_array($k->pkey, $registeredPkeys),
                     'voted'      => in_array($k->pkey, $votedPkeys),

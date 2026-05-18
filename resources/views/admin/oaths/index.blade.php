@@ -152,7 +152,7 @@
         <tbody>
             @foreach($oaths as $oath)
             <tr class="oath-row">
-                <td>{{ $oath->knight->kname }}</td>
+                <td>{{ $oath->knight->rname }}</td>
                 <td style="color:#c0a0a0;">/u/{{ $oath->knight->rname }}</td>
                 <td style="color:#c0a0a0;font-size:0.8rem;">{{ $oath->crtsetdt->format('M j, Y') }}</td>
                 <td>
@@ -177,7 +177,7 @@
                     <form method="POST" action="{{ route('admin.oaths.unverify', $oath->pkey) }}" style="display:inline;">
                         @csrf
                         <button type="submit" class="btn-sm-admin muted"
-                            onclick="return confirm('Remove verification from {{ $oath->knight->kname }}?')">
+                            onclick="return confirm('Remove verification from {{ $oath->knight->rname }}?')">
                             Unverify
                         </button>
                     </form>

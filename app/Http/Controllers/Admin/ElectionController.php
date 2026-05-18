@@ -440,7 +440,7 @@ class ElectionController extends Controller
         return Knight::withoutGlobalScopes()
             ->where('activeflg', 1)
             ->where('delflg', 0)
-            ->orderBy('kname', 'asc')
-            ->get(['pkey', 'kname', 'rname']);
+            ->orderBy('rname', 'asc')
+            ->get(['pkey', 'rname', 'dname']);
     }
 }

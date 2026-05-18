@@ -288,7 +288,7 @@
             <div style="background:#5a2424;border:1px solid #8b3a3a;border-radius:4px;padding:0.75rem 1rem;margin-bottom:0.5rem;">
                 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
                     <div>
-                        <strong>{{ $candidate->knight->kname }}</strong>
+                        <strong>{{ $candidate->knight->rname }}</strong>
                         <span style="color:#c0a0a0;font-size:0.82rem;margin-left:0.5rem;">/u/{{ $candidate->knight->rname }}</span>
                     </div>
                     <span style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.15rem 0.5rem;border-radius:3px;
@@ -299,7 +299,7 @@
                 </div>
                 @if($candidate->nominations->count())
                 <div style="margin-top:0.5rem;font-size:0.78rem;color:#c0a0a0;">
-                    Nominated by {{ $candidate->nominations->where('action','nominated')->first()?->knight?->kname ?? '—' }}
+                    Nominated by {{ $candidate->nominations->where('action','nominated')->first()?->knight?->rname ?? '—' }}
                     &bull; {{ $candidate->nominations->where('action','seconded')->count() }} second(s)
                 </div>
                 @endif

@@ -106,7 +106,7 @@
         <tbody>
             @foreach($registrations as $reg)
             <tr class="voter-row">
-                <td>{{ $reg->knight->kname }}</td>
+                <td>{{ $reg->knight->rname }}</td>
                 <td style="color:#c0a0a0;">/u/{{ $reg->knight->rname }}</td>
                 <td style="color:#c0a0a0;font-size:0.8rem;">{{ $reg->registered_at->format('M j, Y') }}</td>
                 <td>

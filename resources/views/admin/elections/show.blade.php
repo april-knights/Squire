@@ -146,7 +146,7 @@
         @if($administrator)
         <div style="background:#5a2424;border:1px solid #8b3a3a;border-radius:4px;padding:0.75rem 1rem;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
             <div>
-                <strong>{{ $administrator->knight->kname }}</strong>
+                <strong>{{ $administrator->knight->rname }}</strong>
                 <span style="color:#c0a0a0;font-size:0.8rem;margin-left:0.5rem;">/u/{{ $administrator->knight->rname }}</span>
                 <span class="status-pill" style="background:#2d6a2d;color:#5cb85c;margin-left:0.5rem;">Full EA</span>
             </div>
@@ -154,7 +154,7 @@
                 @csrf
                 <input type="hidden" name="ea_pkey" value="{{ $administrator->pkey }}">
                 <button type="submit" class="btn-admin muted"
-                    onclick="return confirm('Remove {{ $administrator->knight->kname }} as Election Administrator?')">
+                    onclick="return confirm('Remove {{ $administrator->knight->rname }} as Election Administrator?')">
                     Remove
                 </button>
             </form>
@@ -166,7 +166,7 @@
         @if($assistant)
         <div style="background:#5a2424;border:1px solid #8b3a3a;border-radius:4px;padding:0.75rem 1rem;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
             <div>
-                <strong>{{ $assistant->knight->kname }}</strong>
+                <strong>{{ $assistant->knight->rname }}</strong>
                 <span style="color:#c0a0a0;font-size:0.8rem;margin-left:0.5rem;">/u/{{ $assistant->knight->rname }}</span>
                 <span class="status-pill" style="background:#4a3a1a;color:#f0ad4e;margin-left:0.5rem;">Assistant EA</span>
             </div>
@@ -174,7 +174,7 @@
                 @csrf
                 <input type="hidden" name="ea_pkey" value="{{ $assistant->pkey }}">
                 <button type="submit" class="btn-admin muted"
-                    onclick="return confirm('Remove {{ $assistant->knight->kname }} as Assistant EA?')">
+                    onclick="return confirm('Remove {{ $assistant->knight->rname }} as Assistant EA?')">
                     Remove
                 </button>
             </form>
@@ -191,7 +191,7 @@
                     <select name="fkeyknight" class="ea-select" required>
                         <option value="">— Select Knight —</option>
                         @foreach($eligibleKnights as $k)
-                        <option value="{{ $k->pkey }}">{{ $k->kname }} (/u/{{ $k->rname }})</option>
+                        <option value="{{ $k->pkey }}">{{ $k->rname }} (/u/{{ $k->rname }})</option>
                         @endforeach
                     </select>
                 </div>
@@ -236,7 +236,7 @@
                 @foreach($candidates as $candidate)
                 <tr>
                     <td>
-                        <div>{{ $candidate->knight->kname }}</div>
+                        <div>{{ $candidate->knight->rname }}</div>
                         <div style="color:#c0a0a0;font-size:0.78rem;">/u/{{ $candidate->knight->rname }}</div>
                     </td>
                     <td>
@@ -277,7 +277,7 @@
                                 @method('DELETE')
                                 <button type="submit" class="btn-admin muted"
                                     style="padding:0.2rem 0.5rem;font-size:0.75rem;margin:0;"
-                                    onclick="return confirm('Remove {{ $candidate->knight->kname }} from candidates?')">
+                                    onclick="return confirm('Remove {{ $candidate->knight->rname }} from candidates?')">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </form>
@@ -298,7 +298,7 @@
                     <select name="fkeyknight" class="ea-select" required>
                         <option value="">— Select Knight —</option>
                         @foreach($eligibleKnights as $k)
-                        <option value="{{ $k->pkey }}">{{ $k->kname }} (/u/{{ $k->rname }})</option>
+                        <option value="{{ $k->pkey }}">{{ $k->rname }} (/u/{{ $k->rname }})</option>
                         @endforeach
                     </select>
                 </div>
@@ -348,7 +348,7 @@
             <tbody>
                 @foreach($allNominations as $nom)
                 <tr>
-                    <td style="font-size:0.82rem;">{{ $nom->candidate->knight->kname }}</td>
+                    <td style="font-size:0.82rem;">{{ $nom->candidate->knight->rname }}</td>
                     <td>
                         <span class="status-pill"
                             style="background:{{ $nom->action === 'nominated' ? '#2d6a2d' : '#4a3a1a' }};
@@ -356,7 +356,7 @@
                             {{ ucfirst($nom->action) }}
                         </span>
                     </td>
-                    <td style="font-size:0.82rem;">{{ $nom->knight->kname }}</td>
+                    <td style="font-size:0.82rem;">{{ $nom->knight->rname }}</td>
                     <td>
                         @if($nom->reddit_comment_url)
                         <a href="{{ $nom->reddit_comment_url }}" target="_blank"
@@ -383,7 +383,7 @@
                     <select name="fkeycandidate" class="ea-select" required>
                         <option value="">— Select Candidate —</option>
                         @foreach($candidates->whereIn('status',['nominated','accepted']) as $c)
-                        <option value="{{ $c->pkey }}">{{ $c->knight->kname }}</option>
+                        <option value="{{ $c->pkey }}">{{ $c->knight->rname }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -392,7 +392,7 @@
                     <select name="fkeyknight" class="ea-select" required>
                         <option value="">— Select Knight —</option>
                         @foreach($eligibleKnights as $k)
-                        <option value="{{ $k->pkey }}">{{ $k->kname }}</option>
+                        <option value="{{ $k->pkey }}">{{ $k->rname }}</option>
                         @endforeach
                     </select>
                 </div>

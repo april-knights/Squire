@@ -103,7 +103,7 @@
         @foreach($candidates as $candidate)
         <div class="candidate-row">
             <div>
-                <div class="candidate-name">{{ $candidate->knight->kname }}</div>
+                <div class="candidate-name">{{ $candidate->knight->rname }}</div>
                 <div class="candidate-rname">/u/{{ $candidate->knight->rname }}</div>
             </div>
             <select

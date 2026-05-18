@@ -67,7 +67,7 @@ class OathController extends Controller
                 ]
             );
 
-            return back()->with('success', 'Your oath has been verified. Thank you, ' . $knight->kname . '!');
+            return back()->with('success', 'Your oath has been verified. Thank you, ' . $knight->rname . '!');
         }
 
         // Not found — create unverified record so we know they tried
@@ -137,7 +137,7 @@ class OathController extends Controller
         $knights = Knight::withoutGlobalScopes()
             ->where('activeflg', 1)
             ->where('delflg', 0)
-            ->get(['pkey', 'kname', 'rname']);
+            ->get(['pkey', 'rname', 'dname']);
 
         $verified   = 0;
         $alreadyOk  = 0;
