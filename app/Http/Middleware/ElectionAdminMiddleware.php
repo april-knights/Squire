@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use app\Model\Election;
-use app\Model\ElectionAdministrator;
+use App\Model\Election;
+use App\Model\ElectionAdministrator;
 
 class ElectionAdminMiddleware
 {
