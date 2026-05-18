@@ -90,11 +90,25 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/debate-thread', [App\Http\Controllers\ElectionController::class, 'postDebateThread'])->name('debate-thread');
     });
 
-    # TEMP DEBUG — remove after testing
+# TEMP DEBUG — remove after testing
 Route::get('/admin/debug-oath-scan', function () {
-    $service = app(\App\Services\RedditService::class);
-    $result  = $service->getAllOathCommenters();
-    dd($result);
+    $service  = app(\App\Services\RedditService::class);
+    $token    = $service->getAccessToken();
+    $postId   = '1ri2l0o';
+    $headers  = ['User-Agent' => 'Squire/2.0 by AKSquire2'];
+    if ($token) {
+        $headers['Authorization'] = 'Bearer ' . $token;
+    }
+    $response = \Illuminate\Support\Facades\Http::withHeaders($headers)
+        ->get('https://oauth.reddit.com/r/AprilKnights/comments/' . $postId, [
+            'limit' => 500,
+            'depth' => 1,
+        ]);
+    dd([
+        'token_present' => ! empty($token),
+        'status'        => $response->status(),
+        'body_preview'  => substr($response->body(), 0, 500),
+    ]);
 });
 
 # Admin
