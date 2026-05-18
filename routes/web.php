@@ -13,6 +13,9 @@ Route::get('/logout', function () {
     return redirect('/login');
 });
 
+# Reddit OAuth callback for AKSquire2
+Route::get('/admin/elections/reddit-callback', [App\Http\Controllers\Admin\ElectionController::class, 'redditAuthCallback'])->name('admin.elections.reddit-callback');
+
 # Signin
 Route::get('/login/reddit', 'LoginController@redirectToProvider');
 Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback');
@@ -191,7 +194,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/settings', [App\Http\Controllers\Admin\ElectionController::class, 'settings'])->name('settings');
             Route::post('/settings', [App\Http\Controllers\Admin\ElectionController::class, 'updateSettings'])->name('settings.update');
             Route::get('/reddit-auth', [App\Http\Controllers\Admin\ElectionController::class, 'redditAuthRedirect'])->name('reddit-auth');
-            Route::get('/reddit-callback', [App\Http\Controllers\Admin\ElectionController::class, 'redditAuthCallback'])->name('reddit-callback');
             Route::get('/{pkey}', [App\Http\Controllers\Admin\ElectionController::class, 'show'])->name('show');
             Route::post('/{pkey}', [App\Http\Controllers\Admin\ElectionController::class, 'update'])->name('update');
             Route::post('/{pkey}/appoint', [App\Http\Controllers\Admin\ElectionController::class, 'appointAdministrator'])->name('appoint');
