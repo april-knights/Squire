@@ -19,7 +19,7 @@ Route::get('/login/reddit/callback', 'LoginController@handleProviderCallback');
 
 ## Internal routes
 Route::middleware(['auth'])->group(function () {
-    Route::view('/', 'home')->name('home');
+    Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
     # Profile
     Route::get('/profile/new', 'ProfileController@create');
