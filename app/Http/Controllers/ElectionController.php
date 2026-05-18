@@ -719,6 +719,7 @@ class ElectionController extends Controller
             // Append Discord silent flag instruction for the bot
             // Bot applies MessageFlags.SuppressNotifications when silent = true
             $response = Http::timeout(5)
+                ->asJson()
                 ->post(config('services.squire_bot_webhook_url') . '/webhook/election-audit', [
                     'discordid' => (string) $eaRecord->knight->discordid,
                     'payload'   => $payload,

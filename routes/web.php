@@ -117,6 +117,7 @@ Route::get('/admin/debug-webhook', function () {
     $knight = auth()->user();
     try {
         $response = \Illuminate\Support\Facades\Http::timeout(5)
+            ->asJson()
             ->post(config('services.squire_bot_webhook_url') . '/webhook/election-audit', [
                 'discordid' => (string) $knight->discordid,
                 'payload'   => "**April Knights — Webhook Test**\nIf you can read this, the audit DM webhook is working.",
