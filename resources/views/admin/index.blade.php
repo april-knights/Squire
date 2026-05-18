@@ -167,6 +167,27 @@
             <div class="section-desc">Browse and manage static image assets</div>
         </a>
     </div>
+    <div class="col-md-4">
+        <a href="/admin/elections" class="admin-section-card">
+            <div class="section-icon"><i class="fas fa-vote-yea"></i></div>
+            <div class="section-title">Elections</div>
+            <div class="section-desc">Manage Grandmaster elections, candidates, and results</div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="/admin/oaths" class="admin-section-card">
+            <div class="section-icon"><i class="fas fa-scroll"></i></div>
+            <div class="section-title">Oaths</div>
+            <div class="section-desc">View and verify annual knight oaths</div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="/admin/elections/settings" class="admin-section-card">
+            <div class="section-icon"><i class="fas fa-cog"></i></div>
+            <div class="section-title">Election Settings</div>
+            <div class="section-desc">Configure oath thread, Reddit authorization, and bot settings</div>
+        </a>
+    </div>
 </div>
 
 @endsection

@@ -48,6 +48,17 @@
                     <a class="nav-link" href="/admin">Admin</a>
                 </li>
                 @endif
+                @php
+                    $navElection = \App\Model\Election::active();
+                    $isNavEA = $navElection && \App\Model\ElectionAdministrator::where('fkeyelection', $navElection->pkey)
+                        ->where('fkeyknight', Auth::user()->pkey)
+                        ->exists();
+                @endphp
+                @if($isNavEA)
+                <li class="nav-item {{ Request::is('election*') ? 'active' : '' }}">
+                    <a class="nav-link" href="/election/dashboard">EA Dashboard</a>
+                </li>
+                @endif
             </ul>
             <form class="form-inline my-2 my-lg-0">
                 <div class="username">{{ Auth::user()->getRankName() . ' ' . Auth::user()->rname }}</div>
