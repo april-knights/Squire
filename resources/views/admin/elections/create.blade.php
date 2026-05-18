@@ -57,12 +57,23 @@
 }
 </style>
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.5rem;">
-    <h4 style="margin:0;"><i class="fas fa-plus mr-2"></i>New Election</h4>
-    <a href="{{ route('admin.elections.index') }}" style="color:#c0a0a0;font-size:0.85rem;">
-        ← Back to Elections
-    </a>
-</div>
+@push('styles')
+<style>
+.breadcrumb { background-color: rgba(0,0,0,0.25); border: 1px solid #8b3a3a; }
+.breadcrumb-item a { color: #efefef; }
+.breadcrumb-item.active { color: #c9a0a0; }
+.breadcrumb-item + .breadcrumb-item::before { color: #8b3a3a; }
+</style>
+@endpush
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+        <li class="breadcrumb-item"><a href="/admin/elections">Elections</a></li>
+        <li class="breadcrumb-item active">New Election</li>
+    </ol>
+</nav>
+<h2>New Election</h2>
 
 <div class="admin-card" style="max-width:480px;">
     <h5>Election Details</h5>

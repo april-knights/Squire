@@ -76,8 +76,23 @@
 }
 </style>
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.5rem;">
-    <h4 style="margin:0;"><i class="fas fa-vote-yea mr-2"></i>Elections</h4>
+@push('styles')
+<style>
+.breadcrumb { background-color: rgba(0,0,0,0.25); border: 1px solid #8b3a3a; }
+.breadcrumb-item a { color: #efefef; }
+.breadcrumb-item.active { color: #c9a0a0; }
+.breadcrumb-item + .breadcrumb-item::before { color: #8b3a3a; }
+</style>
+@endpush
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+        <li class="breadcrumb-item active">Elections</li>
+    </ol>
+</nav>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+    <h2 style="margin:0;">Elections</h2>
     <a href="{{ route('admin.elections.create') }}" class="btn-admin">
         <i class="fas fa-plus mr-1"></i> New Election
     </a>
