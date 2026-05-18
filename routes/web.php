@@ -90,7 +90,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/debate-thread', [App\Http\Controllers\ElectionController::class, 'postDebateThread'])->name('debate-thread');
     });
 
-# TEMP DEBUG — remove after testing
+/* # TEMP DEBUG — remove after testing
 Route::get('/admin/debug-oath-scan', function () {
     $service  = app(\App\Services\RedditService::class);
     $token    = $service->getAccessToken();
@@ -110,7 +110,7 @@ Route::get('/admin/debug-oath-scan', function () {
         'body_preview'  => substr($response->body(), 0, 500),
     ]);
 });
-
+*/
 # Admin
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('/', 'Admin\AdminController@index')->name('admin.index');
@@ -226,7 +226,7 @@ Route::get('/admin/debug-oath-scan', function () {
             Route::get('/', [App\Http\Controllers\OathController::class, 'adminIndex'])->name('index');
             Route::post('/{pkey}/verify', [App\Http\Controllers\OathController::class, 'adminVerify'])->name('verify');
             Route::post('/{pkey}/unverify', [App\Http\Controllers\OathController::class, 'adminUnverify'])->name('unverify');
-            Route::post('/batch-verify', [App\Http\Controllers\OathController::class, 'adminBatchVerify'])->name('admin.oaths.batch-verify');
+            Route::post('/batch-verify', [App\Http\Controllers\OathController::class, 'adminBatchVerify'])->name('batch-verify');
         });
 
     }); // end admin group
