@@ -1,6 +1,8 @@
 <?php
 
-namespace app\Model;
+namespace App\Model;
+
+use App\Support\SquireModel;
 
 class ElectionVote extends SquireModel
 {
