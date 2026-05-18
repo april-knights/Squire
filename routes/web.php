@@ -115,6 +115,7 @@ Route::get('/admin/debug-oath-scan', function () {
 # TEMP DEBUG — remove after testing
 Route::get('/admin/debug-webhook', function () {
     $knight = auth()->user();
+    $secret = config('services.squire_bot_webhook_secret');
     try {
         $response = \Illuminate\Support\Facades\Http::timeout(5)
             ->asJson()
@@ -122,11 +123,13 @@ Route::get('/admin/debug-webhook', function () {
                 'discordid' => (string) $knight->discordid,
                 'payload'   => "**April Knights — Webhook Test**\nIf you can read this, the audit DM webhook is working.",
                 'silent'    => false,
-                'token'     => config('services.squire_bot_webhook_secret'),
+                'token'     => $secret,
             ]);
         dd([
-            'status'   => $response->status(),
-            'response' => $response->json(),
+            'secret_squire'   => $secret,
+            'secret_length'   => strlen($secret),
+            'status'          => $response->status(),
+            'response'        => $response->json(),
         ]);
     } catch (\Exception $e) {
         dd(['error' => $e->getMessage()]);
