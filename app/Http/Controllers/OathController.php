@@ -22,6 +22,7 @@ class OathController extends Controller
             'adminUnverify',
             'adminBatchVerify',
         ]);
+        $this->reddit = $reddit;
     }
 
     // -------------------------------------------------------------------------
