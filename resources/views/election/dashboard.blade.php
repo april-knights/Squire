@@ -354,10 +354,22 @@
                 <i class="fas fa-chart-pie mr-1"></i> Results
             </a>
             @endif
-            @if($isFullEA)
-            <a href="{{ route('election.audit') }}" class="btn-ea" style="display:block;text-align:center;margin-bottom:0.4rem;">
-                <i class="fas fa-upload mr-1"></i> Upload Audit CSV
-            </a>
+            @if($isFullEA && in_array($election->phase, ['counting','complete']))
+            <div style="margin-top:0.75rem;">
+                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:#c0a0a0;margin-bottom:0.5rem;">
+                    <i class="fas fa-clipboard-check mr-1"></i> Audit CSV Upload
+                </div>
+                <form method="POST" action="{{ route('election.audit') }}" enctype="multipart/form-data">
+                    @csrf
+                    <div style="margin-bottom:0.5rem;">
+                        <input type="file" name="audit_csv" accept=".csv,.txt"
+                            style="color:#efefef;font-size:0.82rem;width:100%;">
+                    </div>
+                    <button type="submit" class="btn-ea" style="width:100%;text-align:center;">
+                        <i class="fas fa-upload mr-1"></i> Run Audit
+                    </button>
+                </form>
+            </div>
             @endif
             @if($isFullEA || $isAdminTest)
             <a href="{{ route('admin.elections.show', $election->pkey) }}" class="btn-ea" style="display:block;text-align:center;">
