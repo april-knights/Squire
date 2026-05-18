@@ -65,6 +65,33 @@ Route::middleware(['auth'])->group(function () {
     # Links
     Route::get('/links', 'LinkController@index');
 
+    # Oath
+    Route::post('/oath', [App\Http\Controllers\OathController::class, 'store'])->name('oath.store');
+    Route::post('/oath/reverify', [App\Http\Controllers\OathController::class, 'reverify'])->name('oath.reverify');
+    Route::post('/oath/update', [App\Http\Controllers\OathController::class, 'update'])->name('oath.update');
+
+    # Election — knight facing
+    Route::post('/election/register', [App\Http\Controllers\ElectionController::class, 'register'])->name('election.register');
+    Route::post('/election/unregister', [App\Http\Controllers\ElectionController::class, 'unregister'])->name('election.unregister');
+    Route::get('/election/ballot', [App\Http\Controllers\ElectionController::class, 'ballot'])->name('election.ballot');
+    Route::post('/election/ballot', [App\Http\Controllers\ElectionController::class, 'submitBallot'])->name('election.ballot.submit');
+    Route::get('/election/paused', [App\Http\Controllers\ElectionController::class, 'paused'])->name('election.paused');
+
+    # Election — EA dashboard
+    Route::middleware(['election.admin'])->prefix('election')->name('election.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\ElectionController::class, 'dashboard'])->name('dashboard');
+        Route::post('/advance', [App\Http\Controllers\ElectionController::class, 'advancePhase'])->name('advance');
+        Route::post('/open-voting', [App\Http\Controllers\ElectionController::class, 'openVoting'])->name('open-voting');
+        Route::post('/pause-voting', [App\Http\Controllers\ElectionController::class, 'pauseVoting'])->name('pause-voting');
+        Route::post('/toggles', [App\Http\Controllers\ElectionController::class, 'updateToggles'])->name('toggles');
+        Route::get('/voters', [App\Http\Controllers\ElectionController::class, 'voterList'])->name('voters');
+        Route::get('/results', [App\Http\Controllers\ElectionController::class, 'results'])->name('results');
+        Route::post('/audit', [App\Http\Controllers\ElectionController::class, 'auditUpload'])->name('audit');
+        Route::post('/archive-key', [App\Http\Controllers\ElectionController::class, 'archiveKey'])->name('archive-key');
+        Route::post('/nomination-thread', [App\Http\Controllers\ElectionController::class, 'postNominationThread'])->name('nomination-thread');
+        Route::post('/debate-thread', [App\Http\Controllers\ElectionController::class, 'postDebateThread'])->name('debate-thread');
+    });
+
 # Admin
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('/', 'Admin\AdminController@index')->name('admin.index');
@@ -155,6 +182,33 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/images',              'Admin\ImageController@store')->name('admin.images.store');
         Route::get('/images/delete',        'Admin\ImageController@confirmDelete')->name('admin.images.confirm-delete');
         Route::post('/images/delete',       'Admin\ImageController@destroy')->name('admin.images.destroy');
+
+        # Election management
+        Route::prefix('elections')->name('admin.elections.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\ElectionController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\Admin\ElectionController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\Admin\ElectionController::class, 'store'])->name('store');
+            Route::get('/settings', [App\Http\Controllers\Admin\ElectionController::class, 'settings'])->name('settings');
+            Route::post('/settings', [App\Http\Controllers\Admin\ElectionController::class, 'updateSettings'])->name('settings.update');
+            Route::get('/reddit-auth', [App\Http\Controllers\Admin\ElectionController::class, 'redditAuthRedirect'])->name('reddit-auth');
+            Route::get('/reddit-callback', [App\Http\Controllers\Admin\ElectionController::class, 'redditAuthCallback'])->name('reddit-callback');
+            Route::get('/{pkey}', [App\Http\Controllers\Admin\ElectionController::class, 'show'])->name('show');
+            Route::post('/{pkey}', [App\Http\Controllers\Admin\ElectionController::class, 'update'])->name('update');
+            Route::post('/{pkey}/appoint', [App\Http\Controllers\Admin\ElectionController::class, 'appointAdministrator'])->name('appoint');
+            Route::post('/{pkey}/remove-admin', [App\Http\Controllers\Admin\ElectionController::class, 'removeAdministrator'])->name('remove-admin');
+            Route::post('/{pkey}/candidates', [App\Http\Controllers\Admin\ElectionController::class, 'addCandidate'])->name('candidates.add');
+            Route::post('/{pkey}/candidates/{candidatePkey}', [App\Http\Controllers\Admin\ElectionController::class, 'updateCandidate'])->name('candidates.update');
+            Route::delete('/{pkey}/candidates/{candidatePkey}', [App\Http\Controllers\Admin\ElectionController::class, 'removeCandidate'])->name('candidates.remove');
+            Route::post('/{pkey}/nominations', [App\Http\Controllers\Admin\ElectionController::class, 'addNomination'])->name('nominations.add');
+            Route::post('/{pkey}/toggle-test-mode', [App\Http\Controllers\Admin\ElectionController::class, 'toggleTestMode'])->name('toggle-test-mode');
+        });
+
+        # Oath management
+        Route::prefix('oaths')->name('admin.oaths.')->group(function () {
+            Route::get('/', [App\Http\Controllers\OathController::class, 'adminIndex'])->name('index');
+            Route::post('/{pkey}/verify', [App\Http\Controllers\OathController::class, 'adminVerify'])->name('verify');
+            Route::post('/{pkey}/unverify', [App\Http\Controllers\OathController::class, 'adminUnverify'])->name('unverify');
+        });
 
     }); // end admin group
 
