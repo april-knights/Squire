@@ -131,7 +131,7 @@ public function show($pkey)
         }
 
         $knight->{$field}  = $knight->{$field} ? 0 : 1;
-        $knight->lstmdby   = auth()->user()->rname;
+        $knight->lstmdby   = auth()->user()->pkey;
         $knight->lstmdts   = now();
         $knight->save();
 
