@@ -2,17 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\Battalion;
 use App\Model\Election;
 use App\Model\ElectionAdministrator;
+use App\Model\ElectionCandidate;
 use App\Model\ElectionRegistration;
 use App\Model\ElectionVote;
-use App\Model\ElectionCandidate;
-use App\Model\Oath;
 use App\Model\Knight;
-use Illuminate\Support\Facades\DB;
+use App\Model\Oath;
 
 class HomeController extends Controller
 {
+    /** rval at or below which a knight counts as a secondary officer (Captain, Lieutenant, Sergeant, etc.): names only if the EA allows. */
+    const OFFICER_MAX_RVAL = 8;
+
+    /** Rank value used when a knight has no rank assigned. */
+    const DEFAULT_RVAL = 99;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -28,13 +34,13 @@ class HomeController extends Controller
         $oathYear = Oath::currentOathYear();
 
         // --- Election status ---
-        $registered      = false;
-        $hasVoted        = false;
-        $isEA            = false;
-        $isAssistantEA   = false;
-        $eaRecord        = null;
-        $isCandidate     = false;
-        $battalionStats  = null;
+        $registered     = false;
+        $hasVoted       = false;
+        $isEA           = false;
+        $isAssistantEA  = false;
+        $eaRecord       = null;
+        $isCandidate    = false;
+        $battalionStats = null;
 
         if ($election) {
             $registered = ElectionRegistration::where('fkeyelection', $election->pkey)
@@ -59,14 +65,24 @@ class HomeController extends Controller
                 ->where('status', 'accepted')
                 ->exists();
 
-            // Battalion stats for Commanders, FOs, and accepted candidates
-            $showBattalionStats = $knight->rank->rval <= 5 || $isCandidate;
+            // The names toggle belongs to the ELECTION's Election Administrator, not the viewer.
+            $electionEA = ElectionAdministrator::where('fkeyelection', $election->pkey)
+                ->where('is_assistant', 0)
+                ->first();
 
-            if ($showBattalionStats && $knight->fkeybattalion) {
+            $officersSeeNames = (bool) ($electionEA->show_voter_names_secondary_officers ?? false);
+
+            $rval          = (int) ($knight->rank->rval ?? self::DEFAULT_RVAL);
+            $battalionPkey = $knight->batt;
+
+            if ($battalionPkey && $election->phase !== 'complete') {
                 $battalionStats = $this->getBattalionStats(
                     $election,
-                    $knight->fkeybattalion,
-                    $eaRecord
+                    (int) $battalionPkey,
+                    $knight,
+                    $rval,
+                    $isCandidate,
+                    $officersSeeNames
                 );
             }
         }
@@ -86,68 +102,113 @@ class HomeController extends Controller
         ));
     }
 
-    protected function getBattalionStats(Election $election, int $battalionPkey, $eaRecord): array
+    /**
+     * True if this knight is the leader, sec1 or sec2 of the given battalion.
+     * The relationship methods are called explicitly, so this works whether or not
+     * the battalion table also has same-named columns.
+     */
+    protected function isBattalionLeadership(int $battalionPkey, int $knightPkey): bool
     {
-        // All active knights in this battalion
-        $battalionKnights = Knight::withoutGlobalScopes()
-            ->where('fkeybattalion', $battalionPkey)
+        $battalion = Battalion::find($battalionPkey);
+
+        if (! $battalion) {
+            return false;
+        }
+
+        $leadershipPkeys = array_filter([
+            optional($battalion->leader()->first())->pkey,
+            optional($battalion->sec1()->first())->pkey,
+            optional($battalion->sec2()->first())->pkey,
+        ]);
+
+        return in_array($knightPkey, $leadershipPkeys);
+    }
+
+    /**
+     * Battalion-scoped election stats for the viewing knight's OWN battalion only.
+     *
+     * level 'full'   : battalion leader/sec1/sec2, accepted candidates, and officers
+     *                  (rval <= 8) when the EA allows it.
+     *                  Sees oathed/registered/voted counts, plus a named voter list during voting.
+     * level 'counts' : everyone else. Sees only the voted count, once voting is under way.
+     */
+    protected function getBattalionStats(
+        Election $election,
+        int $battalionPkey,
+        Knight $viewer,
+        int $rval,
+        bool $isCandidate,
+        bool $officersSeeNames
+    ): ?array {
+        $phase = $election->phase;
+
+        $isLeader = $isCandidate
+            || $this->isBattalionLeadership($battalionPkey, (int) $viewer->pkey)
+            || ($rval <= self::OFFICER_MAX_RVAL && $officersSeeNames);
+
+        if (! $isLeader && ! in_array($phase, ['voting', 'counting'], true)) {
+            return null;
+        }
+
+        $members = Knight::withoutGlobalScopes()
+            ->where('batt', $battalionPkey)
             ->where('activeflg', 1)
             ->where('delflg', 0)
-            ->get(['pkey', 'rname', 'dname']);
+            ->get(['pkey', 'rname']);
 
-        $battalionPkeys = $battalionKnights->pluck('pkey')->toArray();
+        $battalionPkeys = $members->pluck('pkey')->all();
         $total          = count($battalionPkeys);
 
-        // Oathed this year
-        $oathYear  = Oath::currentOathYear();
+        if ($total === 0) {
+            return null;
+        }
+
+        $oathYear = Oath::currentOathYear();
+
         $oathedPkeys = Oath::whereIn('fkeyknight', $battalionPkeys)
             ->where('oath_year', $oathYear)
             ->where('verified', 1)
             ->pluck('fkeyknight')
-            ->toArray();
+            ->all();
 
-        // Registered
         $registeredPkeys = ElectionRegistration::where('fkeyelection', $election->pkey)
             ->whereIn('fkeyknight', $battalionPkeys)
             ->where('activeflg', 1)
             ->where('delflg', 0)
             ->pluck('fkeyknight')
-            ->toArray();
+            ->all();
 
-        // Voted
         $votedPkeys = ElectionVote::where('fkeyelection', $election->pkey)
             ->whereIn('fkeyknight', $battalionPkeys)
             ->where('valid', 1)
             ->pluck('fkeyknight')
-            ->toArray();
+            ->all();
 
-        // Show names toggle — EA setting or default on for Commander/FO
-        $showNames = $eaRecord
-            ? $eaRecord->show_voter_names_secondary_officers
-            : true;
+        // Eligible = verified oath AND registered. Only eligible members are listed by name.
+        $eligiblePkeys = array_values(array_intersect($oathedPkeys, $registeredPkeys));
 
-        // Build named voter list if names are shown
         $namedList = null;
-        if ($showNames && $election->phase === 'voting') {
-            $namedList = $battalionKnights->map(function ($k) use ($registeredPkeys, $votedPkeys) {
-                return [
-                    'pkey'       => $k->pkey,
-                    'rname'      => $k->rname,
-                    'rname'      => $k->rname,
-                    'registered' => in_array($k->pkey, $registeredPkeys),
-                    'voted'      => in_array($k->pkey, $votedPkeys),
-                ];
-            });
+        if ($isLeader && $phase === 'voting') {
+            $namedList = $members
+                ->filter(fn ($k) => in_array($k->pkey, $eligiblePkeys))
+                ->map(fn ($k) => [
+                    'rname' => $k->rname,
+                    'voted' => in_array($k->pkey, $votedPkeys),
+                ])
+                ->sort(fn ($a, $b) => [$a['voted'], strtolower($a['rname'])] <=> [$b['voted'], strtolower($b['rname'])])
+                ->values();
         }
 
         return [
-            'total'            => $total,
-            'oathed'           => count($oathedPkeys),
-            'registered'       => count($registeredPkeys),
-            'voted'            => count($votedPkeys),
-            'show_names'       => $showNames,
-            'named_list'       => $namedList,
-            'phase'            => $election->phase,
+            'level'      => $isLeader ? 'full' : 'counts',
+            'phase'      => $phase,
+            'total'      => $total,
+            'oathed'     => count($oathedPkeys),
+            'registered' => count($registeredPkeys),
+            'eligible'   => count($eligiblePkeys),
+            'voted'      => count($votedPkeys),
+            'ineligible' => $total - count($eligiblePkeys),
+            'named_list' => $namedList,
         ];
     }
 }

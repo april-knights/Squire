@@ -38,7 +38,7 @@
 .status-icon.info  { color: #5bc0de; }
 .election-stat-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: 0.75rem;
     margin-top: 0.75rem;
 }
@@ -65,7 +65,7 @@
 .election-voter-table {
     width: 100%;
     font-size: 0.85rem;
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
     border-collapse: collapse;
 }
 .election-voter-table th {
@@ -116,6 +116,11 @@
     margin-left: 0.5rem;
     vertical-align: middle;
 }
+.battalion-note {
+    font-size: 0.78rem;
+    color: #c0a0a0;
+    margin-top: 0.75rem;
+}
 </style>
 
 <div class="election-widget">
@@ -150,11 +155,8 @@
             @endif
         </div>
 
-        {{-- Oath submit form --}}
+        {{-- Oath verify button --}}
         @if(!$oath || !$oath->verified)
-        @if($oath && !$oath->verified)
-        {{-- Already tried, re-scan --}}
-        @endif
         <div style="margin-top:0.75rem;">
             <form method="POST" action="{{ route('oath.verify') }}">
                 @csrf
@@ -234,7 +236,7 @@
                     </a>
                 </div>
                 @endif
-            @elseif(!$registered || !($oath && $oath->verified))
+            @else
                 <div class="election-status-row" style="margin-top:0.75rem;">
                     <span class="status-icon warn"><i class="fas fa-lock"></i></span>
                     <span style="color:#c0a0a0;">Complete your oath and registration above to unlock voting.</span>
@@ -248,12 +250,13 @@
         @endif
     </div>
 
-    {{-- Battalion stats — Commanders, FOs, and accepted candidates --}}
+    {{-- Battalion card: your own battalion only --}}
     @if($battalionStats)
     <div class="election-card">
-        <h5><i class="fas fa-shield-alt mr-1"></i> Battalion Election Status</h5>
+        <h5><i class="fas fa-shield-alt mr-1"></i> Your Battalion</h5>
 
         <div class="election-stat-grid">
+            @if($battalionStats['level'] === 'full')
             <div class="election-stat-box">
                 <div class="stat-number">{{ $battalionStats['oathed'] }}<span style="font-size:0.9rem;color:#c0a0a0;">/{{ $battalionStats['total'] }}</span></div>
                 <div class="stat-label">Oathed</div>
@@ -262,7 +265,8 @@
                 <div class="stat-number">{{ $battalionStats['registered'] }}<span style="font-size:0.9rem;color:#c0a0a0;">/{{ $battalionStats['total'] }}</span></div>
                 <div class="stat-label">Registered</div>
             </div>
-            @if($battalionStats['phase'] === 'voting')
+            @endif
+            @if(in_array($battalionStats['phase'], ['voting', 'counting']))
             <div class="election-stat-box">
                 <div class="stat-number">{{ $battalionStats['voted'] }}<span style="font-size:0.9rem;color:#c0a0a0;">/{{ $battalionStats['total'] }}</span></div>
                 <div class="stat-label">Voted</div>
@@ -270,13 +274,13 @@
             @endif
         </div>
 
-        {{-- Named voter list --}}
-        @if($battalionStats['show_names'] && $battalionStats['phase'] === 'voting' && $battalionStats['named_list'])
+        {{-- Named voter list: eligible members only (verified oath + registered) --}}
+        @if($battalionStats['named_list'])
+        <div class="battalion-note">Eligible voters in your battalion (verified oath and registered). Not voted yet are listed first.</div>
         <table class="election-voter-table">
             <thead>
                 <tr>
                     <th>Knight</th>
-                    <th>Registered</th>
                     <th>Voted</th>
                 </tr>
             </thead>
@@ -289,13 +293,6 @@
                         </a>
                     </td>
                     <td>
-                        @if($member['registered'])
-                            <span class="voted-yes"><i class="fas fa-check"></i></span>
-                        @else
-                            <span class="voted-no"><i class="fas fa-times"></i></span>
-                        @endif
-                    </td>
-                    <td>
                         @if($member['voted'])
                             <span class="voted-yes"><i class="fas fa-check"></i></span>
                         @else
@@ -306,6 +303,11 @@
                 @endforeach
             </tbody>
         </table>
+        @if($battalionStats['ineligible'] > 0)
+        <div class="battalion-note">
+            {{ $battalionStats['ineligible'] }} battalion member(s) are not eligible yet (oath or registration missing).
+        </div>
+        @endif
         @endif
     </div>
     @endif
