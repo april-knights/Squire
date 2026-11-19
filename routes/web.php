@@ -82,8 +82,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/open-voting', [App\Http\Controllers\ElectionController::class, 'openVoting'])->name('open-voting');
         Route::post('/pause-voting', [App\Http\Controllers\ElectionController::class, 'pauseVoting'])->name('pause-voting');
         Route::post('/toggles', [App\Http\Controllers\ElectionController::class, 'updateToggles'])->name('toggles');
+        Route::post('/test-dm', [App\Http\Controllers\ElectionController::class, 'sendTestDm'])->name('test-dm');
         Route::get('/voters', [App\Http\Controllers\ElectionController::class, 'voterList'])->name('voters');
-        Route::get('/results', [App\Http\Controllers\ElectionController::class, 'results'])->name('results');
+        Route::match(['get', 'post'], '/results', [App\Http\Controllers\ElectionController::class, 'results'])->name('results');
         Route::post('/audit', [App\Http\Controllers\ElectionController::class, 'auditUpload'])->name('audit');
         Route::post('/archive-key', [App\Http\Controllers\ElectionController::class, 'archiveKey'])->name('archive-key');
         Route::post('/nomination-thread', [App\Http\Controllers\ElectionController::class, 'postNominationThread'])->name('nomination-thread');
