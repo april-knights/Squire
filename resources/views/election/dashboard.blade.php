@@ -266,12 +266,46 @@
                 @endforeach
             </div>
 
-            @if($election->phase_deadline)
-            <div style="font-size:0.82rem;color:#c0a0a0;margin-top:0.5rem;">
-                <i class="fas fa-calendar-alt mr-1"></i>
-                Phase deadline: {{ $election->phase_deadline->format('F j, Y') }}
+            <div style="border-top:1px solid #8b3a3a;margin-top:0.75rem;padding-top:0.75rem;">
+                <div class="ea-note" style="margin-bottom:0.5rem;">
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    Statutory timeline. Informational only: phases are advanced by hand and nothing changes automatically.
+                </div>
+
+                @if($schedule['any_set'])
+                    @foreach($schedule['items'] as $item)
+                    <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:0.85rem;padding:0.25rem 0;">
+                        <span style="color:#c0a0a0;">{{ $item['label'] }}</span>
+                        <span>
+                            @if($item['at'])
+                                {{ $item['at']->format('M j, Y H:i') }} UTC
+                                <span class="local-time" data-utc="{{ $item['at']->format('Y-m-d\TH:i:s') }}Z" style="color:#c0a0a0;"></span>
+                            @else
+                                <span style="color:#c0a0a0;">not set</span>
+                            @endif
+                        </span>
+                    </div>
+                    @endforeach
+
+                    @if($schedule['extended_until'])
+                    <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:0.85rem;padding:0.25rem 0;">
+                        <span style="color:#f0ad4e;">Voting extended to</span>
+                        <span>
+                            {{ $schedule['extended_until']->format('M j, Y H:i') }} UTC
+                            <span class="local-time" data-utc="{{ $schedule['extended_until']->format('Y-m-d\TH:i:s') }}Z" style="color:#c0a0a0;"></span>
+                        </span>
+                    </div>
+                    @endif
+                @else
+                    <div class="ea-note">No schedule has been set yet.</div>
+                @endif
+
+                @if(\App\Services\ElectionSchedule::canManage(auth()->user()) && ! $isComplete)
+                <a href="{{ route('election.schedule') }}" class="btn-ea" style="margin-top:0.5rem;">
+                    <i class="fas fa-edit mr-1"></i> Edit schedule
+                </a>
+                @endif
             </div>
-            @endif
         </div>
 
         {{-- Stats --}}
@@ -423,7 +457,7 @@
 
         {{-- Reddit threads --}}
         <div class="ea-card">
-            <h5><i class="fas fa-reddit mr-1"></i> Reddit Threads</h5>
+            <h5><i class="fab fa-reddit mr-1"></i> Reddit Threads</h5>
 
             @if($election->nomination_thread_url)
             <div style="margin-bottom:0.5rem;">
@@ -507,6 +541,30 @@
                 <button type="submit" class="btn-ea btn-danger-ea" style="width:100%;text-align:center;"
                     onclick="return confirm('Pause voting? Knights will not be able to submit ballots until you resume.')">
                     <i class="fas fa-pause mr-1"></i> Pause Voting
+                </button>
+            </form>
+            @endif
+                    @if($schedule['effective_close'])
+            <hr style="border-color:#8b3a3a;">
+            <div class="ea-note">
+                Scheduled close: {{ \Illuminate\Support\Carbon::parse($election->voting_closes_at, 'UTC')->format('M j, Y H:i') }} UTC.
+                The statute allows an extension of up to {{ \App\Services\ElectionSchedule::MAX_EXTENSION_DAYS }} days past the
+                scheduled close (latest allowed: {{ $schedule['max_extension']->format('M j, Y H:i') }} UTC).
+                Extending records the new close here and in the phase log; voting still ends when you close it.
+            </div>
+            <form method="POST" action="{{ route('election.extend-voting') }}">
+                @csrf
+                <div class="ea-form-group">
+                    <label>New close (UTC)</label>
+                    <input type="datetime-local" name="extend_until" class="ea-input" required>
+                </div>
+                <div class="ea-form-group">
+                    <label>Note (optional)</label>
+                    <input type="text" name="note" class="ea-input" maxlength="500" placeholder="Reason for the extension...">
+                </div>
+                <button type="submit" class="btn-ea" style="width:100%;text-align:center;"
+                    onclick="return confirm('Extend the voting close? This is recorded in the phase log.')">
+                    <i class="fas fa-clock mr-1"></i> Extend Voting Close
                 </button>
             </form>
             @endif
@@ -698,4 +756,15 @@
 
     </div>
 </div>
+<script>
+(function () {
+    document.querySelectorAll('.local-time').forEach(function (el) {
+        var d = new Date(el.getAttribute('data-utc'));
+        if (isNaN(d.getTime())) { return; }
+        el.textContent = '(' + d.toLocaleString(undefined, {
+            month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+        }) + ')';
+    });
+})();
+</script>
 @endsection

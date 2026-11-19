@@ -197,6 +197,15 @@
     </div>
     @endif
 
+    @if(\App\Services\ElectionSchedule::canManage(auth()->user()))
+    <div class="election-card">
+        <h5><i class="fas fa-calendar-alt mr-1"></i> Election Schedule</h5>
+        <a href="{{ route('election.schedule') }}" class="btn-election" style="margin-top:0;">
+            Manage schedule &amp; registration thread
+        </a>
+    </div>
+    @endif
+
     {{-- Knight election status card --}}
     <div class="election-card">
         <h5><i class="fas fa-vote-yea mr-1"></i> Election {{ $election->election_year }}</h5>
@@ -219,6 +228,13 @@
             <button type="submit" class="btn-election">Register to Vote</button>
         </form>
         @endif
+        @endif
+
+        @if($election->registration_thread_url && $election->phase !== 'complete')
+        <div class="election-status-row" style="margin-top:0.5rem;">
+            <span class="status-icon info"><i class="fab fa-reddit-alien"></i></span>
+            <a href="{{ $election->registration_thread_url }}" target="_blank" style="color:#c0a0a0;">Registration thread on Reddit</a>
+        </div>
         @endif
 
         {{-- Vote prompt --}}

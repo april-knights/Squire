@@ -96,6 +96,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/candidates/{candidatePkey}/remove', [App\Http\Controllers\ElectionCandidateController::class, 'remove'])->name('candidates.remove');
         Route::post('/nominations', [App\Http\Controllers\ElectionCandidateController::class, 'storeNomination'])->name('nominations.store');
         Route::post('/nominations/{nominationPkey}/remove', [App\Http\Controllers\ElectionCandidateController::class, 'removeNomination'])->name('nominations.remove');
+            # Election schedule (Admin, Grandmaster, Archmage)
+        Route::get('/election-schedule', [App\Http\Controllers\ElectionScheduleController::class, 'index'])->name('election.schedule');
+        Route::post('/election-schedule', [App\Http\Controllers\ElectionScheduleController::class, 'update'])->name('election.schedule.update');
+        Route::post('/election-schedule/registration-thread', [App\Http\Controllers\ElectionScheduleController::class, 'registrationThread'])->name('election.schedule.registration-thread');
     });
 
 # Admin
@@ -206,6 +210,7 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{pkey}/candidates/{candidatePkey}', [App\Http\Controllers\Admin\ElectionController::class, 'removeCandidate'])->name('candidates.remove');
             Route::post('/{pkey}/nominations', [App\Http\Controllers\Admin\ElectionController::class, 'addNomination'])->name('nominations.add');
             Route::post('/{pkey}/toggle-test-mode', [App\Http\Controllers\Admin\ElectionController::class, 'toggleTestMode'])->name('toggle-test-mode');
+            Route::post('/extend-voting', [App\Http\Controllers\ElectionScheduleController::class, 'extendVoting'])->name('extend-voting');
         });
 
         # Oath management

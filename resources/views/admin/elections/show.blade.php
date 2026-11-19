@@ -469,6 +469,17 @@
         </form>
     </div>
 
+    {{-- Schedule & registration thread --}}
+    <div class="admin-card">
+        <h5><i class="fas fa-calendar-alt mr-1"></i> Schedule &amp; Registration Thread</h5>
+        <p style="color:#c0a0a0;font-size:0.82rem;margin-bottom:0.75rem;">
+            Statutory dates and the registration thread link are managed by Admins, the Grandmaster and Archmages.
+        </p>
+        <a href="{{ route('election.schedule') }}" class="btn-admin">
+            <i class="fas fa-calendar-check mr-1"></i> Open Schedule
+        </a>
+    </div>
+
     {{-- Notes --}}
     <div class="admin-card">
         <h5><i class="fas fa-sticky-note mr-1"></i> Notes</h5>
@@ -484,7 +495,7 @@
 
     {{-- Reddit thread URLs --}}
     <div class="admin-card">
-        <h5><i class="fas fa-reddit mr-1"></i> Thread Links</h5>
+        <h5><i class="fab fa-reddit mr-1"></i> Thread Links</h5>
         @if($election->nomination_thread_url)
         <div style="margin-bottom:0.5rem;">
             <a href="{{ $election->nomination_thread_url }}" target="_blank"

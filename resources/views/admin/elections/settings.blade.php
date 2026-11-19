@@ -79,7 +79,7 @@
 
 {{-- Reddit Authorization --}}
 <div class="admin-card">
-    <h5><i class="fas fa-reddit mr-1"></i> AKSquire2 Reddit Authorization</h5>
+    <h5><i class="fab fa-reddit mr-1"></i> AKSquire2 Reddit Authorization</h5>
     @if($redditAuthorized)
     <p style="color:#5cb85c;font-size:0.88rem;margin-bottom:0.75rem;">
         <i class="fas fa-check-circle mr-1"></i> AKSquire2 is authorized and ready to post.

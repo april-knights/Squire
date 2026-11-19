@@ -77,6 +77,8 @@ class ElectionController extends Controller
 
         $keyArchived = ElectionKeyArchive::where('fkeyelection', $election->pkey)->exists();
 
+        $schedule = \App\Services\ElectionSchedule::forElection($election);
+
         return view('election.dashboard', compact(
             'election',
             'eaRecord',
@@ -89,7 +91,8 @@ class ElectionController extends Controller
             'redditAuthorized',
             'dmVerified',
             'failedDmCount',
-            'keyArchived'
+            'keyArchived',
+            'schedule'
         ));
     }
 
