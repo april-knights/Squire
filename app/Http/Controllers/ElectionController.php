@@ -5,17 +5,15 @@ namespace App\Http\Controllers;
 use App\Model\Election;
 use App\Model\ElectionAdministrator;
 use App\Model\ElectionCandidate;
-use App\Model\ElectionNomination;
+use App\Model\ElectionKeyArchive;
+use App\Model\ElectionPhaseLog;
 use App\Model\ElectionRegistration;
 use App\Model\ElectionVote;
-use App\Model\ElectionVoteAudit;
-use App\Model\ElectionPhaseLog;
-use App\Model\ElectionAuditLog;
 use App\Model\Oath;
 use App\Services\ElectionService;
 use App\Services\RedditService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class ElectionController extends Controller
 {
@@ -66,6 +64,19 @@ class ElectionController extends Controller
 
         $redditAuthorized = $this->reddit->isAuthorized();
 
+        // Audit DM readiness: the test DM must have succeeded AFTER the current EA was appointed
+        $fullEA = ElectionAdministrator::where('fkeyelection', $election->pkey)
+            ->where('is_assistant', 0)
+            ->first();
+
+        $dmVerified = (bool) ($fullEA
+            && $election->audit_dm_verified_at
+            && $election->audit_dm_verified_at->gte($fullEA->appointed_at));
+
+        $failedDmCount = $this->electionService->failedAuditDmCount($election);
+
+        $keyArchived = ElectionKeyArchive::where('fkeyelection', $election->pkey)->exists();
+
         return view('election.dashboard', compact(
             'election',
             'eaRecord',
@@ -75,7 +86,10 @@ class ElectionController extends Controller
             'voteCount',
             'registeredCount',
             'phaseLog',
-            'redditAuthorized'
+            'redditAuthorized',
+            'dmVerified',
+            'failedDmCount',
+            'keyArchived'
         ));
     }
 
@@ -88,19 +102,24 @@ class ElectionController extends Controller
         $election    = $request->attributes->get('active_election');
         $eaRecord    = $request->attributes->get('ea_record');
         $isAdminTest = $request->attributes->get('is_admin_test', false);
+        $userPkey    = auth()->user()->pkey;
 
         // Assistant EA and admin test mode cannot advance phases
         if ($isAdminTest || ($eaRecord && $eaRecord->is_assistant)) {
             abort(403, 'You do not have permission to advance the election phase.');
         }
 
-        $request->validate([
+        $v = Validator::make($request->all(), [
             'note' => 'nullable|string|max:1000',
         ]);
+        if ($v->fails()) {
+            return back()->with('error', $v->errors()->first());
+        }
 
-        // Gate checks per phase
+        $note         = $request->input('note');
         $currentPhase = $election->phase;
 
+        // nominations -> debate
         if ($currentPhase === 'nominations') {
             $acceptedCount = ElectionCandidate::where('fkeyelection', $election->pkey)
                 ->where('status', 'accepted')
@@ -111,52 +130,65 @@ class ElectionController extends Controller
             }
         }
 
+        // debate -> voting: generates the election keys from the EA passphrase
         if ($currentPhase === 'debate') {
-            if (! $election->debate_post_id) {
-                return back()->with('error', 'The debate thread must be posted to Reddit before advancing to voting.');
+            $debateSkipped = ! $election->debate_post_id;
+
+            if ($debateSkipped && ! $election->admin_test_mode) {
+                return back()->with('error', 'The debate thread must be posted to Reddit before opening voting.');
+            }
+
+            $v = Validator::make($request->all(), [
+                'passphrase' => 'required|string|min:' . ElectionService::MIN_PASSPHRASE_LENGTH . '|confirmed',
+            ]);
+            if ($v->fails()) {
+                return back()->with('error', $v->errors()->first());
+            }
+
+            if ($debateSkipped) {
+                $note = trim('[test mode: debate thread requirement skipped] ' . $note);
+            }
+
+            $result = $this->electionService->startVoting(
+                $election,
+                $request->input('passphrase'),
+                $userPkey,
+                $note ?: null
+            );
+
+            if (! $result['ok']) {
+                return back()->with('error', $result['error']);
+            }
+
+            return redirect()
+                ->route('election.dashboard')
+                ->with('success', 'Voting is open. Encryption keys were generated from your passphrase. Keep that passphrase safe: it cannot be recovered.');
+        }
+
+        // counting -> complete: the key should be archived first (or explicitly skipped)
+        if ($currentPhase === 'counting') {
+            $archived = ElectionKeyArchive::where('fkeyelection', $election->pkey)->exists();
+            $skip     = $request->boolean('skip_archive');
+
+            if (! $archived && ! $skip) {
+                return back()->with('error', 'Archive the encryption key before completing the election, or tick "Complete without archiving the key".');
+            }
+
+            if (! $archived && $skip) {
+                $note = trim('[Key not archived] ' . $note);
             }
         }
 
-        if ($currentPhase === 'voting') {
-            // Require passphrase to close voting
-            $request->validate(['passphrase' => 'required|string']);
-
-            // Verify passphrase works by attempting a test decrypt
-            $testVote = ElectionVote::where('fkeyelection', $election->pkey)
-                ->where('valid', 1)
-                ->first();
-
-            if ($testVote) {
-                $result = $this->electionService->decryptBallot(
-                    $testVote->encrypted_ballot,
-                    $request->passphrase,
-                    $testVote->fkeyknight
-                );
-
-                if ($result === null) {
-                    return back()->with('error', 'Passphrase verification failed. Check your passphrase and try again.');
-                }
-            }
-
-            // Store passphrase in session for counting phase
-            session(['election_passphrase' => $request->passphrase]);
-            $election->voting_paused = false;
-        }
-
-        $this->electionService->advancePhase(
-            $election,
-            auth()->user()->pkey,
-            $request->note
-        );
+        $this->electionService->advancePhase($election, $userPkey, $note);
 
         // Auto-reset admin test mode on completion
         if ($election->phase === 'complete') {
-            $election->update(['admin_test_mode' => false]);
+            $election->forceFill(['admin_test_mode' => false])->save();
         }
 
         return redirect()
             ->route('election.dashboard')
-            ->with('success', 'Election advanced to ' . $election->fresh()->phase . ' phase.');
+            ->with('success', 'Election advanced to ' . ucfirst($election->phase) . ' phase.');
     }
 
     // -------------------------------------------------------------------------
@@ -243,7 +275,31 @@ class ElectionController extends Controller
     }
 
     // -------------------------------------------------------------------------
-    // Voting — EA Passphrase Management
+    // Audit DM readiness
+    // -------------------------------------------------------------------------
+
+    public function sendTestDm(Request $request)
+    {
+        $election    = $request->attributes->get('active_election');
+        $eaRecord    = $request->attributes->get('ea_record');
+        $isAdminTest = $request->attributes->get('is_admin_test', false);
+
+        if ($isAdminTest || ! $eaRecord || $eaRecord->is_assistant) {
+            abort(403, 'Only the full Election Administrator can send a test audit DM.');
+        }
+
+        $result = $this->electionService->sendTestAuditDm($election);
+
+        if (! $result['ok']) {
+            return back()->with('error', 'Test DM failed: ' . $result['error']
+                . ' Check that your Discord ID is on your Squire profile and that you allow DMs from server members.');
+        }
+
+        return back()->with('success', 'Test audit DM delivered. Check your Discord DMs. Voting can now be opened.');
+    }
+
+    // -------------------------------------------------------------------------
+    // Voting controls (manual pause / resume — no passphrase needed)
     // -------------------------------------------------------------------------
 
     public function openVoting(Request $request)
@@ -253,25 +309,25 @@ class ElectionController extends Controller
         $isAdminTest = $request->attributes->get('is_admin_test', false);
 
         if ($isAdminTest || ($eaRecord && $eaRecord->is_assistant)) {
-            abort(403, 'Only the full Election Administrator can open voting.');
+            abort(403, 'Only the full Election Administrator can resume voting.');
         }
 
         if ($election->phase !== 'voting') {
             return back()->with('error', 'Election is not in the voting phase.');
         }
 
-        $request->validate([
-            'passphrase' => 'required|string|min:12',
-        ]);
+        if (! $election->hasKeys()) {
+            return back()->with('error', 'Encryption keys have not been generated for this election.');
+        }
 
-        session(['election_passphrase' => $request->passphrase]);
-
-        $election->update([
+        $election->forceFill([
             'voting_paused' => false,
             'lstmdby'       => auth()->user()->pkey,
-        ]);
+        ])->save();
 
-        return back()->with('success', 'Voting is now open. Keep this session active while voting is open.');
+        $this->logVotingControl($election, 'Voting resumed.');
+
+        return back()->with('success', 'Voting resumed.');
     }
 
     public function pauseVoting(Request $request)
@@ -284,14 +340,29 @@ class ElectionController extends Controller
             abort(403, 'Only the full Election Administrator can pause voting.');
         }
 
-        session()->forget('election_passphrase');
+        if ($election->phase !== 'voting') {
+            return back()->with('error', 'Election is not in the voting phase.');
+        }
 
-        $election->update([
+        $election->forceFill([
             'voting_paused' => true,
             'lstmdby'       => auth()->user()->pkey,
-        ]);
+        ])->save();
 
-        return back()->with('success', 'Voting paused. Knights will see a paused message until you re-authenticate.');
+        $this->logVotingControl($election, 'Voting paused by the Election Administrator.');
+
+        return back()->with('success', 'Voting paused. Knights will see a paused message until you resume.');
+    }
+
+    protected function logVotingControl(Election $election, string $note): void
+    {
+        ElectionPhaseLog::create([
+            'fkeyelection'    => $election->pkey,
+            'from_phase'      => 'voting',
+            'to_phase'        => 'voting',
+            'transitioned_by' => auth()->user()->pkey,
+            'note'            => $note,
+        ]);
     }
 
     // -------------------------------------------------------------------------
@@ -346,7 +417,7 @@ class ElectionController extends Controller
     }
 
     // -------------------------------------------------------------------------
-    // Results
+    // Results — passphrase is entered per request and never stored
     // -------------------------------------------------------------------------
 
     public function results(Request $request)
@@ -355,14 +426,22 @@ class ElectionController extends Controller
         $eaRecord    = $request->attributes->get('ea_record');
         $isAdminTest = $request->attributes->get('is_admin_test', false);
 
-        if ($election->phase !== 'counting' && $election->phase !== 'complete') {
+        if ($isAdminTest) {
+            abort(403, 'Results are not available in admin test mode.');
+        }
+
+        if (! in_array($election->phase, ['counting', 'complete'], true)) {
             abort(403, 'Results are not available until the counting phase.');
         }
 
-        $passphrase = session('election_passphrase');
-
-        if (! $passphrase) {
+        if (! $request->isMethod('post') || ! $request->filled('passphrase')) {
             return view('election.results-locked', compact('election'));
+        }
+
+        $passphrase = $request->input('passphrase');
+
+        if (! $this->electionService->verifyPassphrase($election, $passphrase)) {
+            return redirect()->route('election.results')->with('error', 'Passphrase incorrect.');
         }
 
         $results = $this->electionService->calculateResults($election, $passphrase);
@@ -373,58 +452,121 @@ class ElectionController extends Controller
             ->get()
             ->keyBy('pkey');
 
-        return view('election.results', compact(
-            'election',
-            'eaRecord',
-            'isAdminTest',
-            'results',
-            'candidates'
-        ));
+        $keyArchived = ElectionKeyArchive::where('fkeyelection', $election->pkey)->exists();
+
+        return response()
+            ->view('election.results', compact(
+                'election',
+                'eaRecord',
+                'isAdminTest',
+                'results',
+                'candidates',
+                'keyArchived'
+            ))
+            ->header('Cache-Control', 'no-store, private');
     }
 
     // -------------------------------------------------------------------------
-    // Audit CSV Upload
+    // Audit — upload a CSV, or paste the raw audit DMs
     // -------------------------------------------------------------------------
 
     public function auditUpload(Request $request)
     {
-        $election = $request->attributes->get('active_election');
-        $eaRecord = $request->attributes->get('ea_record');
+        $election    = $request->attributes->get('active_election');
+        $eaRecord    = $request->attributes->get('ea_record');
+        $isAdminTest = $request->attributes->get('is_admin_test', false);
 
-        if ($eaRecord && $eaRecord->is_assistant) {
+        if ($isAdminTest || ($eaRecord && $eaRecord->is_assistant)) {
             abort(403);
         }
 
-        $request->validate([
-            'audit_csv' => 'required|file|mimes:csv,txt|max:2048',
+        if (! in_array($election->phase, ['counting', 'complete'], true)) {
+            return back()->with('error', 'The audit can only be run after voting has closed.');
+        }
+
+        $v = Validator::make($request->all(), [
+            'passphrase' => 'required|string',
+            'audit_csv'  => 'nullable|file|mimes:csv,txt|max:2048',
+            'audit_text' => 'nullable|string|max:500000',
         ]);
-
-        $passphrase = session('election_passphrase');
-
-        if (! $passphrase) {
-            return back()->with('error', 'You must authenticate with your passphrase before running an audit.');
+        if ($v->fails()) {
+            return back()->with('error', $v->errors()->first());
         }
 
-        $path = $request->file('audit_csv')->getRealPath();
-        $rows = array_map('str_getcsv', file($path));
-        $header = array_shift($rows);
-
-        // Expect columns: knight_pkey, rankings
-        if (! in_array('knight_pkey', $header) || ! in_array('rankings', $header)) {
-            return back()->with('error', 'CSV must have columns: knight_pkey, rankings');
+        if (! $request->hasFile('audit_csv') && ! $request->filled('audit_text')) {
+            return back()->with('error', 'Upload a CSV or paste the audit DMs.');
         }
 
-        $mapped = array_map(function ($row) use ($header) {
-            return array_combine($header, $row);
-        }, $rows);
+        $passphrase = $request->input('passphrase');
 
-        $discrepancies = $this->electionService->auditCompare($election, $passphrase, $mapped);
+        if (! $this->electionService->verifyPassphrase($election, $passphrase)) {
+            return back()->with('error', 'Passphrase incorrect.');
+        }
 
-        return view('election.audit-results', compact(
-            'election',
-            'eaRecord',
-            'discrepancies'
-        ));
+        $raw = $request->filled('audit_text')
+            ? $request->input('audit_text')
+            : file_get_contents($request->file('audit_csv')->getRealPath());
+
+        $rows = $this->parseAuditRows((string) $raw);
+
+        if (empty($rows)) {
+            return back()->with('error', 'No audit records found. Paste the DMs as received, or use a CSV with the columns: knight_pkey, rankings.');
+        }
+
+        $checkedCount  = count(array_unique(array_column($rows, 'knight_pkey')));
+        $discrepancies = $this->electionService->auditCompare($election, $passphrase, $rows);
+
+        return response()
+            ->view('election.audit-results', compact(
+                'election',
+                'eaRecord',
+                'discrepancies',
+                'checkedCount'
+            ))
+            ->header('Cache-Control', 'no-store, private');
+    }
+
+    /**
+     * Accepts raw pasted DMs ("Knight ID: / Rankings:") or a CSV with knight_pkey,rankings columns.
+     */
+    protected function parseAuditRows(string $raw): array
+    {
+        $raw = preg_replace('/^\xEF\xBB\xBF/', '', $raw);
+
+        if (trim($raw) === '') {
+            return [];
+        }
+
+        if (stripos($raw, 'Knight ID:') !== false) {
+            return $this->electionService->parseAuditText($raw);
+        }
+
+        $lines  = preg_split('/\R/', trim($raw));
+        $header = array_map(fn ($h) => strtolower(trim($h)), str_getcsv(array_shift($lines)));
+
+        $kIdx = array_search('knight_pkey', $header, true);
+        $rIdx = array_search('rankings', $header, true);
+
+        if ($kIdx === false || $rIdx === false) {
+            return [];
+        }
+
+        $rows = [];
+        foreach ($lines as $line) {
+            if (trim($line) === '') {
+                continue;
+            }
+            $cols = str_getcsv($line);
+            if (! isset($cols[$kIdx], $cols[$rIdx])) {
+                continue;
+            }
+            $rows[] = [
+                'knight_pkey' => (int) $cols[$kIdx],
+                'rankings'    => $cols[$rIdx],
+            ];
+        }
+
+        return $rows;
     }
 
     // -------------------------------------------------------------------------
@@ -433,30 +575,38 @@ class ElectionController extends Controller
 
     public function archiveKey(Request $request)
     {
-        $election = $request->attributes->get('active_election');
-        $eaRecord = $request->attributes->get('ea_record');
+        $election    = $request->attributes->get('active_election');
+        $eaRecord    = $request->attributes->get('ea_record');
+        $isAdminTest = $request->attributes->get('is_admin_test', false);
 
-        if ($eaRecord && $eaRecord->is_assistant) {
+        if ($isAdminTest || ($eaRecord && $eaRecord->is_assistant)) {
             abort(403);
         }
 
-        if ($election->phase !== 'complete') {
-            return back()->with('error', 'The encryption key can only be archived after the election is complete.');
+        if (! in_array($election->phase, ['counting', 'complete'], true)) {
+            return back()->with('error', 'The encryption key can only be archived once voting has closed.');
         }
 
-        $request->validate([
+        $v = Validator::make($request->all(), [
             'passphrase' => 'required|string',
             'note'       => 'nullable|string|max:1000',
         ]);
+        if ($v->fails()) {
+            return back()->with('error', $v->errors()->first());
+        }
 
-        $this->electionService->archiveKey(
+        $result = $this->electionService->archiveKey(
             $election,
-            $request->passphrase,
+            $request->input('passphrase'),
             auth()->user()->pkey,
-            $request->note
+            $request->input('note')
         );
 
-        return back()->with('success', 'Encryption key archived securely.');
+        if (! $result['ok']) {
+            return back()->with('error', $result['error']);
+        }
+
+        return back()->with('success', 'Encryption key archived.');
     }
 
     // -------------------------------------------------------------------------
@@ -534,15 +684,15 @@ class ElectionController extends Controller
         $election = Election::active();
 
         if (! $election || ! $election->isVotingOpen()) {
-            return view('election.paused');
+            return view('election.paused', compact('election'));
         }
 
         $knight = auth()->user();
 
-        // Check eligibility
-        $this->checkVoterEligibility($election, $knight);
+        if ($error = $this->voterEligibilityError($election, $knight)) {
+            return redirect('/')->with('error', $error);
+        }
 
-        // Already voted?
         $alreadyVoted = ElectionVote::where('fkeyelection', $election->pkey)
             ->where('fkeyknight', $knight->pkey)
             ->exists();
@@ -562,7 +712,7 @@ class ElectionController extends Controller
             session(['ballot_order_' . $election->pkey => $shuffled]);
         }
 
-        $order = session('ballot_order_' . $election->pkey);
+        $order      = session('ballot_order_' . $election->pkey);
         $candidates = $candidates->sortBy(fn($c) => array_search($c->pkey, $order))->values();
 
         return view('election.ballot', compact('election', 'candidates'));
@@ -578,9 +728,11 @@ class ElectionController extends Controller
 
         $knight = auth()->user();
 
-        $this->checkVoterEligibility($election, $knight);
+        if ($error = $this->voterEligibilityError($election, $knight)) {
+            return redirect('/')->with('error', $error);
+        }
 
-        // Duplicate vote guard
+        // Duplicate vote guard (the DB unique key is the final backstop)
         $alreadyVoted = ElectionVote::where('fkeyelection', $election->pkey)
             ->where('fkeyknight', $knight->pkey)
             ->exists();
@@ -589,68 +741,59 @@ class ElectionController extends Controller
             return back()->with('error', 'You have already submitted a ballot.');
         }
 
-        // Validate rankings
-        $acceptedCandidates = ElectionCandidate::where('fkeyelection', $election->pkey)
-            ->where('status', 'accepted')
-            ->pluck('pkey')
-            ->toArray();
-
-        $request->validate([
+        $v = Validator::make($request->all(), [
             'rankings'   => 'required|array',
             'rankings.*' => 'required|integer|min:1',
         ]);
+        if ($v->fails()) {
+            return back()->with('error', 'Please rank every candidate before submitting.');
+        }
 
-        $rankings = $request->rankings; // [candidate_pkey => rank]
+        $acceptedCandidates = ElectionCandidate::where('fkeyelection', $election->pkey)
+            ->where('status', 'accepted')
+            ->pluck('pkey')
+            ->map(fn ($p) => (int) $p)
+            ->all();
 
-        // Ensure all submitted candidate pkeys are valid
+        // Normalise to [candidate_pkey => rank] as integers
+        $rankings = [];
+        foreach ($request->input('rankings') as $candidatePkey => $rank) {
+            $rankings[(int) $candidatePkey] = (int) $rank;
+        }
+
         foreach (array_keys($rankings) as $candidatePkey) {
-            if (! in_array((int) $candidatePkey, $acceptedCandidates)) {
+            if (! in_array($candidatePkey, $acceptedCandidates, true)) {
                 return back()->with('error', 'Invalid candidate in ballot submission.');
             }
         }
 
-        // Ensure ranks are unique and sequential
+        // Ranks must be unique and run 1..N across ALL accepted candidates
         $rankValues = array_values($rankings);
         sort($rankValues);
         if ($rankValues !== range(1, count($acceptedCandidates))) {
             return back()->with('error', 'Please rank all candidates with unique values from 1 to ' . count($acceptedCandidates) . '.');
         }
 
-        // Get passphrase from session
-        $passphrase = session('election_passphrase');
+        $result = $this->electionService->recordBallot($election, $knight, $rankings);
 
-        if (! $passphrase) {
-            return back()->with('error', 'Voting is temporarily paused. Please try again shortly.');
+        if ($result['ok']) {
+            return view('election.ballot-confirmed', compact('election'));
         }
 
-        $encrypted = $this->electionService->encryptBallot(
-            $rankings,
-            $passphrase,
-            $knight->pkey
-        );
+        if ($result['code'] === 'duplicate') {
+            return back()->with('error', 'You have already submitted a ballot.');
+        }
 
-        $vote = ElectionVote::create([
-            'fkeyelection'     => $election->pkey,
-            'fkeyknight'       => $knight->pkey,
-            'encrypted_ballot' => $encrypted,
-            'submitted_at'     => now(),
-            'valid'            => true,
-            'crtsetid'         => $knight->pkey,
-            'lstmdby'          => $knight->pkey,
-        ]);
+        if ($result['code'] === 'audit_dm') {
+            return back()->with('error',
+                'Your ballot was NOT recorded. A required audit message could not be delivered to the Election Administrator, '
+                . 'so the system rejected your vote rather than record it unverified. This is not a problem with your account or your Discord settings. '
+                . 'Please submit your ballot again in a minute. If it keeps failing, contact the Arcaenum at AskTheArcaenum@aprilknights.org '
+                . 'and describe what you see.'
+            );
+        }
 
-        // Log the audit event
-        $this->electionService->logVoteAudit(
-            $election->pkey,
-            $knight->pkey,
-            'submitted',
-            $knight->pkey
-        );
-
-        // Send Discord DM audit to EA
-        $this->sendAuditDm($election, $knight, $rankings);
-
-        return view('election.ballot-confirmed', compact('election'));
+        return back()->with('error', 'Your ballot was NOT recorded due to a system error. Please try again, or contact the Arcaenum at AskTheArcaenum@aprilknights.org if it continues.');
     }
 
     // -------------------------------------------------------------------------
@@ -667,9 +810,11 @@ class ElectionController extends Controller
     // Helpers
     // -------------------------------------------------------------------------
 
-    protected function checkVoterEligibility(Election $election, $knight): void
+    /**
+     * Returns a human-readable reason the knight cannot vote, or null if eligible.
+     */
+    protected function voterEligibilityError(Election $election, $knight): ?string
     {
-        // Must be registered
         $registered = ElectionRegistration::where('fkeyelection', $election->pkey)
             ->where('fkeyknight', $knight->pkey)
             ->where('activeflg', 1)
@@ -677,81 +822,15 @@ class ElectionController extends Controller
             ->exists();
 
         if (! $registered) {
-            abort(403, 'You are not registered to vote in this election.');
+            return 'You are not registered to vote in this election.';
         }
 
-        // Must have a current-year oath
         $oath = Oath::currentYearForKnight($knight->pkey);
 
         if (! $oath || ! $oath->verified) {
-            abort(403, 'You must have a verified oath for the current year to vote.');
+            return 'You need a verified oath for ' . Oath::currentOathYear() . ' to vote.';
         }
-    }
 
-    protected function sendAuditDm(Election $election, $knight, array $rankings): void
-    {
-        try {
-            $eaRecord = ElectionAdministrator::where('fkeyelection', $election->pkey)
-                ->where('is_assistant', 0)
-                ->with('knight')
-                ->first();
-
-            if (! $eaRecord || ! $eaRecord->knight) {
-                Log::warning('sendAuditDm: No EA found for election ' . $election->pkey);
-                return;
-            }
-
-            // Build ranking string: candidate pkeys in rank order
-            asort($rankings);
-            $rankingString = implode(',', array_keys($rankings));
-
-            // Build payload — rankings are included here because the webhook
-            // delivers directly to EA Discord DMs and is stored nowhere in between
-            $payload = implode("\n", [
-                '**April Knights — Vote Audit**',
-                'Election: ' . $election->election_year,
-                'Knight ID: ' . $knight->pkey,
-                'Rankings: ' . $rankingString,
-            ]);
-
-            $silent = $eaRecord->silent_audit_dms;
-
-            // Append Discord silent flag instruction for the bot
-            // Bot applies MessageFlags.SuppressNotifications when silent = true
-            $response = Http::timeout(5)
-                ->asJson()
-                ->post(config('services.squire_bot_webhook_url') . '/webhook/election-audit', [
-                    'discordid' => (string) $eaRecord->knight->discordid,
-                    'payload'   => $payload,
-                    'silent'    => $silent,
-                    'token'     => config('services.squire_bot_webhook_secret'),
-                ]);
-
-            // Log delivery confirmation — no content stored
-            ElectionAuditLog::create([
-                'fkeyelection' => $election->pkey,
-                'fkeyknight'   => $knight->pkey,
-                'delivered'    => $response->successful(),
-                'delivered_at' => $response->successful() ? now() : null,
-            ]);
-
-            if (! $response->successful()) {
-                Log::warning('sendAuditDm: Webhook delivery failed for knight ' . $knight->pkey, [
-                    'status' => $response->status(),
-                ]);
-            }
-
-        } catch (\Throwable $e) {
-            // DM failure must never prevent a ballot from being recorded
-            Log::error('sendAuditDm: Exception for knight ' . $knight->pkey . ': ' . $e->getMessage());
-
-            // Still log the delivery attempt as failed
-            ElectionAuditLog::create([
-                'fkeyelection' => $election->pkey,
-                'fkeyknight'   => $knight->pkey,
-                'delivered'    => false,
-                'delivered_at' => null,
-            ]);
-        }
+        return null;
     }
 }
