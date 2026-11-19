@@ -388,6 +388,26 @@ class ElectionController extends Controller
         return back()->with('success', 'Settings updated.');
     }
 
+        public function toggleTestMode(Request $request)
+    {
+        $election    = $request->attributes->get('active_election');
+        $eaRecord    = $request->attributes->get('ea_record');
+        $isAdminTest = $request->attributes->get('is_admin_test', false);
+
+        if ($isAdminTest || ! $eaRecord || $eaRecord->is_assistant) {
+            abort(403, 'Only the full Election Administrator can change test mode.');
+        }
+
+        $on = $request->boolean('admin_test_mode');
+
+        $election->forceFill([
+            'admin_test_mode' => $on,
+            'lstmdby'         => auth()->user()->pkey,
+        ])->save();
+
+        return back()->with('success', 'Admin test mode ' . ($on ? 'enabled' : 'disabled') . '.');
+    }
+
     // -------------------------------------------------------------------------
     // Voter List
     // -------------------------------------------------------------------------

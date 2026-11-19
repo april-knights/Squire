@@ -89,6 +89,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/archive-key', [App\Http\Controllers\ElectionController::class, 'archiveKey'])->name('archive-key');
         Route::post('/nomination-thread', [App\Http\Controllers\ElectionController::class, 'postNominationThread'])->name('nomination-thread');
         Route::post('/debate-thread', [App\Http\Controllers\ElectionController::class, 'postDebateThread'])->name('debate-thread');
+        Route::post('/test-mode', [App\Http\Controllers\ElectionController::class, 'toggleTestMode'])->name('test-mode');
     });
 
 /* # TEMP DEBUG — remove after testing

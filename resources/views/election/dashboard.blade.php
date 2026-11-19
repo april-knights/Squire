@@ -201,19 +201,29 @@
     align-items: center;
     gap: 0.75rem;
 }
+.ea-note {
+    font-size: 0.78rem;
+    color: #c0a0a0;
+    margin-bottom: 0.75rem;
+}
+.ea-ok   { color: #5cb85c; }
+.ea-warn { color: #f0ad4e; }
 </style>
 
 @php
-    $phases  = \App\Model\Election::PHASES;
-    $current = array_search($election->phase, $phases);
-    $isFullEA = $eaRecord && $eaRecord->isFullEA();
+    $phases     = \App\Model\Election::PHASES;
+    $current    = array_search($election->phase, $phases);
+    $nextPhase  = $phases[$current + 1] ?? null;
+    $isFullEA   = $eaRecord && $eaRecord->isFullEA();
+    $isAdmin    = (int) auth()->user()->security === 1;
+    $isComplete = $election->phase === 'complete';
 @endphp
 
 {{-- Admin test mode banner --}}
 @if($isAdminTest)
 <div class="warning-banner">
     <i class="fas fa-flask"></i>
-    <span>Admin test mode active — you are viewing the EA dashboard as an administrator. Toggle off in election settings when done.</span>
+    <span>Admin test mode active — you are viewing the EA dashboard as an administrator (view only). Turn test mode off in the Admin Election Panel when done.</span>
 </div>
 @endif
 
@@ -221,7 +231,15 @@
 @if($election->phase === 'voting' && $election->voting_paused)
 <div class="warning-banner">
     <i class="fas fa-pause-circle"></i>
-    <span>Voting is currently paused. Knights cannot submit ballots until you authenticate with your passphrase.</span>
+    <span>Voting is paused. Knights cannot submit ballots until the Election Administrator resumes voting.</span>
+</div>
+@endif
+
+{{-- Completed election banner --}}
+@if($isComplete)
+<div class="warning-banner">
+    <i class="fas fa-flag-checkered"></i>
+    <span>This election is complete. Results, the audit and the key archive remain available; everything else is closed.</span>
 </div>
 @endif
 
@@ -279,6 +297,13 @@
                 </div>
                 @endif
             </div>
+
+            @if($election->phase === 'voting' && $registeredCount > 0 && $voteCount >= $registeredCount)
+            <div class="ea-note ea-ok" style="margin-bottom:0;">
+                <i class="fas fa-check-circle mr-1"></i>
+                Every registered voter has voted. Voting may be closed early.
+            </div>
+            @endif
         </div>
 
         {{-- Candidate list --}}
@@ -288,8 +313,7 @@
             <div style="background:#5a2424;border:1px solid #8b3a3a;border-radius:4px;padding:0.75rem 1rem;margin-bottom:0.5rem;">
                 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
                     <div>
-                        <strong>{{ $candidate->knight->rname }}</strong>
-                        <span style="color:#c0a0a0;font-size:0.82rem;margin-left:0.5rem;">/u/{{ $candidate->knight->rname }}</span>
+                        <strong>/u/{{ $candidate->knight->rname }}</strong>
                     </div>
                     <span style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.15rem 0.5rem;border-radius:3px;
                         background:{{ $candidate->status === 'accepted' ? '#2d6a2d' : ($candidate->status === 'declined' || $candidate->status === 'withdrawn' ? '#5a2424' : '#4a3a1a') }};
@@ -308,7 +332,7 @@
             <p style="color:#c0a0a0;font-size:0.88rem;">No candidates added yet.</p>
             @endforelse
 
-            @if($isFullEA)
+            @if($isAdmin && ! $isComplete)
             <div style="margin-top:0.75rem;">
                 <a href="{{ route('admin.elections.show', $election->pkey) }}" class="btn-ea">
                     <i class="fas fa-edit mr-1"></i> Manage Candidates
@@ -324,7 +348,9 @@
             <div class="phase-log-row">
                 <span class="phase-log-time">{{ $log->crtsetdt->format('M j, Y g:ia') }}</span>
                 <span>
-                    @if($log->from_phase)
+                    @if($log->from_phase && $log->from_phase === $log->to_phase)
+                        {{ ucfirst($log->to_phase) }}
+                    @elseif($log->from_phase)
                         {{ ucfirst($log->from_phase) }} → {{ ucfirst($log->to_phase) }}
                     @else
                         Election created ({{ ucfirst($log->to_phase) }})
@@ -349,34 +375,50 @@
             <a href="{{ route('election.voters') }}" class="btn-ea" style="display:block;text-align:center;margin-bottom:0.4rem;">
                 <i class="fas fa-list mr-1"></i> Voter List
             </a>
-            @if(in_array($election->phase, ['counting','complete']))
+            @if($isFullEA && in_array($election->phase, ['counting','complete']))
             <a href="{{ route('election.results') }}" class="btn-ea" style="display:block;text-align:center;margin-bottom:0.4rem;">
                 <i class="fas fa-chart-pie mr-1"></i> Results
             </a>
             @endif
-            @if($isFullEA && in_array($election->phase, ['counting','complete']))
-            <div style="margin-top:0.75rem;">
-                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:#c0a0a0;margin-bottom:0.5rem;">
-                    <i class="fas fa-clipboard-check mr-1"></i> Audit CSV Upload
-                </div>
-                <form method="POST" action="{{ route('election.audit') }}" enctype="multipart/form-data">
-                    @csrf
-                    <div style="margin-bottom:0.5rem;">
-                        <input type="file" name="audit_csv" accept=".csv,.txt"
-                            style="color:#efefef;font-size:0.82rem;width:100%;">
-                    </div>
-                    <button type="submit" class="btn-ea" style="width:100%;text-align:center;">
-                        <i class="fas fa-upload mr-1"></i> Run Audit
-                    </button>
-                </form>
-            </div>
-            @endif
-            @if($isFullEA || $isAdminTest)
+            @if($isAdmin)
             <a href="{{ route('admin.elections.show', $election->pkey) }}" class="btn-ea" style="display:block;text-align:center;">
                 <i class="fas fa-cog mr-1"></i> Admin Election Panel
             </a>
             @endif
         </div>
+
+        {{-- Audit DM readiness (full EA, before the election completes) --}}
+        @if($isFullEA && ! $isComplete)
+        <div class="ea-card">
+            <h5><i class="fas fa-satellite-dish mr-1"></i> Audit DM Delivery</h5>
+
+            @if($dmVerified)
+            <div class="ea-note ea-ok">
+                <i class="fas fa-check-circle mr-1"></i>
+                Test DM confirmed {{ $election->audit_dm_verified_at->format('M j, g:ia') }}.
+            </div>
+            @else
+            <div class="ea-note ea-warn">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                Not confirmed. Voting cannot open until a test audit DM reaches you.
+            </div>
+            @endif
+
+            <form method="POST" action="{{ route('election.test-dm') }}">
+                @csrf
+                <button type="submit" class="btn-ea" style="width:100%;text-align:center;">
+                    <i class="fab fa-discord mr-1"></i> Send Test DM
+                </button>
+            </form>
+
+            @if($failedDmCount > 0)
+            <div class="ea-note ea-warn" style="margin-bottom:0;">
+                <i class="fas fa-exclamation-circle mr-1"></i>
+                {{ $failedDmCount }} ballot attempt(s) were rejected because the audit DM failed. Those knights were told to retry.
+            </div>
+            @endif
+        </div>
+        @endif
 
         {{-- Reddit threads --}}
         <div class="ea-card">
@@ -398,7 +440,7 @@
             </div>
             @endif
 
-            @if($isFullEA && $redditAuthorized)
+            @if($isFullEA && ! $isComplete && $redditAuthorized)
                 @if($election->phase === 'nominations' && !$election->nomination_post_id)
                 <form method="POST" action="{{ route('election.nomination-thread') }}" style="margin-top:0.75rem;">
                     @csrf
@@ -434,25 +476,26 @@
                     </button>
                 </form>
                 @endif
-            @elseif($isFullEA && !$redditAuthorized)
+            @elseif($isFullEA && ! $isComplete && ! $redditAuthorized)
             <p style="color:#f0ad4e;font-size:0.82rem;">
                 <i class="fas fa-exclamation-triangle mr-1"></i>
-                AKSquire2 is not authorized. <a href="{{ route('admin.elections.reddit-auth') }}" style="color:#f0ad4e;">Authorize here.</a>
+                AKSquire2 is not authorized.
+                @if($isAdmin)
+                    <a href="{{ route('admin.elections.reddit-auth') }}" style="color:#f0ad4e;">Authorize here.</a>
+                @else
+                    Ask an Admin to re-authorize it.
+                @endif
             </p>
             @endif
         </div>
 
-        {{-- Voting controls (full EA only) --}}
+        {{-- Voting controls (full EA only) — no passphrase needed --}}
         @if($isFullEA && $election->phase === 'voting')
         <div class="ea-card">
-            <h5><i class="fas fa-key mr-1"></i> Voting Controls</h5>
+            <h5><i class="fas fa-vote-yea mr-1"></i> Voting Controls</h5>
             @if($election->voting_paused)
             <form method="POST" action="{{ route('election.open-voting') }}">
                 @csrf
-                <div class="ea-form-group">
-                    <label>Your Passphrase</label>
-                    <input type="password" name="passphrase" class="ea-input" required autocomplete="off">
-                </div>
                 <button type="submit" class="btn-ea" style="width:100%;text-align:center;">
                     <i class="fas fa-play mr-1"></i> Resume Voting
                 </button>
@@ -460,7 +503,8 @@
             @else
             <form method="POST" action="{{ route('election.pause-voting') }}">
                 @csrf
-                <button type="submit" class="btn-ea btn-danger-ea" style="width:100%;text-align:center;">
+                <button type="submit" class="btn-ea btn-danger-ea" style="width:100%;text-align:center;"
+                    onclick="return confirm('Pause voting? Knights will not be able to submit ballots until you resume.')">
                     <i class="fas fa-pause mr-1"></i> Pause Voting
                 </button>
             </form>
@@ -469,36 +513,144 @@
         @endif
 
         {{-- Phase advancement (full EA only) --}}
-        @if($isFullEA && $election->phase !== 'complete')
+        @if($isFullEA && ! $isComplete && $nextPhase)
+        @php
+            $confirmText = $election->phase === 'debate'
+                ? 'Open voting? Encryption keys will be generated from your passphrase. The passphrase cannot be recovered or changed afterwards.'
+                : 'Advance election to ' . ucfirst($nextPhase) . ' phase?';
+            $openingVoting = $election->phase === 'debate';
+        @endphp
         <div class="ea-card">
             <h5><i class="fas fa-forward mr-1"></i> Advance Phase</h5>
             <form method="POST" action="{{ route('election.advance') }}">
                 @csrf
-                @if($election->phase === 'voting')
+
+                @if($openingVoting)
+                <div class="ea-note">
+                    Opening voting generates the encryption keys from your passphrase. Choose a long random passphrase
+                    (at least {{ \App\Services\ElectionService::MIN_PASSPHRASE_LENGTH }} characters, several random words work well)
+                    and store it in a password manager. <strong>If it is lost, ballots can never be counted.</strong>
+                    Never share it.
+                </div>
                 <div class="ea-form-group">
-                    <label>Passphrase (required to close voting)</label>
-                    <input type="password" name="passphrase" class="ea-input" required autocomplete="off">
+                    <label>Election Passphrase</label>
+                    <input type="password" name="passphrase" class="ea-input" required
+                        minlength="{{ \App\Services\ElectionService::MIN_PASSPHRASE_LENGTH }}" autocomplete="new-password">
+                </div>
+                <div class="ea-form-group">
+                    <label>Confirm Passphrase</label>
+                    <input type="password" name="passphrase_confirmation" class="ea-input" required
+                        minlength="{{ \App\Services\ElectionService::MIN_PASSPHRASE_LENGTH }}" autocomplete="new-password">
+                </div>
+                <div class="ea-form-group">
+                    <label style="display:flex;gap:0.5rem;align-items:flex-start;">
+                        <input type="checkbox" required style="margin-top:0.2rem;">
+                        <span>I have stored this passphrase safely and understand it cannot be recovered.</span>
+                    </label>
                 </div>
                 @endif
+
+                @if($election->phase === 'counting')
+                    @if($keyArchived)
+                    <div class="ea-note ea-ok">
+                        <i class="fas fa-check-circle mr-1"></i> Encryption key archived.
+                    </div>
+                    @else
+                    <div class="ea-note ea-warn">
+                        The encryption key is not archived yet. Archive it below (after results are announced), or tick the box to complete without it.
+                    </div>
+                    <div class="ea-form-group">
+                        <label style="display:flex;gap:0.5rem;align-items:flex-start;">
+                            <input type="checkbox" name="skip_archive" value="1" style="margin-top:0.2rem;">
+                            <span>Complete without archiving the key</span>
+                        </label>
+                    </div>
+                    @endif
+                @endif
+
                 <div class="ea-form-group">
                     <label>Note (optional)</label>
                     <input type="text" name="note" class="ea-input" placeholder="Reason for advancing...">
                 </div>
-                @php
-                    $nextPhase = \App\Model\Election::PHASES[array_search($election->phase, \App\Model\Election::PHASES) + 1] ?? null;
-                @endphp
-                @if($nextPhase)
-                <button type="submit" class="btn-ea" style="width:100%;text-align:center;"
-                    onclick="return confirm('Advance election to {{ ucfirst($nextPhase) }} phase?')">
-                    <i class="fas fa-arrow-right mr-1"></i> Advance to {{ ucfirst($nextPhase) }}
-                </button>
+
+                @if($openingVoting && ! $dmVerified)
+                <div class="ea-note ea-warn">
+                    <i class="fas fa-lock mr-1"></i> Send a successful test DM first (Audit DM Delivery above).
+                </div>
                 @endif
+
+                <button type="submit" class="btn-ea" style="width:100%;text-align:center;"
+                    {{ ($openingVoting && ! $dmVerified) ? 'disabled' : '' }}
+                    onclick="return confirm('{{ $confirmText }}')">
+                    <i class="fas fa-arrow-right mr-1"></i>
+                    {{ $openingVoting ? 'Open Voting' : 'Advance to ' . ucfirst($nextPhase) }}
+                </button>
             </form>
         </div>
         @endif
 
+        {{-- Audit (full EA, after voting closes) --}}
+        @if($isFullEA && in_array($election->phase, ['counting','complete']))
+        <div class="ea-card">
+            <h5><i class="fas fa-clipboard-check mr-1"></i> Audit</h5>
+            <div class="ea-note">
+                Paste the audit DMs exactly as you received them, or upload a .txt/.csv file
+                (CSV columns: <code>knight_pkey</code>, <code>rankings</code>). If a knight retried after a failed submission, the most recent DM is used.
+            </div>
+            <form method="POST" action="{{ route('election.audit') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="ea-form-group">
+                    <label>Election Passphrase</label>
+                    <input type="password" name="passphrase" class="ea-input" required autocomplete="off">
+                </div>
+                <div class="ea-form-group">
+                    <label>Paste audit DMs</label>
+                    <textarea name="audit_text" class="ea-textarea" placeholder="Knight ID: 42&#10;Rankings: 15,12,18"></textarea>
+                </div>
+                <div class="ea-form-group">
+                    <label>…or upload a file</label>
+                    <input type="file" name="audit_csv" accept=".csv,.txt" style="color:#efefef;font-size:0.82rem;width:100%;">
+                </div>
+                <button type="submit" class="btn-ea" style="width:100%;text-align:center;">
+                    <i class="fas fa-search mr-1"></i> Run Audit
+                </button>
+            </form>
+        </div>
+
+        {{-- Key archive --}}
+        <div class="ea-card">
+            <h5><i class="fas fa-archive mr-1"></i> Encryption Key Archive</h5>
+            @if($keyArchived)
+            <div class="ea-note ea-ok" style="margin-bottom:0;">
+                <i class="fas fa-check-circle mr-1"></i> Key archived.
+            </div>
+            @else
+            <div class="ea-note">
+                Archiving stores your passphrase encrypted with the application key, so this election's ballots can be re-checked
+                server-side in future. Anyone with database and application access could then decrypt them.
+                Do this only after results are announced.
+            </div>
+            <form method="POST" action="{{ route('election.archive-key') }}">
+                @csrf
+                <div class="ea-form-group">
+                    <label>Election Passphrase</label>
+                    <input type="password" name="passphrase" class="ea-input" required autocomplete="off">
+                </div>
+                <div class="ea-form-group">
+                    <label>Note (optional)</label>
+                    <input type="text" name="note" class="ea-input" placeholder="e.g. archived after results announced">
+                </div>
+                <button type="submit" class="btn-ea" style="width:100%;text-align:center;"
+                    onclick="return confirm('Archive the key? Anyone with database and application access will be able to decrypt this election\'s ballots afterwards.')">
+                    <i class="fas fa-archive mr-1"></i> Archive Key
+                </button>
+            </form>
+            @endif
+        </div>
+        @endif
+
         {{-- EA Dashboard Settings (full EA only) --}}
-        @if($isFullEA)
+        @if($isFullEA && ! $isComplete)
         <div class="ea-card">
             <h5><i class="fas fa-sliders-h mr-1"></i> Dashboard Settings</h5>
             <form method="POST" action="{{ route('election.toggles') }}">
@@ -522,18 +674,19 @@
                 </button>
             </form>
         </div>
-        @endif
 
-        {{-- Admin test mode toggle --}}
-        @if($isAdminTest || ($isFullEA && $election->admin_test_mode !== null))
+        {{-- Admin test mode (full EA only) --}}
         <div class="ea-card">
             <h5><i class="fas fa-flask mr-1"></i> Admin Test Mode</h5>
-            <form method="POST" action="{{ route('admin.elections.toggle-test-mode', $election->pkey) }}">
+            <div class="ea-note">
+                Lets an Admin view this dashboard (view only) for troubleshooting. Resets automatically when the election completes.
+            </div>
+            <form method="POST" action="{{ route('election.test-mode') }}">
                 @csrf
                 @include('partials.toggle', [
                     'name'    => 'admin_test_mode',
                     'checked' => $election->admin_test_mode,
-                    'label'   => 'Allow Admin full EA access',
+                    'label'   => 'Allow Admin view access',
                 ])
                 <button type="submit" class="btn-ea" style="width:100%;text-align:center;margin-top:0.75rem;">
                     Save
