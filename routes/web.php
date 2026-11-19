@@ -229,6 +229,34 @@ Route::get('/admin/debug-oath-scan', function () {
             Route::post('/{pkey}/unverify', [App\Http\Controllers\OathController::class, 'adminUnverify'])->name('unverify');
             Route::post('/batch-verify', [App\Http\Controllers\OathController::class, 'adminBatchVerify'])->name('batch-verify');
         });
+        # TEMP DEBUG — remove after testing
+        Route::get('/debug-sodium', function () {
+            $out = [
+                'sodium_loaded' => extension_loaded('sodium'),
+                'memory_limit'  => ini_get('memory_limit'),
+                'php'           => PHP_VERSION,
+            ];
+            if ($out['sodium_loaded']) {
+                $salt = random_bytes(SODIUM_CRYPTO_PWHASH_SALTBYTES);
+                $profiles = [
+                    'interactive' => [SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE, SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE],
+                    'moderate'    => [SODIUM_CRYPTO_PWHASH_OPSLIMIT_MODERATE, SODIUM_CRYPTO_PWHASH_MEMLIMIT_MODERATE],
+                ];
+                foreach ($profiles as $name => [$ops, $mem]) {
+                    $t = microtime(true);
+                    try {
+                        sodium_crypto_pwhash(32, 'test passphrase', $salt, $ops, $mem, SODIUM_CRYPTO_PWHASH_ALG_ARGON2ID13);
+                        $out[$name] = 'ok in ' . round(microtime(true) - $t, 2) . 's';
+                    } catch (\Throwable $e) {
+                        $out[$name] = 'FAILED: ' . $e->getMessage();
+                    }
+                }
+                $kp = sodium_crypto_box_keypair();
+                $sealed = sodium_crypto_box_seal('hello', sodium_crypto_box_publickey($kp));
+                $out['seal_roundtrip'] = sodium_crypto_box_seal_open($sealed, $kp) === 'hello';
+            }
+            dd($out);
+        });
 
     }); // end admin group
 
