@@ -90,29 +90,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/nomination-thread', [App\Http\Controllers\ElectionController::class, 'postNominationThread'])->name('nomination-thread');
         Route::post('/debate-thread', [App\Http\Controllers\ElectionController::class, 'postDebateThread'])->name('debate-thread');
         Route::post('/test-mode', [App\Http\Controllers\ElectionController::class, 'toggleTestMode'])->name('test-mode');
+        Route::get('/candidates', [App\Http\Controllers\ElectionCandidateController::class, 'index'])->name('candidates');
+        Route::post('/candidates', [App\Http\Controllers\ElectionCandidateController::class, 'store'])->name('candidates.store');
+        Route::post('/candidates/{candidatePkey}', [App\Http\Controllers\ElectionCandidateController::class, 'update'])->name('candidates.update');
+        Route::post('/candidates/{candidatePkey}/remove', [App\Http\Controllers\ElectionCandidateController::class, 'remove'])->name('candidates.remove');
+        Route::post('/nominations', [App\Http\Controllers\ElectionCandidateController::class, 'storeNomination'])->name('nominations.store');
+        Route::post('/nominations/{nominationPkey}/remove', [App\Http\Controllers\ElectionCandidateController::class, 'removeNomination'])->name('nominations.remove');
     });
-
-/* # TEMP DEBUG — remove after testing
-Route::get('/admin/debug-oath-scan', function () {
-    $service  = app(\App\Services\RedditService::class);
-    $token    = $service->getAccessToken();
-    $postId   = '1ri2l0o';
-    $headers  = ['User-Agent' => 'Squire/2.0 by AKSquire2'];
-    if ($token) {
-        $headers['Authorization'] = 'Bearer ' . $token;
-    }
-    $response = \Illuminate\Support\Facades\Http::withHeaders($headers)
-        ->get('https://oauth.reddit.com/r/AprilKnights/comments/' . $postId, [
-            'limit' => 500,
-            'depth' => 1,
-        ]);
-    dd([
-        'token_present' => ! empty($token),
-        'status'        => $response->status(),
-        'body_preview'  => substr($response->body(), 0, 500),
-    ]);
-});
-*/
 
 # Admin
     Route::middleware(['admin'])->prefix('admin')->group(function () {

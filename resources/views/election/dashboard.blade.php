@@ -332,13 +332,14 @@
             <p style="color:#c0a0a0;font-size:0.88rem;">No candidates added yet.</p>
             @endforelse
 
-            @if($isAdmin && ! $isComplete)
+            @unless($isComplete)
             <div style="margin-top:0.75rem;">
-                <a href="{{ route('admin.elections.show', $election->pkey) }}" class="btn-ea">
-                    <i class="fas fa-edit mr-1"></i> Manage Candidates
+                <a href="{{ route('election.candidates') }}" class="btn-ea">
+                    <i class="fas fa-edit mr-1"></i>
+                    {{ $isFullEA && in_array($election->phase, ['setup', 'nominations', 'debate']) ? 'Manage Candidates & Nominations' : 'View Candidates & Nominations' }}
                 </a>
             </div>
-            @endif
+            @endunless
         </div>
 
         {{-- Phase log --}}
