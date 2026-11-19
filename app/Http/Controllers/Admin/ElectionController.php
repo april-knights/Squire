@@ -378,36 +378,66 @@ class ElectionController extends Controller
     {
         $redditAuthorized = $this->reddit->isAuthorized();
         $oathThreadUrl    = Setting::get('oath_thread_url');
-        $oathPostId       = Setting::get('oath_post_id');
+        $oathYear         = \App\Model\Oath::currentOathYear();
 
         return view('admin.elections.settings', compact(
             'redditAuthorized',
-            'oathThreadUrl'
+            'oathThreadUrl',
+            'oathYear'
         ));
     }
 
     public function updateSettings(Request $request)
     {
-        $request->validate([
+        $v = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'oath_thread_url' => 'nullable|url|max:500',
+            'oath_year'       => 'nullable|integer|min:2024|max:2100',
         ]);
-
-        if ($request->filled('oath_thread_url')) {
-            $existing = Setting::get('oath_thread_url');
-
-            // If thread URL is changing, reset unverified current-year oaths
-            if ($existing !== $request->oath_thread_url) {
-                $oathYear = \App\Model\Oath::currentOathYear();
-                \App\Model\Oath::where('oath_year', $oathYear)
-                    ->where('verified', 0)
-                    ->delete();
-            }
-
-            Setting::set('oath_thread_url', $request->oath_thread_url);
-            Setting::set('oath_thread_crtsetdt', now()->toDateTimeString());
+        if ($v->fails()) {
+            return back()->with('error', $v->errors()->first());
         }
 
-        return back()->with('success', 'Settings updated.');
+        $currentUrl  = Setting::get('oath_thread_url');
+        $currentYear = \App\Model\Oath::currentOathYear();
+
+        $newUrl  = $request->filled('oath_thread_url') ? $request->oath_thread_url : $currentUrl;
+        $newYear = $request->filled('oath_year') ? (int) $request->oath_year : $currentYear;
+
+        $urlChanged  = rtrim((string) $newUrl, '/') !== rtrim((string) $currentUrl, '/');
+        $yearChanged = $newYear !== $currentYear;
+
+        // Changing the year mid-election would void every knight's eligibility
+        if ($yearChanged) {
+            $election = \App\Model\Election::active();
+            if ($election && $election->phase !== 'setup') {
+                return back()->with('error',
+                    'The oath year cannot be changed while an election is in progress ('
+                    . ucfirst($election->phase) . ' phase).');
+            }
+        }
+
+        if ($urlChanged) {
+            Setting::set('oath_thread_url', $newUrl);
+        }
+
+        if ($yearChanged) {
+            Setting::set('oath_year', (string) $newYear);
+        }
+
+        // Unverified oaths for the resulting year point at the old thread: clear them
+        $removed = 0;
+        if ($urlChanged || $yearChanged) {
+            $removed = \App\Model\Oath::where('oath_year', $newYear)
+                ->where('verified', 0)
+                ->delete();
+        }
+
+        $message = 'Settings updated.';
+        if ($removed > 0) {
+            $message .= ' Cleared ' . $removed . ' unverified oath(s) that pointed at the old thread.';
+        }
+
+        return back()->with('success', $message);
     }
 
     // -------------------------------------------------------------------------

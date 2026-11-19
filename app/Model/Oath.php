@@ -46,11 +46,18 @@ class Oath extends SquireModel
      */
     public static function currentOathYear(): int
     {
+        $year = (int) Setting::get('oath_year');
+
+        if ($year >= 2000) {
+            return $year;
+        }
+
+        // Legacy fallback if the oath_year setting is missing
         $threadDate = Setting::get('oath_thread_crtsetdt');
         if ($threadDate) {
             return (int) date('Y', strtotime($threadDate));
         }
-        // Fall back to current year if no oath thread configured
+
         return (int) date('Y');
     }
 }

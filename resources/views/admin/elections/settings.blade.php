@@ -112,4 +112,13 @@
         </button>
     </form>
 </div>
+
+<div style="margin-bottom:1rem;">
+    <label class="form-label-ea">Oath Year</label>
+    <input type="number" name="oath_year" class="ea-input" style="max-width:140px;"
+        value="{{ $oathYear }}" min="2024" max="2100">
+    <span style="font-size:0.75rem;color:#c0a0a0;display:block;margin-top:0.25rem;">
+        Set this to the new year when the new oath thread opens (March 1). It cannot be changed while an election is past setup.
+    </span>
+</div>
 @endsection
