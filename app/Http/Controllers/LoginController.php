@@ -28,6 +28,19 @@ class LoginController extends Controller
     {
         // AKSquire2 bot authorization flow
         if ($request->state && str_starts_with($request->state, 'aksquire2_auth_')) {
+            $expected = session()->pull('aksquire2_oauth_state');
+            $isAdmin  = auth()->check() && (int) auth()->user()->security === 1;
+
+            // Must be an Admin, in the same session that started the flow, with a matching state.
+            if (! $isAdmin || ! $expected || ! hash_equals($expected, (string) $request->state)) {
+                return redirect('/login')->with('error', 'Invalid authorization request.');
+            }
+
+            if ($request->error || ! $request->code) {
+                return redirect()->route('admin.elections.settings')
+                    ->with('error', 'Reddit authorization was not completed' . ($request->error ? ': ' . $request->error : '.'));
+            }
+
             $success = app(\App\Services\RedditService::class)->storeTokens(
                 $request->code,
                 config('services.reddit.redirect')

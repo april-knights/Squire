@@ -328,10 +328,14 @@ class ElectionController extends Controller
 
     public function redditAuthRedirect()
     {
+        // Random state, remembered in this admin's session; the callback must present it back.
+        $state = 'aksquire2_auth_' . bin2hex(random_bytes(16));
+        session(['aksquire2_oauth_state' => $state]);
+
         $params = http_build_query([
             'client_id'     => config('services.reddit.client_id'),
             'response_type' => 'code',
-            'state'         => 'aksquire2_auth_' . csrf_token(),
+            'state'         => $state,
             'redirect_uri'  => config('services.reddit.redirect'),
             'duration'      => 'permanent',
             'scope'         => 'submit modposts identity read',
@@ -340,35 +344,6 @@ class ElectionController extends Controller
         return redirect('https://www.reddit.com/api/v1/authorize?' . $params);
     }
 
-    public function redditAuthCallback(Request $request)
-    {
-        if ($request->error) {
-            return redirect()
-                ->route('admin.elections.settings')
-                ->with('error', 'Reddit authorization was denied: ' . $request->error);
-        }
-
-        if ($request->state !== csrf_token()) {
-            return redirect()
-                ->route('admin.elections.settings')
-                ->with('error', 'Invalid state. Please try again.');
-        }
-
-        $success = $this->reddit->storeTokens(
-            $request->code,
-            config('services.reddit.redirect')
-        );
-
-        if (! $success) {
-            return redirect()
-                ->route('admin.elections.settings')
-                ->with('error', 'Token exchange failed. Check logs.');
-        }
-
-        return redirect()
-            ->route('admin.elections.settings')
-            ->with('success', 'AKSquire2 authorized successfully.');
-    }
 
     // -------------------------------------------------------------------------
     // Settings Page
