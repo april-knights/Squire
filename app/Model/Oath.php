@@ -15,6 +15,8 @@ class Oath extends SquireModel
         'reddit_comment_id',
         'verified_at',
         'verified',
+        'crtsetid',
+        'lstmdby',
     ];
 
     protected $casts = [
@@ -28,21 +30,17 @@ class Oath extends SquireModel
     }
 
     /**
-     * Get the oath record for a knight for the current oath cycle year.
-     * Uses the oath thread with the youngest crtsetdt in settings
-     * rather than calendar year, so a late thread doesn't break eligibility.
+     * The knight's oath record for the current oath cycle year.
      */
     public static function currentYearForKnight(int $knightPkey): ?self
     {
-        $year = static::currentOathYear();
         return static::where('fkeyknight', $knightPkey)
-            ->where('oath_year', $year)
+            ->where('oath_year', static::currentOathYear())
             ->first();
     }
 
     /**
-     * Resolve the current oath year from the configured oath thread timestamp.
-     * Falls back to current calendar year if no thread is configured.
+     * The oath cycle year: an explicit setting, changed only by an admin.
      */
     public static function currentOathYear(): int
     {

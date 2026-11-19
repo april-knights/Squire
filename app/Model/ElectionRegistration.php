@@ -2,16 +2,23 @@
 
 namespace App\Model;
 
+use App\Support\HasActiveTrait;
 use App\Support\SquireModel;
 
 class ElectionRegistration extends SquireModel
 {
+    use HasActiveTrait;
+
     protected $table = 'election_registration';
 
     protected $fillable = [
         'fkeyelection',
         'fkeyknight',
         'registered_at',
+        'crtsetid',
+        'lstmdby',
+        'activeflg',
+        'delflg',
     ];
 
     protected $casts = [

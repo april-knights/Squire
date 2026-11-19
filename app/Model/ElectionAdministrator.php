@@ -2,10 +2,13 @@
 
 namespace App\Model;
 
+use App\Support\HasActiveTrait;
 use App\Support\SquireModel;
 
 class ElectionAdministrator extends SquireModel
 {
+    use HasActiveTrait;
+
     protected $table = 'election_administrator';
 
     protected $fillable = [
@@ -16,6 +19,10 @@ class ElectionAdministrator extends SquireModel
         'show_voter_names_secondary_officers',
         'appointed_at',
         'appointed_by',
+        'crtsetid',
+        'lstmdby',
+        'activeflg',
+        'delflg',
     ];
 
     protected $casts = [

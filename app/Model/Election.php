@@ -2,10 +2,13 @@
 
 namespace App\Model;
 
+use App\Support\HasActiveTrait;
 use App\Support\SquireModel;
 
 class Election extends SquireModel
 {
+    use HasActiveTrait;
+
     protected $table = 'election';
 
     protected $fillable = [
@@ -21,13 +24,12 @@ class Election extends SquireModel
         'voting_paused',
         'admin_test_mode',
         'notes',
+        'crtsetid',
+        'lstmdby',
     ];
 
-    /**
-     * Key material is deliberately NOT fillable: it is only ever set through
-     * ElectionService::startVoting() using forceFill().
-     * public_key / wrapped_private_key / key_salt / key_created_at / audit_dm_verified_at
-     */
+    // Key material is deliberately NOT fillable: it is only set through
+    // ElectionService::startVoting() using forceFill().
 
     protected $hidden = [
         'wrapped_private_key',
@@ -100,25 +102,18 @@ class Election extends SquireModel
     }
 
     /**
-     * Get the single active (non-complete) election, if one exists.
+     * The single active (non-complete, non-deleted) election, if one exists.
      */
     public static function active(): ?self
     {
         return static::where('phase', '!=', 'complete')->first();
     }
 
-    /**
-     * True once startVoting() has generated the election keypair.
-     */
     public function hasKeys(): bool
     {
         return ! empty($this->public_key) && ! empty($this->wrapped_private_key);
     }
 
-    /**
-     * Voting is open only in the voting phase, not manually paused,
-     * and with encryption keys in place.
-     */
     public function isVotingOpen(): bool
     {
         return $this->phase === 'voting' && ! $this->voting_paused && $this->hasKeys();

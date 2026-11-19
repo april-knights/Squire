@@ -2,10 +2,13 @@
 
 namespace App\Model;
 
+use App\Support\HasActiveTrait;
 use App\Support\SquireModel;
 
 class ElectionNomination extends SquireModel
 {
+    use HasActiveTrait;
+
     protected $table = 'election_nomination';
 
     protected $fillable = [
@@ -14,6 +17,10 @@ class ElectionNomination extends SquireModel
         'fkeyknight',
         'action',
         'reddit_comment_url',
+        'crtsetid',
+        'lstmdby',
+        'activeflg',
+        'delflg',
     ];
 
     public function knight()
