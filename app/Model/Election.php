@@ -23,10 +23,23 @@ class Election extends SquireModel
         'notes',
     ];
 
+    /**
+     * Key material is deliberately NOT fillable: it is only ever set through
+     * ElectionService::startVoting() using forceFill().
+     * public_key / wrapped_private_key / key_salt / key_created_at / audit_dm_verified_at
+     */
+
+    protected $hidden = [
+        'wrapped_private_key',
+        'key_salt',
+    ];
+
     protected $casts = [
-        'phase_deadline' => 'datetime',
-        'voting_paused'  => 'boolean',
-        'admin_test_mode' => 'boolean',
+        'phase_deadline'       => 'datetime',
+        'key_created_at'       => 'datetime',
+        'audit_dm_verified_at' => 'datetime',
+        'voting_paused'        => 'boolean',
+        'admin_test_mode'      => 'boolean',
     ];
 
     const PHASES = [
@@ -94,9 +107,21 @@ class Election extends SquireModel
         return static::where('phase', '!=', 'complete')->first();
     }
 
+    /**
+     * True once startVoting() has generated the election keypair.
+     */
+    public function hasKeys(): bool
+    {
+        return ! empty($this->public_key) && ! empty($this->wrapped_private_key);
+    }
+
+    /**
+     * Voting is open only in the voting phase, not manually paused,
+     * and with encryption keys in place.
+     */
     public function isVotingOpen(): bool
     {
-        return $this->phase === 'voting' && ! $this->voting_paused;
+        return $this->phase === 'voting' && ! $this->voting_paused && $this->hasKeys();
     }
 
     public function isComplete(): bool
