@@ -75,34 +75,39 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/election/ballot', [App\Http\Controllers\ElectionController::class, 'submitBallot'])->name('election.ballot.submit');
     Route::get('/election/paused', [App\Http\Controllers\ElectionController::class, 'paused'])->name('election.paused');
 
-    # Election — EA dashboard
+    # Election — EA dashboard (names are prefixed "election.", URLs with /election)
     Route::middleware(['election.admin'])->prefix('election')->name('election.')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\ElectionController::class, 'dashboard'])->name('dashboard');
         Route::post('/advance', [App\Http\Controllers\ElectionController::class, 'advancePhase'])->name('advance');
         Route::post('/open-voting', [App\Http\Controllers\ElectionController::class, 'openVoting'])->name('open-voting');
         Route::post('/pause-voting', [App\Http\Controllers\ElectionController::class, 'pauseVoting'])->name('pause-voting');
+        Route::post('/extend-voting', [App\Http\Controllers\ElectionScheduleController::class, 'extendVoting'])->name('extend-voting');
         Route::post('/toggles', [App\Http\Controllers\ElectionController::class, 'updateToggles'])->name('toggles');
         Route::post('/test-dm', [App\Http\Controllers\ElectionController::class, 'sendTestDm'])->name('test-dm');
+        Route::post('/test-mode', [App\Http\Controllers\ElectionController::class, 'toggleTestMode'])->name('test-mode');
         Route::get('/voters', [App\Http\Controllers\ElectionController::class, 'voterList'])->name('voters');
         Route::match(['get', 'post'], '/results', [App\Http\Controllers\ElectionController::class, 'results'])->name('results');
         Route::post('/audit', [App\Http\Controllers\ElectionController::class, 'auditUpload'])->name('audit');
         Route::post('/archive-key', [App\Http\Controllers\ElectionController::class, 'archiveKey'])->name('archive-key');
         Route::post('/nomination-thread', [App\Http\Controllers\ElectionController::class, 'postNominationThread'])->name('nomination-thread');
         Route::post('/debate-thread', [App\Http\Controllers\ElectionController::class, 'postDebateThread'])->name('debate-thread');
-        Route::post('/test-mode', [App\Http\Controllers\ElectionController::class, 'toggleTestMode'])->name('test-mode');
+
+        # Candidates and nominations (full EA edits; assistant EA views)
         Route::get('/candidates', [App\Http\Controllers\ElectionCandidateController::class, 'index'])->name('candidates');
         Route::post('/candidates', [App\Http\Controllers\ElectionCandidateController::class, 'store'])->name('candidates.store');
         Route::post('/candidates/{candidatePkey}', [App\Http\Controllers\ElectionCandidateController::class, 'update'])->name('candidates.update');
         Route::post('/candidates/{candidatePkey}/remove', [App\Http\Controllers\ElectionCandidateController::class, 'remove'])->name('candidates.remove');
         Route::post('/nominations', [App\Http\Controllers\ElectionCandidateController::class, 'storeNomination'])->name('nominations.store');
         Route::post('/nominations/{nominationPkey}/remove', [App\Http\Controllers\ElectionCandidateController::class, 'removeNomination'])->name('nominations.remove');
-            # Election schedule (Admin, Grandmaster, Archmage)
-        Route::get('/election-schedule', [App\Http\Controllers\ElectionScheduleController::class, 'index'])->name('election.schedule');
-        Route::post('/election-schedule', [App\Http\Controllers\ElectionScheduleController::class, 'update'])->name('election.schedule.update');
-        Route::post('/election-schedule/registration-thread', [App\Http\Controllers\ElectionScheduleController::class, 'registrationThread'])->name('election.schedule.registration-thread');
     });
 
-# Admin
+    # Election schedule (Admin, Grandmaster, Archmage) — deliberately OUTSIDE the EA group,
+    # so the route names are election.schedule* and the URL is /election-schedule
+    Route::get('/election-schedule', [App\Http\Controllers\ElectionScheduleController::class, 'index'])->name('election.schedule');
+    Route::post('/election-schedule', [App\Http\Controllers\ElectionScheduleController::class, 'update'])->name('election.schedule.update');
+    Route::post('/election-schedule/registration-thread', [App\Http\Controllers\ElectionScheduleController::class, 'registrationThread'])->name('election.schedule.registration-thread');
+
+    # Admin
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('/', 'Admin\AdminController@index')->name('admin.index');
 
@@ -193,8 +198,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/images/delete',        'Admin\ImageController@confirmDelete')->name('admin.images.confirm-delete');
         Route::post('/images/delete',       'Admin\ImageController@destroy')->name('admin.images.destroy');
 
-        # Election management
-        Route::prefix('elections')->name('admin.elections.')->group(function () {
+        # Election management (numeric ids only: a non-numeric URL is a 404, not a 500)
+        Route::prefix('elections')->name('admin.elections.')->where(['pkey' => '[0-9]+', 'candidatePkey' => '[0-9]+'])->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\ElectionController::class, 'index'])->name('index');
             Route::get('/create', [App\Http\Controllers\Admin\ElectionController::class, 'create'])->name('create');
             Route::post('/', [App\Http\Controllers\Admin\ElectionController::class, 'store'])->name('store');
@@ -210,7 +215,6 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{pkey}/candidates/{candidatePkey}', [App\Http\Controllers\Admin\ElectionController::class, 'removeCandidate'])->name('candidates.remove');
             Route::post('/{pkey}/nominations', [App\Http\Controllers\Admin\ElectionController::class, 'addNomination'])->name('nominations.add');
             Route::post('/{pkey}/toggle-test-mode', [App\Http\Controllers\Admin\ElectionController::class, 'toggleTestMode'])->name('toggle-test-mode');
-            Route::post('/extend-voting', [App\Http\Controllers\ElectionScheduleController::class, 'extendVoting'])->name('extend-voting');
         });
 
         # Oath management
