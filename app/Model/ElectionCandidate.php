@@ -2,12 +2,12 @@
 
 namespace App\Model;
 
-use App\Support\HasActiveTrait;
+use App\Support\HasLiveRowsTrait;
 use App\Support\SquireModel;
 
 class ElectionCandidate extends SquireModel
 {
-    use HasActiveTrait;
+    use HasLiveRowsTrait;
 
     protected $table = 'election_candidate';
 
@@ -22,9 +22,10 @@ class ElectionCandidate extends SquireModel
         'delflg',
     ];
 
+    /** Names must resolve even if the knight is later deactivated or deleted. */
     public function knight()
     {
-        return $this->belongsTo(Knight::class, 'fkeyknight', 'pkey');
+        return $this->belongsTo(Knight::class, 'fkeyknight', 'pkey')->withoutGlobalScopes();
     }
 
     public function election()

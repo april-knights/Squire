@@ -2,12 +2,12 @@
 
 namespace App\Model;
 
-use App\Support\HasActiveTrait;
+use App\Support\HasLiveRowsTrait;
 use App\Support\SquireModel;
 
 class Election extends SquireModel
 {
-    use HasActiveTrait;
+    use HasLiveRowsTrait;
 
     protected $table = 'election';
 
@@ -28,8 +28,8 @@ class Election extends SquireModel
         'lstmdby',
     ];
 
-    // Key material is deliberately NOT fillable: it is only set through
-    // ElectionService::startVoting() using forceFill().
+    // Key material and schedule columns are deliberately NOT fillable: they are only set
+    // through ElectionService / ElectionSchedule using forceFill().
 
     protected $hidden = [
         'wrapped_private_key',

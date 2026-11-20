@@ -24,9 +24,10 @@ class Oath extends SquireModel
         'verified_at' => 'datetime',
     ];
 
+    /** Names must resolve even if the knight is later deactivated or deleted. */
     public function knight()
     {
-        return $this->belongsTo(Knight::class, 'fkeyknight', 'pkey');
+        return $this->belongsTo(Knight::class, 'fkeyknight', 'pkey')->withoutGlobalScopes();
     }
 
     /**
